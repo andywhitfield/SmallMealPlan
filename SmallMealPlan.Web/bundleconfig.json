@@ -1,0 +1,19 @@
+﻿[
+  {
+    "outputFileName": "wwwroot/css/smallmealplan.min.css",
+    "inputFiles": [
+      "wwwroot/css/smallmealplan.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/smallmealplan.min.js",
+    "inputFiles": [
+      "wwwroot/js/smallmealplan.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]

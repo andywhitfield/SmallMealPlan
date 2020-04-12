@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="@Url.Content("~/favicon.ico")?v=1" />
+    <link rel="apple-touch-icon" href="@Url.Content("~/images/smallmealplan.png")" sizes="32x32" />
+    <title>Small:MealPlan</title>
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/css/smallmealplan.css" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="~/css/smallmealplan.min.css" asp-append-version="true" />
+    </environment>
+    @RenderSection("HeaderScripts", required: false)
+</head>
+<body>
+    <!-- TODO: header -->
+
+    @RenderBody()
+
+    <environment names="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/js/smallmealplan.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.4.1.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous">
+        </script>
+        <script src="~/js/smallmealplan.min.js" asp-append-version="true"></script>
+    </environment>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,28 @@
+body {
+    background-color: white;
+}
+body, p, li, div, span, a, td, form, button, input, textarea, label, legend {
+    font-family: sans-serif;
+    font-size: 11pt;
+}
+a, a:link, a:visited, a:any-link{
+    color: black;
+    text-decoration: underline;
+}
+a:hover, a:active {
+    color: darkkhaki;
+    text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    body { background-color: black; }
+    body, p, li, div, span, a, td, form, button, input, textarea, label, legend {
+        color: white;
+    }
+    a, a:link, a:visited, a:any-link{
+        color: white;
+    }
+    a:hover, a:active {
+        color: khaki;
+    }
+}
