@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace SmallMealPlan.Web.Model.Home
 {
-    public class IndexViewModel : BaseViewModel
+    public class PlannerViewModel : BaseViewModel
     {
-        public IndexViewModel(HttpContext context) : base(context)
+        public PlannerViewModel(HttpContext context) : base(context)
         {
             SelectedArea = SmpArea.Planner;
         }

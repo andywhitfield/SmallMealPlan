@@ -28,7 +28,9 @@
         </nav>
         <nav class="navbar-main">
             <div class="navbar-nav">
-                Andy Whitfield
+                @if (Model.IsLoggedIn) {
+                    <a href="/signout">Logout</a>
+                }
             </div>
             <div>
                 <img class="nav-show" src="/images/add.png" height="24" width="24" />

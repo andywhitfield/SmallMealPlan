@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Web.Model.Meals;
@@ -13,7 +14,7 @@ namespace SmallMealPlan.Web.Controllers
             _logger = logger;
         }
 
-        //[Authorize]
-        public IActionResult Index() => View(new IndexViewModel());
+        [Authorize]
+        public IActionResult Index() => View(new IndexViewModel(HttpContext));
     }
 }

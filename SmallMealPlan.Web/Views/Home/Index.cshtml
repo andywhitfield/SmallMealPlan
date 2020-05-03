@@ -1,3 +1,55 @@
 ﻿@model SmallMealPlan.Web.Model.Home.IndexViewModel
 
-Planner
+<p>
+    <button><img src="/images/up.png" height="18" width="18" />Mon 19th Apr - Sun 26th Apr</button>
+</p>
+<ul class="smp-planner-list">
+    <li class="smp-planner-list">
+        <div class="smp-planner-list-day">Monday<br/>27th Apr<br/></div>
+        <ul class="smp-planner-list-meal">
+            <button data-href="/planner/20200427">Add</button>
+            <li class="smp-planner-list-meal">
+                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
+                <div><img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" /></div>
+                <div>
+                    <div>Spaghetti</div>
+                    <div class="smp-planner-list-meal-details">
+                        <div>Ingredients:</div>
+                        <ul>
+                            <li>Spaghetti</li>
+                            <li>Onion</li>
+                            <li>Tinned fish</li>
+                            <li>Tinned tomatoes</li>
+                        </ul>
+                        <div>Notes:</div>
+                        <div>Easy does it</div>
+                    </div>
+                </div>
+                <div><button><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
+            </li>
+            <li class="smp-planner-list-meal">
+                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
+                <div></div>
+                <div>
+                    <div>Eggs</div>
+                </div>
+                <div><button><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
+            </li>
+        </ul>
+    </li>
+    <li class="smp-planner-list">
+        <div class="smp-planner-list-day">Tuesday<br/>28th Apr</div>
+        <ul class="smp-planner-list-meal">
+            <button data-href="/planner/20200428">Add</button>
+        </ul>
+    </li>
+    <li class="smp-planner-list">
+        <div class="smp-planner-list-day">Wednesday<br/>29th Apr</div>
+        <ul class="smp-planner-list-meal">
+            <button data-href="/planner/20200429">Add</button>
+        </ul>
+    </li>
+</ul>
+<p>
+    <button><img src="/images/down.png" height="16" width="16" />Mon 27th Apr - Sun 2nd May</button>
+</p>

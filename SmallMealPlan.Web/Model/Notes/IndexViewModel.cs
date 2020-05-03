@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Http;
+
 namespace SmallMealPlan.Web.Model.Notes
 {
     public class IndexViewModel : BaseViewModel
     {
-        public IndexViewModel()
+        public IndexViewModel(HttpContext context) : base(context)
         {
             SelectedArea = SmpArea.Notes;
         }
