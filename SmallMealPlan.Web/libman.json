@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "jquery@3.5.0",
+      "destination": "wwwroot/lib/jquery",
+      "files": [
+        "jquery.min.js"
+      ]
+    },
+    {
+      "library": "jquery-sortable@0.9.13",
+      "destination": "wwwroot/lib/jquery-sortable",
+      "files": [
+        "jquery-sortable-min.js"
+      ]
+    }
+  ]
+}

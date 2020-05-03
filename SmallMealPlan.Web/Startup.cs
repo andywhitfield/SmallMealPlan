@@ -52,7 +52,7 @@ namespace SmallMealPlan.Web
                 .AddOpenIdConnect(options =>
                 {
                     options.ClientId = "smallmealplan";
-                    options.ClientSecret = "<put client secret here>";
+                    options.ClientSecret = "a00b51b9-28f4-417e-8a7f-940e91a998ee";
 
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.SaveTokens = true;
