@@ -1,10 +1,10 @@
-namespace SmallMealPlan.Web.Model.Home
+namespace SmallMealPlan.Web.Model.Meals
 {
     public class IndexViewModel : BaseViewModel
     {
         public IndexViewModel()
         {
-            SelectedArea = SmpArea.Planner;
+            SelectedArea = SmpArea.Meals;
         }
     }
 }

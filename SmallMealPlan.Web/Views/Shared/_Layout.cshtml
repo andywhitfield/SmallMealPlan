@@ -1,42 +1,85 @@
+@model SmallMealPlan.Web.Model.BaseViewModel
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="@Url.Content("~/favicon.ico")?v=1" />
-    <link rel="apple-touch-icon" href="@Url.Content("~/images/smallmealplan.png")" sizes="32x32" />
+    <link rel="icon" sizes="16x16" href="/images/smp.png">
+    <link rel="apple-touch-icon" href="/images/smp.png" sizes="32x32" />
     <title>Small:MealPlan</title>
 
     <environment names="Development">
-        <link rel="stylesheet" href="~/css/smallmealplan.css" />
+        <link rel="stylesheet" href="/css/smallmealplan.css" />
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="~/css/smallmealplan.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="/css/smallmealplan.min.css" asp-append-version="true" />
     </environment>
     @RenderSection("HeaderScripts", required: false)
 </head>
 <body>
-    <!-- TODO: header -->
+    <header>
+        <nav class="navbar-header">
+            <a href="/">
+                <img src="/images/smp.png" height="38" width="38" />
+                <span>
+                    Small:MealPlan
+                </span>
+            </a>
+        </nav>
+        <nav class="navbar-main">
+            <div class="navbar-nav">
+                Andy Whitfield
+            </div>
+            <div>
+                <img class="nav-show" src="/images/add.png" height="24" width="24" />
+                <img class="nav-close" src="/images/close.png" height="24" width="24" />
+            </div>
+        </nav>
+    </header>
 
-    @RenderBody()
+    <main>
+        <aside>
+            <nav>
+                <ul>
+                    <li data-href="/" class="@Model.PlannerCss"><span>Planner</span></li>
+                    <li data-href="/meals" class="@Model.MealsCss"><span>Meals</span></li>
+                    <li data-href="/shoppinglist" class="@Model.ShoppingListCss"><span>Shopping List</span></li>
+                    <li data-href="/notes" class="@Model.NotesCss"><span>Notes</span></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <article>
+            @RenderBody()
+        </article>
+    </main>
+
+    <footer class="footer ">
+        © 2020 Small:MealPlan
+    </footer>
+
 
     <environment names="Development">
-        <script src="~/lib/jquery/jquery.min.js"></script>
-        <script src="~/lib/jquery-sortable/jquery-sortable-min.js"></script>
-        <script src="~/js/smallmealplan.js" asp-append-version="true"></script>
+        <script src="/lib/jquery/jquery.min.js"></script>
+        <script src="/lib/jquery-sortable/jquery-sortable-min.js"></script>
+        <script src="/js/smallmealplan.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"
-                asp-fallback-src="~/lib/jquery/jquery.min.js"
+                asp-fallback-src="/lib/jquery/jquery.min.js"
                 asp-fallback-test="window.jQuery"
                 crossorigin="anonymous">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"
-                asp-fallback-src="~/lib/jquery-sortable/jquery-sortable-min.js"
+                asp-fallback-src="/lib/jquery-sortable/jquery-sortable-min.js"
                 asp-fallback-test="window.jQuery"
                 crossorigin="anonymous">
         </script>
-        <script src="~/js/smallmealplan.min.js" asp-append-version="true"></script>
+        <script src="/js/smallmealplan.min.js" asp-append-version="true"></script>
     </environment>
+
+    <script type="text/javascript">
+        $(function() { smpInitialise() })
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>

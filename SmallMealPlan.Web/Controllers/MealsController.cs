@@ -1,20 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SmallMealPlan.Web.Model.Home;
+using SmallMealPlan.Web.Model.Meals;
 
 namespace SmallMealPlan.Web.Controllers
 {
-    public class HomeController : Controller
+    public class MealsController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<MealsController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public MealsController(ILogger<MealsController> logger)
         {
             _logger = logger;
         }
 
         //[Authorize]
         public IActionResult Index() => View(new IndexViewModel());
-        public IActionResult Error() => View();
     }
 }
