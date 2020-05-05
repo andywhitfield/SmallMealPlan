@@ -4,6 +4,8 @@ namespace SmallMealPlan.Web.Model
 {
     public abstract class BaseViewModel
     {
+        public const string ShortDateFormat = "ddd dd MMM yyyy";
+
         protected BaseViewModel(HttpContext context)
         {
             IsLoggedIn = context.User?.Identity?.IsAuthenticated ?? false;
@@ -18,6 +20,7 @@ namespace SmallMealPlan.Web.Model
 
         public bool IsLoggedIn { get; }
 
-        private string AppendSelected(SmpArea area, string css) => area == SelectedArea ? $"{css} smp-selected" : css;
+        public string AppendCss(bool appendCondition, string css, string appendCss) => appendCondition ? $"{css} {appendCss}" : css;
+        private string AppendSelected(SmpArea area, string css) => AppendCss(area == SelectedArea, css, "smp-selected");
     }
 }

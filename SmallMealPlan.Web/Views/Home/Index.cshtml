@@ -1,13 +1,13 @@
 ﻿@model SmallMealPlan.Web.Model.Home.IndexViewModel
 
 <p>
-    <button><img src="/images/up.png" height="18" width="18" />Mon 19th Apr - Sun 26th Apr</button>
+    <button data-href="/planner/@(Model.PreviousWeekStart.ToString("yyyyMMdd"))"><img src="/images/up.png" height="18" width="18" />@Model.PreviousWeek</button>
 </p>
 <ul class="smp-planner-list">
     <li class="smp-planner-list">
         <div class="smp-planner-list-day">Monday<br/>27th Apr<br/></div>
         <ul class="smp-planner-list-meal">
-            <button data-href="/planner/20200427">Add</button>
+            <button data-href="/planner/add/20200427">Add</button>
             <li class="smp-planner-list-meal">
                 <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
                 <div><img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" /></div>
@@ -37,19 +37,40 @@
             </li>
         </ul>
     </li>
+
+    @foreach (var day in Model.Days) {
     <li class="smp-planner-list">
-        <div class="smp-planner-list-day">Tuesday<br/>28th Apr</div>
+        <div class="@Model.AppendCss(day.Day == DateTime.Today, "smp-planner-list-day", "smp-planner-list-day-selected")">@day.Day.ToString("dddd")<br/>@day.Day.ToString("dd") @day.Day.ToString("MMM")</div>
         <ul class="smp-planner-list-meal">
-            <button data-href="/planner/20200428">Add</button>
+            <button data-href="/planner/add/@(day.Day.ToString("yyyyMMdd"))">Add</button>
+            @foreach (var meal in day.Meals) {
+            <li class="smp-planner-list-meal">
+                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
+                <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
+                <div>
+                    <div>@meal.Name</div>
+                    <div class="smp-planner-list-meal-details">
+                        @if (meal.HasIngredients) {
+                        <div>Ingredients:</div>
+                        <ul>
+                            @foreach (var ingredient in meal.Ingredients) {
+                            <li>@ingredient</li>
+                            }
+                        </ul>
+                        }
+                        @if (meal.HasNotes) {
+                        <div>Notes:</div>
+                        <div>@meal.Notes</div>
+                        }
+                    </div>
+                </div>
+                <div><button><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
+            </li>
+            }
         </ul>
     </li>
-    <li class="smp-planner-list">
-        <div class="smp-planner-list-day">Wednesday<br/>29th Apr</div>
-        <ul class="smp-planner-list-meal">
-            <button data-href="/planner/20200429">Add</button>
-        </ul>
-    </li>
+    }
 </ul>
 <p>
-    <button><img src="/images/down.png" height="16" width="16" />Mon 27th Apr - Sun 2nd May</button>
+    <button data-href="/planner/@(Model.NextWeekStart.ToString("yyyyMMdd"))"><img src="/images/down.png" height="16" width="16" />@Model.NextWeek</button>
 </p>
