@@ -5,7 +5,11 @@ namespace SmallMealPlan.Web.Model.Home
 {
     public class PlannerDayMealViewModel
     {
-        public string Name { get;set; }
+        public PlannerDayMealViewModel(int id) => Id = id;
+
+        public int Id { get; }
+
+        public string Name { get; set; }
 
         public bool HasIngredients => Ingredients?.Any() ?? false;
         public IEnumerable<string> Ingredients { get; set; }

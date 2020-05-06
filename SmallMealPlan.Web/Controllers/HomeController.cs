@@ -47,7 +47,7 @@ namespace SmallMealPlan.Web.Controllers
                 {
                     Day = monday.AddDays(d),
                     Meals =
-                    d == 0 ? new[] { new PlannerDayMealViewModel {
+                    d == 0 ? new[] { new PlannerDayMealViewModel(1) {
                         Name = "Spaghetti",
                         Ingredients = new[] {
                             "Wholewheat spaghetti",
@@ -57,11 +57,11 @@ namespace SmallMealPlan.Web.Controllers
                         },
                         Notes = "Quick & easy"
                     }} :
-                    d == 1 ? new[] { new PlannerDayMealViewModel {
+                    d == 1 ? new[] { new PlannerDayMealViewModel(2) {
                         Name = "Pasta bake",
                         Notes = "Long but easy"
                     }} :
-                    d == 2 ? new[] { new PlannerDayMealViewModel {
+                    d == 2 ? new[] { new PlannerDayMealViewModel(3) {
                         Name = "Pizza"
                     }} : Enumerable.Empty<PlannerDayMealViewModel>()
                 })

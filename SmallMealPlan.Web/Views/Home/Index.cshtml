@@ -4,40 +4,6 @@
     <button data-href="/planner/@(Model.PreviousWeekStart.ToString("yyyyMMdd"))"><img src="/images/up.png" height="18" width="18" />@Model.PreviousWeek</button>
 </p>
 <ul class="smp-planner-list">
-    <li class="smp-planner-list">
-        <div class="smp-planner-list-day">Monday<br/>27th Apr<br/></div>
-        <ul class="smp-planner-list-meal">
-            <button data-href="/planner/add/20200427">Add</button>
-            <li class="smp-planner-list-meal">
-                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
-                <div><img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" /></div>
-                <div>
-                    <div>Spaghetti</div>
-                    <div class="smp-planner-list-meal-details">
-                        <div>Ingredients:</div>
-                        <ul>
-                            <li>Spaghetti</li>
-                            <li>Onion</li>
-                            <li>Tinned fish</li>
-                            <li>Tinned tomatoes</li>
-                        </ul>
-                        <div>Notes:</div>
-                        <div>Easy does it</div>
-                    </div>
-                </div>
-                <div><button><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
-            </li>
-            <li class="smp-planner-list-meal">
-                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
-                <div></div>
-                <div>
-                    <div>Eggs</div>
-                </div>
-                <div><button><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
-            </li>
-        </ul>
-    </li>
-
     @foreach (var day in Model.Days) {
     <li class="smp-planner-list">
         <div class="@Model.AppendCss(day.Day == DateTime.Today, "smp-planner-list-day", "smp-planner-list-day-selected")">@day.Day.ToString("dddd")<br/>@day.Day.ToString("dd") @day.Day.ToString("MMM")</div>
@@ -64,7 +30,7 @@
                         }
                     </div>
                 </div>
-                <div><button><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
+                <div><button data-href="/planner/delete/@(meal.Id)"><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
             </li>
             }
         </ul>
