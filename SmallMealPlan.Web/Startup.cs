@@ -85,7 +85,11 @@ namespace SmallMealPlan.Web
                 o.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<SqliteDataContext>();
+            services.AddDbContext<SqliteDataContext>((serviceProvider, options) => {
+                var sqliteConnectionString = Configuration.GetConnectionString("SmallMealPlan");
+                serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
+                options.UseSqlite(sqliteConnectionString);                
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             services.AddRazorPages();
