@@ -1,16 +1,17 @@
 ﻿@model SmallMealPlan.Web.Model.Meals.IndexViewModel
 
 <div class="smp-planner-add-header">
-    <span class="selected" data-select=".smp-planner-add-recent">Saved meal list box</span>
-    <span data-select=".smp-planner-add-new">Add new meal to list box</span>
+    <span class="selected" data-select=".smp-planner-add-recent">Saved meal-box</span>
+    <span data-select=".smp-planner-add-new">Add to your meal-box</span>
 </div>
 <div class="smp-planner-add-recent">
     Sort by <a href="#">name</a> | <a href="#">recently used</a>
     <ul class="smp-planner-list-meal">
         <li class="smp-planner-list-meal">
+            <div></div>
             <div><img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" /></div>
             <div>
-                <div><a href="#">Pasta bake</a></div>
+                <div>Pasta bake</div>
                 <div class="smp-planner-list-meal-details">
                     <div>Ingredients:</div>
                     <ul>
@@ -21,6 +22,17 @@
                     <div>Easy does it</div>
                 </div>
             </div>
+            <div><button data-href="/meals/delete/123"><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
+        </li>
+        <li class="smp-planner-list-meal">
+            <div></div>
+            <div></div>
+            <div>
+                <div>Pizza</div>
+                <div class="smp-planner-list-meal-details">
+                </div>
+            </div>
+            <div><button data-href="/meals/delete/123"><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
         </li>
     </ul>
     <div class="pagination">
@@ -44,5 +56,5 @@
     <div>Notes:</div>
     <textarea class="smp-planner-add-new-notes" wrap="off"></textarea>
 
-    <p><button>OK</button> <button>Cancel</button></p>
+    <p><button>OK</button></p>
 </div>

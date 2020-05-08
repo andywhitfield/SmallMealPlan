@@ -166,6 +166,10 @@ ul.smp-planner-list-meal>li {
     margin: 2px;
 }
 
+ul.smp-planner-list-meal>li>div:nth-child(2) {
+    min-width: 18px;
+}
+
 ul.smp-planner-list-meal>li>div:nth-child(3) {
     flex-grow: 1;
 }
