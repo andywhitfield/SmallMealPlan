@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using SmallMealPlan.Web.Data;
+using SmallMealPlan.Data;
 
 namespace SmallMealPlan.Web
 {

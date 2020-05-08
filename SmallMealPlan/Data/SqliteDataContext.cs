@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using SmallMealPlan.Model;
 
-namespace SmallMealPlan.Web.Data
+namespace SmallMealPlan.Data
 {
     public class SqliteDataContext : DbContext
     {
@@ -14,6 +15,10 @@ namespace SmallMealPlan.Web.Data
             _configuration = configuration;
             _logger = logger;
         }
+        
+        public DbSet<UserAccount> UserAccounts { get; set; }
+        public DbSet<Meal> Meals { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

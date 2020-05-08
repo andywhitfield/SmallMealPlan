@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallMealPlan.Web", "SmallMealPlan.Web\SmallMealPlan.Web.csproj", "{3D8A333C-D4D3-4B1B-9E9F-E48434B0A7B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallMealPlan", "SmallMealPlan\SmallMealPlan.csproj", "{D317B56B-80D4-4B64-8509-7570DCAA2726}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,17 @@ Global
 		{3D8A333C-D4D3-4B1B-9E9F-E48434B0A7B2}.Release|x64.Build.0 = Release|Any CPU
 		{3D8A333C-D4D3-4B1B-9E9F-E48434B0A7B2}.Release|x86.ActiveCfg = Release|Any CPU
 		{3D8A333C-D4D3-4B1B-9E9F-E48434B0A7B2}.Release|x86.Build.0 = Release|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Debug|x64.Build.0 = Debug|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Debug|x86.Build.0 = Debug|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Release|x64.ActiveCfg = Release|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Release|x64.Build.0 = Release|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Release|x86.ActiveCfg = Release|Any CPU
+		{D317B56B-80D4-4B64-8509-7570DCAA2726}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
