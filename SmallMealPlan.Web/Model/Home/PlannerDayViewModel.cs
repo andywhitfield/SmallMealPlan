@@ -7,6 +7,6 @@ namespace SmallMealPlan.Web.Model.Home
     public class PlannerDayViewModel
     {
         public DateTime Day { get; set; }
-        public IEnumerable<PlannerDayMealViewModel> Meals { get; set; } = Enumerable.Empty<PlannerDayMealViewModel>();
+        public List<PlannerDayMealViewModel> Meals { get; set; } = new List<PlannerDayMealViewModel>();
     }
 }

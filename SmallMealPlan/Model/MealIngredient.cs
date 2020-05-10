@@ -9,5 +9,6 @@ namespace SmallMealPlan.Model
         public Meal Meal { get; set; }
         [Required]
         public Ingredient Ingredient { get; set; }
+        public int SortOrder { get; set; }
     }
 }

@@ -61,7 +61,8 @@ namespace SmallMealPlan.Migrations
                     MealIngredientId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     MealId = table.Column<int>(nullable: false),
-                    IngredientId = table.Column<int>(nullable: false)
+                    IngredientId = table.Column<int>(nullable: false),
+                    SortOrder = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,7 +89,8 @@ namespace SmallMealPlan.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Date = table.Column<DateTime>(nullable: false),
                     MealId = table.Column<int>(nullable: false),
-                    UserAccountId = table.Column<int>(nullable: false)
+                    UserAccountId = table.Column<int>(nullable: false),
+                    SortOrder = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

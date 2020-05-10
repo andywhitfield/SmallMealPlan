@@ -1,7 +1,7 @@
 ﻿@model SmallMealPlan.Web.Model.Home.PlannerViewModel
 
 <p>
-    Add meal for Monday 19th April 2020
+    Add meal for @Model.Date.ToString("dddd dd MMMM yyyy")
 </p>
 <div class="smp-planner-add-header">
     <span class="selected" data-select=".smp-planner-add-recent">Saved meal-box</span>
@@ -48,14 +48,17 @@
     </div>
 </div>
 <div class="smp-planner-add-new">
+    <form method="post" action="/planner/add/@Model.Date.ToString("yyyyMMdd")">
+    @Html.AntiForgeryToken()
     <div>Description:</div>
-    <input type="text" class="smp-planner-add-new-description" />
+    <input type="text" name="description" class="smp-planner-add-new-description" />
 
     <div>Ingredients:</div>
-    <textarea class="smp-planner-add-new-ingredients" wrap="off"></textarea>
+    <textarea name="ingredients" class="smp-planner-add-new-ingredients" wrap="off"></textarea>
 
     <div>Notes:</div>
-    <textarea class="smp-planner-add-new-notes" wrap="off"></textarea>
+    <textarea name="notes" class="smp-planner-add-new-notes" wrap="off"></textarea>
 
-    <p><button>Add</button></p>
+    <p><input type="submit" value="Add" /></p>
+    </form>
 </div>

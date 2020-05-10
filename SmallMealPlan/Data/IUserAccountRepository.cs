@@ -8,6 +8,7 @@ namespace SmallMealPlan.Data
     {
         Task CreateNewUserAsync(ClaimsPrincipal user);
         Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user);
+        Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user);
         Task SaveUserAccountAsync(UserAccount userAccount);
     }
 }

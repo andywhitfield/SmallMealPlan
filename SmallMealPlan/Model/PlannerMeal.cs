@@ -11,5 +11,6 @@ namespace SmallMealPlan.Model
         public Meal Meal { get; set; }
         [Required]
         public UserAccount User { get; set; }
+        public int SortOrder { get; set; }
     }
 }

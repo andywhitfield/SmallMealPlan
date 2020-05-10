@@ -66,6 +66,9 @@ namespace SmallMealPlan.Migrations
                     b.Property<int>("MealId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("MealIngredientId");
 
                     b.HasIndex("IngredientId");
@@ -85,6 +88,9 @@ namespace SmallMealPlan.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MealId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SortOrder")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserAccountId")

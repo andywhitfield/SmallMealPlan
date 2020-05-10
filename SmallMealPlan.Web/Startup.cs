@@ -90,6 +90,9 @@ namespace SmallMealPlan.Web
                 serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
                 options.UseSqlite(sqliteConnectionString);                
             });
+            services
+                .AddScoped<IUserAccountRepository, UserAccountRepository>()
+                .AddScoped<IMealPlannerRepository, MealPlannerRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             services.AddRazorPages();
@@ -101,13 +104,9 @@ namespace SmallMealPlan.Web
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseExceptionHandler("/Home/Error");
-            }
 
             app.UseStaticFiles();
             app.UseCookiePolicy();

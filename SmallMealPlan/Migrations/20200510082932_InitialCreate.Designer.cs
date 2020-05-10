@@ -9,7 +9,7 @@ using SmallMealPlan.Data;
 namespace SmallMealPlan.Migrations
 {
     [DbContext(typeof(SqliteDataContext))]
-    [Migration("20200508195240_InitialCreate")]
+    [Migration("20200510082932_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,6 +68,9 @@ namespace SmallMealPlan.Migrations
                     b.Property<int>("MealId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("MealIngredientId");
 
                     b.HasIndex("IngredientId");
@@ -87,6 +90,9 @@ namespace SmallMealPlan.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MealId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SortOrder")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserAccountId")

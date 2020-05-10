@@ -9,13 +9,13 @@ namespace SmallMealPlan.Data
 {
     public class UserAccountRepository : IUserAccountRepository
     {
-        private readonly SqliteDataContext context;
-        private readonly ILogger<UserAccountRepository> logger;
+        private readonly SqliteDataContext _context;
+        private readonly ILogger<UserAccountRepository> _logger;
 
         public UserAccountRepository(SqliteDataContext context, ILogger<UserAccountRepository> logger)
         {
-            this.context = context;
-            this.logger = logger;
+            _context = context;
+            _logger = logger;
         }
 
         public Task CreateNewUserAsync(ClaimsPrincipal user)
@@ -23,27 +23,27 @@ namespace SmallMealPlan.Data
             var authenticationUri = GetIdentifierFromPrincipal(user);
             var newAccount = new UserAccount { AuthenticationUri = authenticationUri };
 
-            context.UserAccounts.Add(newAccount);
-            return context.SaveChangesAsync();
+            _context.UserAccounts.Add(newAccount);
+            return _context.SaveChangesAsync();
         }
 
         private string GetIdentifierFromPrincipal(ClaimsPrincipal user) => user?.FindFirstValue("sub");
 
         public Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => GetUserAccountOrNullAsync(user) ?? throw new ArgumentException($"No UserAccount for the user: {user}");
 
-        private Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user)
+        public Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user)
         {
             var authenticationUri = GetIdentifierFromPrincipal(user);
             if (string.IsNullOrWhiteSpace(authenticationUri))
                 return null;
 
-            return context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri);
+            return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri);
         }
 
         public async Task SaveUserAccountAsync(UserAccount userAccount)
         {
-            context.UserAccounts.Update(userAccount);
-            await context.SaveChangesAsync();
+            _context.UserAccounts.Update(userAccount);
+            await _context.SaveChangesAsync();
         }
     }
 }
