@@ -8,7 +8,7 @@
     <li class="smp-planner-list">
         <div class="@Model.AppendCss(day.Day == DateTime.Today, "smp-planner-list-day", "smp-planner-list-day-selected")">@day.Day.ToString("dddd")<br/>@day.Day.ToString("dd") @day.Day.ToString("MMM")</div>
         <ul class="smp-planner-list-meal" data-day="@day.Day.ToString("yyyyMMdd")">
-            <button data-href="/planner/add/@(day.Day.ToString("yyyyMMdd"))">Add</button>
+            <button data-href="/planner/@(day.Day.ToString("yyyyMMdd"))/add">Add</button>
             @foreach (var meal in day.Meals) {
             <li class="smp-planner-list-meal" data-meal="@meal.Id">
                 <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
@@ -30,7 +30,7 @@
                         }
                     </div>
                 </div>
-                <div><button data-href="/planner/delete/@(meal.Id)"><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
+                <div><form method="post" action="/planner/@(day.Day.ToString("yyyyMMdd"))/delete/@(meal.Id)">@Html.AntiForgeryToken()<button data-href="/planner/delete/@(meal.Id)"><img src="/images/close.png" height="15" width="15" /> Delete</button></form></div>
             </li>
             }
         </ul>

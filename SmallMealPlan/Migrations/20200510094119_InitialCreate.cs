@@ -90,7 +90,8 @@ namespace SmallMealPlan.Migrations
                     Date = table.Column<DateTime>(nullable: false),
                     MealId = table.Column<int>(nullable: false),
                     UserAccountId = table.Column<int>(nullable: false),
-                    SortOrder = table.Column<int>(nullable: false)
+                    SortOrder = table.Column<int>(nullable: false),
+                    DeletedDateTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {

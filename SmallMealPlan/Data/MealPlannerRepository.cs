@@ -19,8 +19,14 @@ namespace SmallMealPlan.Data
             _logger = logger;
         }
 
-        public Task AddNewMealToPlannerAsync(UserAccount userAccount, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+        public async Task AddNewMealToPlannerAsync(UserAccount userAccount, DateTime date, string description, IEnumerable<string> ingredients, string notes)
         {
+            var currentMealsOnDate = await _context.PlannerMeals
+                .Where(pm => pm.User == userAccount)
+                .Where(pm => pm.Date == date.Date)
+                .Where(pm => !pm.DeletedDateTime.HasValue)
+                .CountAsync();
+
             _context.PlannerMeals.Add(new PlannerMeal
             {
                 Date = date.Date,
@@ -35,9 +41,10 @@ namespace SmallMealPlan.Data
                         SortOrder = idx
                     }).ToList()
                 },
-                User = userAccount
+                User = userAccount,
+                SortOrder = currentMealsOnDate
             });
-            return _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public Task<List<PlannerMeal>> GetPlannerMealsAsync(UserAccount userAccount, DateTime fromDateInclusive, DateTime toDateExclusive)
@@ -49,9 +56,23 @@ namespace SmallMealPlan.Data
                 .Where(pm => pm.User == userAccount)
                 .Where(pm => pm.Date >= fromDateInclusive)
                 .Where(pm => pm.Date < toDateExclusive)
+                .Where(pm => !pm.DeletedDateTime.HasValue)
                 .OrderBy(pm => pm.Date)
                 .ThenBy(pm => pm.SortOrder)
                 .ToListAsync();
+        }
+
+        public async Task DeleteMealFromPlannerAsync(UserAccount userAccount, int mealPlannerId)
+        {
+            if (userAccount == null)
+                throw new ArgumentNullException(nameof(userAccount));
+
+            var plannerMeal = await _context.PlannerMeals.FindAsync(mealPlannerId);
+            if (plannerMeal == null)
+                return;
+            _logger.LogDebug($"Deleting planner meal id: {plannerMeal.PlannerMealId}");
+            plannerMeal.DeletedDateTime = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
     }
 }

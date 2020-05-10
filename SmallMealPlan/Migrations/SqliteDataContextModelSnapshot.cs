@@ -87,6 +87,9 @@ namespace SmallMealPlan.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("MealId")
                         .HasColumnType("INTEGER");
 

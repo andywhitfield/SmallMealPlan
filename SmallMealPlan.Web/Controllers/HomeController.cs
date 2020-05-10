@@ -80,11 +80,11 @@ namespace SmallMealPlan.Web.Controllers
         }
 
         [Authorize]
-        [HttpGet("~/planner/add/{date}")]
+        [HttpGet("~/planner/{date}/add")]
         public IActionResult Planner(string date) => View(new PlannerViewModel(HttpContext, ParseDateOrToday(date)));
 
         [Authorize]
-        [HttpPost("~/planner/add/{date}")]
+        [HttpPost("~/planner/{date}/add")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToPlanner([FromRoute] string date, [FromForm] AddToPlannerRequest addModel)
         {
@@ -92,6 +92,18 @@ namespace SmallMealPlan.Web.Controllers
                 return BadRequest();
             var userAccount = await _userAccountRepository.GetUserAccountAsync(User);
             await _mealPlannerRepository.AddNewMealToPlannerAsync(userAccount, ParseDateOrToday(date), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
+            return Redirect($"~/planner/{date}");
+        }
+
+        [Authorize]
+        [HttpPost("~/planner/{date}/delete/{mealPlannerId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFromPlanner([FromRoute] string date, [FromRoute] int mealPlannerId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var userAccount = await _userAccountRepository.GetUserAccountAsync(User);
+            await _mealPlannerRepository.DeleteMealFromPlannerAsync(userAccount, mealPlannerId);
             return Redirect($"~/planner/{date}");
         }
 

@@ -12,5 +12,6 @@ namespace SmallMealPlan.Model
         [Required]
         public UserAccount User { get; set; }
         public int SortOrder { get; set; }
+        public DateTime? DeletedDateTime { get; set; }
     }
 }

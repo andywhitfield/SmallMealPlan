@@ -9,7 +9,7 @@ using SmallMealPlan.Data;
 namespace SmallMealPlan.Migrations
 {
     [DbContext(typeof(SqliteDataContext))]
-    [Migration("20200510082932_InitialCreate")]
+    [Migration("20200510094119_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,6 +87,9 @@ namespace SmallMealPlan.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedDateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MealId")

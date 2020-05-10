@@ -48,7 +48,7 @@
     </div>
 </div>
 <div class="smp-planner-add-new">
-    <form method="post" action="/planner/add/@Model.Date.ToString("yyyyMMdd")">
+    <form method="post" action="/planner/@(Model.Date.ToString("yyyyMMdd"))/add">
     @Html.AntiForgeryToken()
     <div>Description:</div>
     <input type="text" name="description" class="smp-planner-add-new-description" />
