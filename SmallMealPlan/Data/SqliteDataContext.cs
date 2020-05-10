@@ -12,5 +12,6 @@ namespace SmallMealPlan.Data
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<MealIngredient> MealIngredients { get; set; }
         public DbSet<PlannerMeal> PlannerMeals { get; set; }
+        public DbSet<Note> Notes { get; set; }
     }
 }

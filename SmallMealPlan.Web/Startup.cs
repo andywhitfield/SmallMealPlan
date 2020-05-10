@@ -92,7 +92,8 @@ namespace SmallMealPlan.Web
             });
             services
                 .AddScoped<IUserAccountRepository, UserAccountRepository>()
-                .AddScoped<IPlannerMealRepository, PlannerMealRepository>();
+                .AddScoped<IPlannerMealRepository, PlannerMealRepository>()
+                .AddScoped<INoteRepository, NoteRepository>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             services.AddRazorPages();

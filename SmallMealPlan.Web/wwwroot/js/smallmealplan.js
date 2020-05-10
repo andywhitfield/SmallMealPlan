@@ -1,7 +1,7 @@
 function smpInitialise() {
     smpInitialiseNav();
 
-    $("ul.smp-planner-list").sortable({
+    $('ul.smp-planner-list').sortable({
         handle: '.smp-planner-list-meal-drag-handle',
         isValidTarget: function(item, container) {
             return container.el[0].className.includes('smp-planner-list-meal');
@@ -13,7 +13,7 @@ function smpInitialise() {
             let newDate = item.parent('ul').attr('data-day');
             let prevMeal = parseInt(item.prev('li').attr('data-meal'));
             $.ajax({
-                url: '/planner/' + mealMoved + '/move',
+                url: '/api/planner/' + mealMoved + '/move',
                 type: 'PUT',
                 data: JSON.stringify({ date: newDate, sortOrderPreviousPlannerMealId: prevMeal == NaN ? null : prevMeal }),
                 contentType: 'application/json; charset=utf-8',
@@ -22,21 +22,37 @@ function smpInitialise() {
         }
     });
 
-    $(".smp-planner-list-meal-oc").click(function() {
-        $(this).parent("div").next().find(".smp-planner-list-meal-details").toggle();
+    $('.smp-planner-list-meal-oc').click(function() {
+        $(this).parent('div').next().find('.smp-planner-list-meal-details').toggle();
     });
 
-    $(".smp-planner-add-header > span").click(function() {
-        if ($(this).hasClass("selected"))
+    $('.smp-planner-add-header > span').click(function() {
+        if ($(this).hasClass('selected'))
             return;
-        $(this).parent().children("span.selected").each(function() {
-            $(this).removeClass("selected");
-            let selectedEl = $(this).attr("data-select");
+        $(this).parent().children('span.selected').each(function() {
+            $(this).removeClass('selected');
+            let selectedEl = $(this).attr('data-select');
             $(selectedEl).hide();
         });
-        $(this).addClass("selected");
-        let selectEl = $(this).attr("data-select");
+        $(this).addClass('selected');
+        let selectEl = $(this).attr('data-select');
         $(selectEl).show();
+    });
+
+    $('textarea.notes').on('change input paste keyup', function() {
+        let updatedText = $(this).val();
+        let timeout = $(this).data('throttle');
+        if (typeof timeout !== 'undefined')
+            clearTimeout(timeout);
+        $(this).data('throttle', setTimeout(function() {
+            $.ajax({
+                url: '/api/note',
+                type: 'PUT',
+                data: JSON.stringify({ noteText: updatedText }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json'
+            });
+        }, 1000));
     });
 }
 

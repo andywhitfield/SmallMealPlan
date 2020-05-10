@@ -8,5 +8,7 @@ namespace SmallMealPlan.Web.Model.Notes
         {
             SelectedArea = SmpArea.Notes;
         }
+        
+        public string Notes { get; set; }
     }
 }

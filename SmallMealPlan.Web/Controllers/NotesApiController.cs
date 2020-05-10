@@ -10,27 +10,27 @@ namespace SmallMealPlan.Web.Controllers
 {
     [ApiController]
     [Authorize]
-    public class HomeApiController : ControllerBase
+    public class NotesApiController : ControllerBase
     {
-        private readonly ILogger<HomeApiController> _logger;
+        private readonly ILogger<NotesApiController> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IPlannerMealRepository _plannerMealRepository;
+        private readonly INoteRepository _noteRepository;
 
-        public HomeApiController(ILogger<HomeApiController> logger,
+        public NotesApiController(ILogger<NotesApiController> logger,
             IUserAccountRepository userAccountRepository,
-            IPlannerMealRepository plannerMealRepository)
+            INoteRepository noteRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
-            _plannerMealRepository = plannerMealRepository;
+            _noteRepository = noteRepository;
         }
 
-        [HttpPut("~/api/planner/{plannerMealId}/move")]
+        [HttpPut("~/api/note")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> Move(int plannerMealId, PlannerMealMoveRequest plannerMealMoveRequest)
+        public async Task<IActionResult> AddOrUpdate(AddUpdateNoteRequest addUpdateNote)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _plannerMealRepository.UpdateAsync(user, plannerMealId, plannerMealMoveRequest.Date.ParseDateOrToday(), plannerMealMoveRequest.SortOrderPreviousPlannerMealId);
+            await _noteRepository.AddOrUpdateAsync(user, string.IsNullOrWhiteSpace(addUpdateNote.NoteText) ? "" : addUpdateNote.NoteText);
             return NoContent();
         }
     }
