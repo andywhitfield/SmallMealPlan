@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -10,5 +11,7 @@ namespace SmallMealPlan.Model
         public string AuthenticationUri { get; set; }
         public List<PlannerMeal> PlannerMeals { get; set; }
         public List<Meal> Meals { get; set; }
+        public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
+        public DateTime? LastUpdateDateTime { get; set; }
     }
 }

@@ -8,29 +8,47 @@ namespace SmallMealPlan.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Ingredients",
-                columns: table => new
-                {
-                    IngredientId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Description = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ingredients", x => x.IngredientId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserAccounts",
                 columns: table => new
                 {
                     UserAccountId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AuthenticationUri = table.Column<string>(nullable: false)
+                    AuthenticationUri = table.Column<string>(nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(nullable: false),
+                    LastUpdateDateTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserAccounts", x => x.UserAccountId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Ingredients",
+                columns: table => new
+                {
+                    IngredientId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Description = table.Column<string>(nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(nullable: false),
+                    CreatedByUserAccountId = table.Column<int>(nullable: true),
+                    LastUpdateDateTime = table.Column<DateTime>(nullable: true),
+                    LastUpdatedByUserAccountId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ingredients", x => x.IngredientId);
+                    table.ForeignKey(
+                        name: "FK_Ingredients_UserAccounts_CreatedByUserAccountId",
+                        column: x => x.CreatedByUserAccountId,
+                        principalTable: "UserAccounts",
+                        principalColumn: "UserAccountId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Ingredients_UserAccounts_LastUpdatedByUserAccountId",
+                        column: x => x.LastUpdatedByUserAccountId,
+                        principalTable: "UserAccounts",
+                        principalColumn: "UserAccountId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,7 +59,9 @@ namespace SmallMealPlan.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     UserAccountId = table.Column<int>(nullable: false),
                     Description = table.Column<string>(nullable: false),
-                    Notes = table.Column<string>(nullable: true)
+                    Notes = table.Column<string>(nullable: true),
+                    CreatedDateTime = table.Column<DateTime>(nullable: false),
+                    LastUpdateDateTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,7 +82,9 @@ namespace SmallMealPlan.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     MealId = table.Column<int>(nullable: false),
                     IngredientId = table.Column<int>(nullable: false),
-                    SortOrder = table.Column<int>(nullable: false)
+                    SortOrder = table.Column<int>(nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(nullable: false),
+                    LastUpdateDateTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -91,6 +113,8 @@ namespace SmallMealPlan.Migrations
                     MealId = table.Column<int>(nullable: false),
                     UserAccountId = table.Column<int>(nullable: false),
                     SortOrder = table.Column<int>(nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(nullable: false),
+                    LastUpdateDateTime = table.Column<DateTime>(nullable: true),
                     DeletedDateTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
@@ -109,6 +133,16 @@ namespace SmallMealPlan.Migrations
                         principalColumn: "UserAccountId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ingredients_CreatedByUserAccountId",
+                table: "Ingredients",
+                column: "CreatedByUserAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ingredients_LastUpdatedByUserAccountId",
+                table: "Ingredients",
+                column: "LastUpdatedByUserAccountId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MealIngredients_IngredientId",

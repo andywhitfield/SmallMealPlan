@@ -22,11 +22,27 @@ namespace SmallMealPlan.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("CreatedByUserAccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("LastUpdateDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("LastUpdatedByUserAccountId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("IngredientId");
+
+                    b.HasIndex("CreatedByUserAccountId");
+
+                    b.HasIndex("LastUpdatedByUserAccountId");
 
                     b.ToTable("Ingredients");
                 });
@@ -37,8 +53,14 @@ namespace SmallMealPlan.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUpdateDateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Notes")
@@ -60,8 +82,14 @@ namespace SmallMealPlan.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("IngredientId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastUpdateDateTime")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("MealId")
                         .HasColumnType("INTEGER");
@@ -84,10 +112,16 @@ namespace SmallMealPlan.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DeletedDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUpdateDateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MealId")
@@ -118,9 +152,26 @@ namespace SmallMealPlan.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastUpdateDateTime")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("UserAccountId");
 
                     b.ToTable("UserAccounts");
+                });
+
+            modelBuilder.Entity("SmallMealPlan.Model.Ingredient", b =>
+                {
+                    b.HasOne("SmallMealPlan.Model.UserAccount", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserAccountId");
+
+                    b.HasOne("SmallMealPlan.Model.UserAccount", "LastUpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("LastUpdatedByUserAccountId");
                 });
 
             modelBuilder.Entity("SmallMealPlan.Model.Meal", b =>

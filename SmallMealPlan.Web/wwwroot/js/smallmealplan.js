@@ -9,14 +9,16 @@ function smpInitialise() {
         onDrop: function(item, container, _super, event) {
             _super(item, container, event);
 
-            // TODO: callback to update meal planner...
             let mealMoved = item.attr('data-meal');
             let newDate = item.parent('ul').attr('data-day');
-            let prevMeal = item.prev('li').attr('data-meal');
-            if (!prevMeal) prevMeal = -1;
-            let nextMeal = item.next('li').attr('data-meal');
-            if (!nextMeal) nextMeal = -1;
-            console.log('moved ' + mealMoved + ' to day ' + newDate + ' between ' + prevMeal + ' and ' + nextMeal);
+            let prevMeal = parseInt(item.prev('li').attr('data-meal'));
+            $.ajax({
+                url: '/planner/' + mealMoved + '/move',
+                type: 'PUT',
+                data: JSON.stringify({ date: newDate, sortOrderPreviousPlannerMealId: prevMeal == NaN ? null : prevMeal }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json'
+            });
         }
     });
 

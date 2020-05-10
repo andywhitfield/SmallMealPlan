@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -19,18 +18,16 @@ namespace SmallMealPlan.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IMealPlannerRepository _mealPlannerRepository;
+        private readonly IPlannerMealRepository _plannerMealRepository;
 
         public HomeController(ILogger<HomeController> logger,
             IUserAccountRepository userAccountRepository,
-            IMealPlannerRepository mealPlannerRepository)
+            IPlannerMealRepository plannerMealRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
-            _mealPlannerRepository = mealPlannerRepository;
+            _plannerMealRepository = plannerMealRepository;
         }
-
-        private DateTime ParseDateOrToday(string date) => DateTime.TryParseExact(date, "yyyyMMdd", null, DateTimeStyles.AssumeUniversal, out var dt) ? dt : DateTime.Today;
 
         [Authorize]
         [HttpGet("~/")]
@@ -38,7 +35,7 @@ namespace SmallMealPlan.Web.Controllers
         [HttpGet("~/planner/{date}")]
         public async Task<IActionResult> Index(string date)
         {
-            var monday = ParseDateOrToday(date);
+            var monday = date.ParseDateOrToday();
             if (monday.DayOfWeek != DayOfWeek.Monday)
             {
                 var daysSinceMonday = (monday.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)monday.DayOfWeek) - 1;
@@ -51,7 +48,7 @@ namespace SmallMealPlan.Web.Controllers
                 Day = monday.AddDays(d)
             }).ToList();
 
-            var plannerMeals = await _mealPlannerRepository.GetPlannerMealsAsync(
+            var plannerMeals = await _plannerMealRepository.GetPlannerMealsAsync(
                 await _userAccountRepository.GetUserAccountAsync(User), monday, monday.AddDays(7));
 
             foreach (var plannerMeal in plannerMeals)
@@ -81,7 +78,7 @@ namespace SmallMealPlan.Web.Controllers
 
         [Authorize]
         [HttpGet("~/planner/{date}/add")]
-        public IActionResult Planner(string date) => View(new PlannerViewModel(HttpContext, ParseDateOrToday(date)));
+        public IActionResult Planner(string date) => View(new PlannerViewModel(HttpContext, date.ParseDateOrToday()));
 
         [Authorize]
         [HttpPost("~/planner/{date}/add")]
@@ -90,20 +87,20 @@ namespace SmallMealPlan.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var userAccount = await _userAccountRepository.GetUserAccountAsync(User);
-            await _mealPlannerRepository.AddNewMealToPlannerAsync(userAccount, ParseDateOrToday(date), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            await _plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
             return Redirect($"~/planner/{date}");
         }
 
         [Authorize]
-        [HttpPost("~/planner/{date}/delete/{mealPlannerId}")]
+        [HttpPost("~/planner/{date}/delete/{plannerMealId}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteFromPlanner([FromRoute] string date, [FromRoute] int mealPlannerId)
+        public async Task<IActionResult> DeleteFromPlanner([FromRoute] string date, [FromRoute] int plannerMealId)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            var userAccount = await _userAccountRepository.GetUserAccountAsync(User);
-            await _mealPlannerRepository.DeleteMealFromPlannerAsync(userAccount, mealPlannerId);
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            await _plannerMealRepository.DeleteMealFromPlannerAsync(user, plannerMealId);
             return Redirect($"~/planner/{date}");
         }
 

@@ -21,9 +21,9 @@ namespace SmallMealPlan.Data
         public Task CreateNewUserAsync(ClaimsPrincipal user)
         {
             var authenticationUri = GetIdentifierFromPrincipal(user);
-            var newAccount = new UserAccount { AuthenticationUri = authenticationUri };
+            var newUser = new UserAccount { AuthenticationUri = authenticationUri };
 
-            _context.UserAccounts.Add(newAccount);
+            _context.UserAccounts.Add(newUser);
             return _context.SaveChangesAsync();
         }
 
@@ -38,12 +38,6 @@ namespace SmallMealPlan.Data
                 return null;
 
             return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri);
-        }
-
-        public async Task SaveUserAccountAsync(UserAccount userAccount)
-        {
-            _context.UserAccounts.Update(userAccount);
-            await _context.SaveChangesAsync();
         }
     }
 }
