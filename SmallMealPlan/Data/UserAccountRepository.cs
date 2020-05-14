@@ -37,7 +37,7 @@ namespace SmallMealPlan.Data
             if (string.IsNullOrWhiteSpace(authenticationUri))
                 return null;
 
-            return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri);
+            return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri && ua.DeletedDateTime == null);
         }
     }
 }

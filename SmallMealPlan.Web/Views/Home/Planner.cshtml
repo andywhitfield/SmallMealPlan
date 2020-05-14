@@ -1,7 +1,7 @@
 ﻿@model SmallMealPlan.Web.Model.Home.PlannerViewModel
 
 <p>
-    Add meal for @Model.Date.ToString("dddd dd MMMM yyyy")
+    Add meal for @Model.Day.ToString("dddd dd MMMM yyyy")
 </p>
 <div class="smp-planner-add-header">
     <span class="selected" data-select=".smp-planner-add-recent">Saved meal-box</span>
@@ -10,45 +10,48 @@
 <div class="smp-planner-add-recent">
     Sort by <a href="#">name</a> | <a href="#">recently used</a>
     <ul class="smp-planner-list-meal">
+        @foreach (var meal in Model.Meals) {
         <li class="smp-planner-list-meal">
             <div></div>
-            <div><img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" /></div>
+            <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
             <div>
-                <div><a href="#">Pasta bake</a></div>
+                <div><a href="#">@meal.Name</a></div>
                 <div class="smp-planner-list-meal-details">
+                    @if (meal.HasIngredients) {
                     <div>Ingredients:</div>
                     <ul>
-                        <li>Pasta bake sauce</li>
-                        <li>90g Pasta</li>
+                        @foreach (var ingredient in meal.Ingredients) {
+                        <li>@ingredient</li>
+                        }
                     </ul>
+                    }
+                    @if (meal.HasNotes) {
                     <div>Notes:</div>
-                    <div>Easy does it</div>
+                    <div>@meal.Notes</div>
+                    }
                 </div>
             </div>
         </li>
-        <li class="smp-planner-list-meal">
-            <div></div>
-            <div></div>
-            <div>
-                <div><a href="#">Pizza</a></div>
-                <div class="smp-planner-list-meal-details">
-                </div>
-            </div>
-        </li>
+        }
     </ul>
     <div class="pagination">
-        <a href="#">&laquo;</a>
-        <a href="#">1</a>
-        <a class="pagination-active" href="#">2</a>
-        <a href="#">3</a>
-        <a href="#">4</a>
-        <a href="#">5</a>
-        <a href="#">6</a>
-        <a href="#">&raquo;</a>
+        @if (Model.PageNumber > 1) {
+        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber - 1)">&laquo;</a>
+        }
+        @for (var pageNum = 1; pageNum <= Model.PageCount; pageNum++) {
+        @if (pageNum == Model.PageNumber) {
+        <a class="pagination-active">@pageNum</a>
+        } else {
+        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@pageNum">@pageNum</a>
+        }
+        }
+        @if (Model.PageNumber < Model.PageCount) {
+        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber + 1)">&raquo;</a>
+        }
     </div>
 </div>
 <div class="smp-planner-add-new">
-    <form method="post" action="/planner/@(Model.Date.ToString("yyyyMMdd"))/add">
+    <form method="post" action="/planner/@(Model.Day.ToString("yyyyMMdd"))/add">
     @Html.AntiForgeryToken()
     <div>Description:</div>
     <input type="text" name="description" class="smp-planner-add-new-description" />

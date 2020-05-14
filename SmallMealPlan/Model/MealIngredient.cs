@@ -13,5 +13,6 @@ namespace SmallMealPlan.Model
         public int SortOrder { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public DateTime? LastUpdateDateTime { get; set; }
+        public DateTime? DeletedDateTime { get; set; }
     }
 }

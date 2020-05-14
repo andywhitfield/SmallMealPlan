@@ -1,16 +1,20 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
 namespace SmallMealPlan.Web.Model.Home
 {
     public class PlannerViewModel : BaseViewModel
     {
-        public PlannerViewModel(HttpContext context, DateTime date) : base(context)
+        public PlannerViewModel(HttpContext context, DateTime day) : base(context)
         {
-            Date = date;
+            Day = day;
             SelectedArea = SmpArea.Planner;
         }
 
-        public DateTime Date { get; }
+        public DateTime Day { get; }
+        public int PageNumber { get; set; }
+        public int PageCount { get; set; }
+        public List<PlannerDayMealViewModel> Meals { get; set; } = new List<PlannerDayMealViewModel>();
     }
 }

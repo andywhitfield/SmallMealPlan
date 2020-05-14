@@ -25,7 +25,7 @@ namespace SmallMealPlan.Data
             var currentMealsOnDate = await _context.PlannerMeals
                 .Where(pm => pm.User == user)
                 .Where(pm => pm.Date == date.Date)
-                .Where(pm => !pm.DeletedDateTime.HasValue)
+                .Where(pm => pm.DeletedDateTime == null)
                 .CountAsync();
 
             _context.PlannerMeals.Add(new PlannerMeal
@@ -48,20 +48,18 @@ namespace SmallMealPlan.Data
             await _context.SaveChangesAsync();
         }
 
-        public Task<List<PlannerMeal>> GetPlannerMealsAsync(UserAccount user, DateTime fromDateInclusive, DateTime toDateExclusive)
-        {
-            return _context.PlannerMeals
+        public Task<List<PlannerMeal>> GetPlannerMealsAsync(UserAccount user, DateTime fromDateInclusive, DateTime toDateExclusive) =>
+            _context.PlannerMeals
                 .Include(pm => pm.Meal)
                 .ThenInclude(m => m.Ingredients)
                 .ThenInclude(mi => mi.Ingredient)
                 .Where(pm => pm.User == user)
                 .Where(pm => pm.Date >= fromDateInclusive)
                 .Where(pm => pm.Date < toDateExclusive)
-                .Where(pm => !pm.DeletedDateTime.HasValue)
+                .Where(pm => pm.DeletedDateTime == null)
                 .OrderBy(pm => pm.Date)
                 .ThenBy(pm => pm.SortOrder)
                 .ToListAsync();
-        }
 
         public async Task DeleteMealFromPlannerAsync(UserAccount user, int mealPlannerId)
         {
@@ -97,10 +95,10 @@ namespace SmallMealPlan.Data
             var mealsOnDate = _context.PlannerMeals
                 .Where(pm => pm.User == user)
                 .Where(pm => pm.Date == date.Date)
-                .Where(pm => !pm.DeletedDateTime.HasValue)
+                .Where(pm => pm.DeletedDateTime == null)
                 .OrderBy(pm => pm.SortOrder)
                 .AsAsyncEnumerable();
-            
+
             int? sortOrder = null;
             PlannerMeal lastMealOnDate = null;
             if (!sortOrderPreviousPlannerMealId.HasValue)

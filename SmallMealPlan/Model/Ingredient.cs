@@ -12,5 +12,6 @@ namespace SmallMealPlan.Model
         public UserAccount CreatedBy { get; set; }
         public DateTime? LastUpdateDateTime { get; set; }
         public UserAccount LastUpdatedBy { get; set; }
+        public DateTime? DeletedDateTime { get; set; }
     }
 }

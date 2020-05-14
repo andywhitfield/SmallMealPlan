@@ -19,14 +19,17 @@ namespace SmallMealPlan.Web.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IPlannerMealRepository _plannerMealRepository;
+        private readonly IMealRepository _mealRepository;
 
         public HomeController(ILogger<HomeController> logger,
             IUserAccountRepository userAccountRepository,
-            IPlannerMealRepository plannerMealRepository)
+            IPlannerMealRepository plannerMealRepository,
+            IMealRepository mealRepository)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _plannerMealRepository = plannerMealRepository;
+            _mealRepository = mealRepository;
         }
 
         [Authorize]
@@ -43,13 +46,13 @@ namespace SmallMealPlan.Web.Controllers
             }
             monday = monday.Date;
 
-            var plannerDayViewModels = Enumerable.Range(0, 7).Select(d => new PlannerDayViewModel
+            var plannerDayViewModels = Enumerable.Range(0, 14).Select(d => new PlannerDayViewModel
             {
                 Day = monday.AddDays(d)
             }).ToList();
 
             var plannerMeals = await _plannerMealRepository.GetPlannerMealsAsync(
-                await _userAccountRepository.GetUserAccountAsync(User), monday, monday.AddDays(7));
+                await _userAccountRepository.GetUserAccountAsync(User), monday, monday.AddDays(14));
 
             foreach (var plannerMeal in plannerMeals)
             {
@@ -59,7 +62,8 @@ namespace SmallMealPlan.Web.Controllers
                     _logger.LogWarning($"Could not add planner meal {plannerMeal.PlannerMealId} with date {plannerMeal.Date}");
                     continue;
                 }
-                viewModel.Meals.Add(new PlannerDayMealViewModel(plannerMeal.PlannerMealId) {
+                viewModel.Meals.Add(new PlannerDayMealViewModel(plannerMeal.PlannerMealId)
+                {
                     Name = plannerMeal.Meal.Description,
                     Notes = plannerMeal.Meal.Notes,
                     Ingredients = plannerMeal.Meal.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description) ?? Enumerable.Empty<string>()
@@ -78,7 +82,24 @@ namespace SmallMealPlan.Web.Controllers
 
         [Authorize]
         [HttpGet("~/planner/{date}/add")]
-        public IActionResult Planner(string date) => View(new PlannerViewModel(HttpContext, date.ParseDateOrToday()));
+        public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var meals = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1);
+            return View(new PlannerViewModel(HttpContext, date.ParseDateOrToday())
+            {
+                PageCount = meals.PageCount,
+                PageNumber = meals.PageNumber,
+                Meals = meals.Meals
+                .Select(m => new PlannerDayMealViewModel(m.MealId)
+                {
+                    Name = m.Description,
+                    Notes = m.Notes,
+                    Ingredients = m.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description) ?? Enumerable.Empty<string>()
+                })
+                .ToList()
+            });
+        }
 
         [Authorize]
         [HttpPost("~/planner/{date}/add")]

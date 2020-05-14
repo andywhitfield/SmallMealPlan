@@ -15,5 +15,6 @@ namespace SmallMealPlan.Model
         public string Notes { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public DateTime? LastUpdateDateTime { get; set; }
+        public DateTime? DeletedDateTime { get; set; }
     }
 }
