@@ -24,32 +24,49 @@ namespace SmallMealPlan.Data
         public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, int pageSize)
         {
             var meals = await GetAsync(user);
-            var totalCount = meals.Count;
-            var pageCount = totalCount / pageSize;
-            if (totalCount % pageSize != 0) pageCount++;
-            var pageIndex = Math.Min(pageCount, Math.Max(0, pageNumber - 1));
+            var pagination = GetPagination(meals.Count, pageSize, pageNumber);
 
             var mealIds = meals
                 .OrderByDescending(m => m.DateOnPlanner ?? DateTime.MinValue)
                 .ThenByDescending(m => m.MealCreatedDate)
                 .Select(m => m.MealId)
-                .Skip(pageIndex * pageSize)
+                .Skip(pagination.PageIndex * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            return (mealIds, pageIndex + 1, pageCount);
+            return (mealIds, pagination.PageIndex + 1, pagination.PageCount);
         }
 
         public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByNameAsync(UserAccount user, int pageNumber, int pageSize)
         {
-            return (new List<int>(), 1, 1);
+            var meals = await GetAsync(user);
+            var pagination = GetPagination(meals.Count, pageSize, pageNumber);
+
+            var mealIds = meals
+                .OrderBy(m => m.MealDescription)
+                .ThenByDescending(m => m.DateOnPlanner ?? DateTime.MinValue)
+                .ThenByDescending(m => m.MealCreatedDate)
+                .Select(m => m.MealId)
+                .Skip(pagination.PageIndex * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (mealIds, pagination.PageIndex + 1, pagination.PageCount);
         }
 
-        private async Task<List<(int MealId, DateTime MealCreatedDate, DateTime? DateOnPlanner)>> GetAsync(UserAccount user)
+        private (int PageIndex, int PageCount) GetPagination(int totalCount, int pageSize, int pageNumber)
         {
-            var mealIds = new List<(int, DateTime, DateTime?)>();
+            var pageCount = totalCount / pageSize;
+            if (totalCount % pageSize != 0) pageCount++;
+            var pageIndex = Math.Min(pageCount - 1, Math.Max(0, pageNumber - 1));
+            return (pageIndex, pageCount);
+        }
+
+        private async Task<List<(int MealId, DateTime MealCreatedDate, DateTime? DateOnPlanner, string MealDescription)>> GetAsync(UserAccount user)
+        {
+            var mealIds = new List<(int, DateTime, DateTime?, string)>();
             foreach (var mealInfo in await _context.Database.GetDbConnection().QueryAsync(
-                @"select m.MealId, m.CreatedDateTime, pm.Date
+                @"select m.MealId, m.CreatedDateTime, pm.Date, m.Description
                 from Meals m
                 left join (
                     select max(Date) Date, MealId
@@ -61,7 +78,7 @@ namespace SmallMealPlan.Data
                 on m.MealId = pm.MealId
                 where m.UserAccountId = @UserAccountId
                 and m.DeletedDateTime is null", new { user.UserAccountId }))
-                mealIds.Add(((int)mealInfo.MealId, ToDateTime(mealInfo.CreatedDateTime) ?? DateTime.MinValue, ToDateTime(mealInfo.Date)?.Date));
+                mealIds.Add(((int)mealInfo.MealId, ToDateTime(mealInfo.CreatedDateTime) ?? DateTime.MinValue, ToDateTime(mealInfo.Date)?.Date, (string)mealInfo.Description));
 
             return mealIds;
 

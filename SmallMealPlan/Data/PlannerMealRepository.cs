@@ -20,8 +20,32 @@ namespace SmallMealPlan.Data
             _logger = logger;
         }
 
+        public async Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (meal == null) throw new ArgumentNullException(nameof(user));
+            if (meal.User != user) throw new SecurityException($"User {user.UserAccountId} does not own meal {meal.MealId}, cannot add.");
+
+            var currentMealsOnDate = await _context.PlannerMeals
+                .Where(pm => pm.User == user)
+                .Where(pm => pm.Date == date.Date)
+                .Where(pm => pm.DeletedDateTime == null)
+                .CountAsync();
+
+            _context.PlannerMeals.Add(new PlannerMeal
+            {
+                Date = date.Date,
+                Meal = meal,
+                User = user,
+                SortOrder = currentMealsOnDate
+            });
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string notes)
         {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
             var currentMealsOnDate = await _context.PlannerMeals
                 .Where(pm => pm.User == user)
                 .Where(pm => pm.Date == date.Date)

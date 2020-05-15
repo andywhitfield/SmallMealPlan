@@ -8,14 +8,19 @@
     <span data-select=".smp-planner-add-new">Add a new meal</span>
 </div>
 <div class="smp-planner-add-recent">
-    Sort by <a href="#">name</a> | <a href="#">recently used</a>
+    Sort by
+    @if (Model.SortedByName) {
+    <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber)&sort=@(SmallMealPlan.Web.Model.Home.PlannerViewModel.SortByRecentlyUsed)">recently used</a>
+    } else {
+    <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber)&sort=@(SmallMealPlan.Web.Model.Home.PlannerViewModel.SortByName)">name</a>
+    }
     <ul class="smp-planner-list-meal">
         @foreach (var meal in Model.Meals) {
         <li class="smp-planner-list-meal">
             <div></div>
             <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
             <div>
-                <div><a href="#">@meal.Name</a></div>
+                <div><a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add/@(meal.Id)">@meal.Name</a></div>
                 <div class="smp-planner-list-meal-details">
                     @if (meal.HasIngredients) {
                     <div>Ingredients:</div>
@@ -34,21 +39,23 @@
         </li>
         }
     </ul>
+    @if (Model.PageCount > 1) {
     <div class="pagination">
         @if (Model.PageNumber > 1) {
-        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber - 1)">&laquo;</a>
+        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber - 1)&sort=@(Model.Sort)">&laquo;</a>
         }
         @for (var pageNum = 1; pageNum <= Model.PageCount; pageNum++) {
         @if (pageNum == Model.PageNumber) {
         <a class="pagination-active">@pageNum</a>
         } else {
-        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@pageNum">@pageNum</a>
+        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@pageNum&sort=@(Model.Sort)">@pageNum</a>
         }
         }
         @if (Model.PageNumber < Model.PageCount) {
-        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber + 1)">&raquo;</a>
+        <a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add?pageNumber=@(Model.PageNumber + 1)&sort=@(Model.Sort)">&raquo;</a>
         }
     </div>
+    }
 </div>
 <div class="smp-planner-add-new">
     <form method="post" action="/planner/@(Model.Day.ToString("yyyyMMdd"))/add">

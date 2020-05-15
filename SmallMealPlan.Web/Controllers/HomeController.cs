@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
+using SmallMealPlan.Model;
 using SmallMealPlan.Web.Model;
 using SmallMealPlan.Web.Model.Home;
 using SmallMealPlan.Web.Model.Request;
@@ -82,15 +84,24 @@ namespace SmallMealPlan.Web.Controllers
 
         [Authorize]
         [HttpGet("~/planner/{date}/add")]
-        public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber)
+        public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber, [FromQuery] string sort)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var meals = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1);
+            List<Meal> meals;
+            int page;
+            int pageCount;
+            var sortByName = sort == PlannerViewModel.SortByName;
+            if (sortByName)
+                (meals, page, pageCount) = await _mealRepository.GetMealsByNameAsync(user, pageNumber ?? 1);
+            else
+                (meals, page, pageCount) = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1);
+
             return View(new PlannerViewModel(HttpContext, date.ParseDateOrToday())
             {
-                PageCount = meals.PageCount,
-                PageNumber = meals.PageNumber,
-                Meals = meals.Meals
+                PageCount = pageCount,
+                PageNumber = page,
+                Sort = sortByName ? PlannerViewModel.SortByName : PlannerViewModel.SortByRecentlyUsed,
+                Meals = meals
                 .Select(m => new PlannerDayMealViewModel(m.MealId)
                 {
                     Name = m.Description,
@@ -102,9 +113,21 @@ namespace SmallMealPlan.Web.Controllers
         }
 
         [Authorize]
+        [HttpGet("~/planner/{date}/add/{mealId}")]
+        public async Task<IActionResult> AddExistingMealToPlanner(string date, int mealId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var meal = await _mealRepository.GetAsync(mealId);
+            if (meal.User != user)
+                return BadRequest();
+            await _plannerMealRepository.AddMealToPlannerAsync(user, date.ParseDateOrToday(), meal);
+            return Redirect($"~/planner/{date}");
+        }
+
+        [Authorize]
         [HttpPost("~/planner/{date}/add")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddToPlanner([FromRoute] string date, [FromForm] AddToPlannerRequest addModel)
+        public async Task<IActionResult> AddNewMealToPlanner([FromRoute] string date, [FromForm] AddToPlannerRequest addModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
