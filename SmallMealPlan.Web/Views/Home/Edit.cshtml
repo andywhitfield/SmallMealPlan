@@ -1,8 +1,24 @@
 ﻿@model SmallMealPlan.Web.Model.Home.PlannerEditMealViewModel
 
 <p>
-    Edit meal
+    Edit meal <strong>@Model.Name</strong> on @Model.Day.ToString("dddd dd MMMM yyyy")
 </p>
 <p>
-    <button data-href="/planner/@(Model.Day.ToString("yyyyMMdd"))">Cancel</button>
+    <form method="post" action="/planner/@(Model.Day.ToString("yyyyMMdd"))/edit/@(Model.PlannerMealId)">
+    @Html.AntiForgeryToken()
+    <div>Description:</div>
+    <input type="text" name="description" class="smp-planner-add-new-description" value="@Model.Name" />
+
+    <div>Ingredients:</div>
+    <textarea name="ingredients" class="smp-planner-add-new-ingredients" wrap="off">@Model.Ingredients</textarea>
+
+    <div>Notes:</div>
+    <textarea name="notes" class="smp-planner-add-new-notes" wrap="off">@Model.Notes</textarea>
+
+    <p>
+        <button name="save" value="true" type="submit">Save</button>
+        <button name="saveasnew" value="true">Save as new meal</button>
+        <button data-href="/planner/@(Model.Day.ToString("yyyyMMdd"))">Cancel</button>
+    </p>
+    </form>
 </p>

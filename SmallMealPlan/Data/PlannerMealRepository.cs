@@ -19,12 +19,14 @@ namespace SmallMealPlan.Data
             _context = context;
             _logger = logger;
         }
-        
-        public async Task<PlannerMeal> GetAsync(int plannerMealId)
-        {
-            var plannerMeal = await _context.PlannerMeals.FindAsync(plannerMealId);
-            return plannerMeal ?? throw new ArgumentException($"PlannerMealId {plannerMealId} not found", nameof(plannerMealId));
-        }
+
+        public Task<PlannerMeal> GetAsync(int plannerMealId) =>
+             _context.PlannerMeals
+                .Include(pm => pm.Meal)
+                .ThenInclude(m => m.Ingredients)
+                .ThenInclude(mi => mi.Ingredient)
+                .Where(pm => pm.PlannerMealId == plannerMealId)
+                .SingleAsync();
 
         public async Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal)
         {
@@ -163,6 +165,34 @@ namespace SmallMealPlan.Data
             if (!sortOrder.HasValue)
                 plannerMeal.SortOrder = lastMealOnDate?.SortOrder ?? 0;
 
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            var plannerMeal = await GetAsync(plannerMealId);
+            plannerMeal.Meal.LastUpdateDateTime = DateTime.UtcNow;
+            plannerMeal.Meal.Description = description;
+            plannerMeal.Meal.Notes = notes;
+
+            if (
+                plannerMeal.Meal.Ingredients?.Count == 0 && !ingredients.Any() ||
+                (plannerMeal.Meal.Ingredients?.Count == ingredients.Count() && plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients)))
+            {
+                return;
+            }
+            // for now, just delete the MealIngredient and create a a new set
+            _context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
+            if (ingredients.Any())
+            {
+                plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                {
+                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    SortOrder = idx
+                }).ToList();
+            }
             await _context.SaveChangesAsync();
         }
     }

@@ -153,11 +153,43 @@ namespace SmallMealPlan.Web.Controllers
         public async Task<IActionResult> Edit([FromRoute] string date, [FromRoute] int plannerMealId)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var meal = await _plannerMealRepository.GetAsync(plannerMealId);
-            if (meal.User != user)
+            var plannerMeal = await _plannerMealRepository.GetAsync(plannerMealId);
+            if (plannerMeal.User != user)
                 return BadRequest();
 
-            return View(new PlannerEditMealViewModel(HttpContext, date.ParseDateOrToday()));
+            return View(new PlannerEditMealViewModel(HttpContext, date.ParseDateOrToday(), plannerMeal.PlannerMealId)
+            {
+                Name = plannerMeal.Meal.Description,
+                Ingredients = plannerMeal.Meal.Ingredients == null ? null : string.Join('\n', plannerMeal.Meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description)),
+                Notes = plannerMeal.Meal.Notes
+            });
+        }
+
+        [Authorize]
+        [HttpPost("~/planner/{date}/edit/{plannerMealId}")]
+        public async Task<IActionResult> SaveEdit([FromRoute] string date, [FromRoute] int plannerMealId, [FromForm] EditPlannerMealRequest editModel)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var plannerMeal = await _plannerMealRepository.GetAsync(plannerMealId);
+            if (plannerMeal.User != user)
+                return BadRequest();
+            
+            var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
+
+            if (editModel.SaveAsNew ?? false)
+            {
+                await _plannerMealRepository.DeleteMealFromPlannerAsync(user, plannerMealId);
+                await _plannerMealRepository.AddNewMealToPlannerAsync(user, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes);
+            }
+            else
+            {
+                await _plannerMealRepository.UpdateMealPlannerAsync(user, plannerMealId, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes);
+            }
+
+            return Redirect($"~/planner/{date}");
         }
 
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));
