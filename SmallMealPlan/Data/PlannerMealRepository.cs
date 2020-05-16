@@ -19,6 +19,12 @@ namespace SmallMealPlan.Data
             _context = context;
             _logger = logger;
         }
+        
+        public async Task<PlannerMeal> GetAsync(int plannerMealId)
+        {
+            var plannerMeal = await _context.PlannerMeals.FindAsync(plannerMealId);
+            return plannerMeal ?? throw new ArgumentException($"PlannerMealId {plannerMealId} not found", nameof(plannerMealId));
+        }
 
         public async Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal)
         {

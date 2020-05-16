@@ -11,8 +11,8 @@
             <button data-href="/planner/@(day.Day.ToString("yyyyMMdd"))/add">Add</button>
             @foreach (var meal in day.Meals) {
             <li class="smp-planner-list-meal" data-meal="@meal.Id">
-                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" /></div>
-                <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
+                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
+                <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" title="Show/Hide ingredients and notes" />}</div>
                 <div>
                     <div>@meal.Name</div>
                     <div class="smp-planner-list-meal-details">
@@ -30,7 +30,10 @@
                         }
                     </div>
                 </div>
-                <div><form method="post" action="/planner/@(day.Day.ToString("yyyyMMdd"))/delete/@(meal.Id)">@Html.AntiForgeryToken()<button data-href="/planner/delete/@(meal.Id)"><img src="/images/close.png" height="15" width="15" /> Delete</button></form></div>
+                <div>
+                    <button data-href="/planner/@(day.Day.ToString("yyyyMMdd"))/edit/@(meal.Id)" title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                    <form method="post" action="/planner/@(day.Day.ToString("yyyyMMdd"))/delete/@(meal.Id)">@Html.AntiForgeryToken()<button data-href="/planner/delete/@(meal.Id)" title="Delete"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
+                </div>
             </li>
             }
         </ul>

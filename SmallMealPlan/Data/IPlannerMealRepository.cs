@@ -7,6 +7,7 @@ namespace SmallMealPlan.Data
 {
     public interface IPlannerMealRepository
     {
+        Task<PlannerMeal> GetAsync(int plannerMealId);
         Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal);
         Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string notes);
         Task<List<PlannerMeal>> GetPlannerMealsAsync(UserAccount user, DateTime fromDateInclusive, DateTime toDateExclusive);

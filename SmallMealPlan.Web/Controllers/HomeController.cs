@@ -148,6 +148,18 @@ namespace SmallMealPlan.Web.Controllers
             return Redirect($"~/planner/{date}");
         }
 
+        [Authorize]
+        [HttpGet("~/planner/{date}/edit/{plannerMealId}")]
+        public async Task<IActionResult> Edit([FromRoute] string date, [FromRoute] int plannerMealId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var meal = await _plannerMealRepository.GetAsync(plannerMealId);
+            if (meal.User != user)
+                return BadRequest();
+
+            return View(new PlannerEditMealViewModel(HttpContext, date.ParseDateOrToday()));
+        }
+
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));
 
         [HttpGet("~/signin")]

@@ -69,6 +69,9 @@
     <div>Notes:</div>
     <textarea name="notes" class="smp-planner-add-new-notes" wrap="off"></textarea>
 
-    <p><input type="submit" value="Add" /></p>
+    <p><button type="submit">Add</button></p>
     </form>
 </div>
+<p>
+    <button data-href="/planner/@(Model.Day.ToString("yyyyMMdd"))">Cancel</button>
+</p>
