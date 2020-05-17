@@ -5,6 +5,7 @@
 <form action="/signin" method="post">
     <p>
         Sign in using SmallAuth:
-        <input type="submit" value="Login"/>
+        <button type="submit">Login</button>
     </p>
+    @Html.AntiForgeryToken()
 </form>

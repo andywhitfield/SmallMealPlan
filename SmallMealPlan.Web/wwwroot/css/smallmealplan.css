@@ -336,3 +336,22 @@ div.smp-planner-add-new {
         white-space: nowrap;
     }
 }
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: black;
+    }
+    article {
+        background-color: black;
+        color: white;
+    }
+    .smp-planner-add-recent>a,
+    .pagination>a {
+        color: white;
+    }
+    ul.smp-planner-list-meal>li,
+    a.pagination-active,
+    span.selected {
+        color: black;
+    }
+}

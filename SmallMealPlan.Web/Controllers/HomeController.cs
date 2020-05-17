@@ -167,6 +167,7 @@ namespace SmallMealPlan.Web.Controllers
 
         [Authorize]
         [HttpPost("~/planner/{date}/edit/{plannerMealId}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveEdit([FromRoute] string date, [FromRoute] int plannerMealId, [FromForm] EditPlannerMealRequest editModel)
         {
             if (!ModelState.IsValid)
@@ -198,6 +199,7 @@ namespace SmallMealPlan.Web.Controllers
         public IActionResult SignIn() => View("Login", new LoginViewModel(HttpContext));
 
         [HttpPost("~/signin")]
+        [ValidateAntiForgeryToken]
         public IActionResult SignInChallenge() => Challenge(new AuthenticationProperties { RedirectUri = "/signedin" }, OpenIdConnectDefaults.AuthenticationScheme);
 
         [Authorize]

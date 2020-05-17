@@ -178,20 +178,19 @@ namespace SmallMealPlan.Data
             plannerMeal.Meal.Notes = notes;
 
             if (
-                plannerMeal.Meal.Ingredients?.Count == 0 && !ingredients.Any() ||
-                (plannerMeal.Meal.Ingredients?.Count == ingredients.Count() && plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients)))
+                plannerMeal.Meal.Ingredients?.Count != ingredients.Count() ||
+                !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
             {
-                return;
-            }
-            // for now, just delete the MealIngredient and create a a new set
-            _context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
-            if (ingredients.Any())
-            {
-                plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                // for now, just delete the MealIngredient and create a a new set
+                _context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
+                if (ingredients.Any())
                 {
-                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
-                    SortOrder = idx
-                }).ToList();
+                    plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                    {
+                        Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                        SortOrder = idx
+                    }).ToList();
+                }
             }
             await _context.SaveChangesAsync();
         }
