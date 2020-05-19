@@ -5,56 +5,71 @@
     <span data-select=".smp-planner-add-new">Add to your meal-box</span>
 </div>
 <div class="smp-planner-add-recent">
-    Sort by <a href="#">name</a> | <a href="#">recently used</a>
+    Sort by
+    @if (Model.SortedByName) {
+    <a href="/meals?pageNumber=@(Model.PageNumber)&sort=@(SmallMealPlan.Web.Model.Meals.IndexViewModel.SortByRecentlyUsed)">recently used</a>
+    } else {
+    <a href="/meals?pageNumber=@(Model.PageNumber)&sort=@(SmallMealPlan.Web.Model.Meals.IndexViewModel.SortByName)">name</a>
+    }
     <ul class="smp-planner-list-meal">
+        @foreach (var meal in Model.Meals) {
         <li class="smp-planner-list-meal">
             <div></div>
-            <div><img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" /></div>
+            <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
             <div>
-                <div>Pasta bake</div>
+                <div>@meal.Name</div>
                 <div class="smp-planner-list-meal-details">
+                    @if (meal.HasIngredients) {
                     <div>Ingredients:</div>
                     <ul>
-                        <li>Pasta bake sauce</li>
-                        <li>90g Pasta</li>
+                        @foreach (var ingredient in meal.Ingredients) {
+                        <li>@ingredient</li>
+                        }
                     </ul>
+                    }
+                    @if (meal.HasNotes) {
                     <div>Notes:</div>
-                    <div>Easy does it</div>
+                    <div>@meal.Notes</div>
+                    }
                 </div>
             </div>
-            <div><button data-href="/meals/delete/123"><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
-        </li>
-        <li class="smp-planner-list-meal">
-            <div></div>
-            <div></div>
             <div>
-                <div>Pizza</div>
-                <div class="smp-planner-list-meal-details">
-                </div>
+                <button data-href="/meal/edit/@(meal.Id)" title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                <form method="post" action="/meal/delete/@(meal.Id)">@Html.AntiForgeryToken()<button title="Delete" type="submit"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
             </div>
-            <div><button data-href="/meals/delete/123"><img src="/images/close.png" height="15" width="15" /> Delete</button></div>
         </li>
+        }
     </ul>
+    @if (Model.PageCount > 1) {
     <div class="pagination">
-        <a href="#">&laquo;</a>
-        <a href="#">1</a>
-        <a class="pagination-active" href="#">2</a>
-        <a href="#">3</a>
-        <a href="#">4</a>
-        <a href="#">5</a>
-        <a href="#">6</a>
-        <a href="#">&raquo;</a>
+        @if (Model.PageNumber > 1) {
+        <a href="/meals?pageNumber=@(Model.PageNumber - 1)&sort=@(Model.Sort)">&laquo;</a>
+        }
+        @for (var pageNum = 1; pageNum <= Model.PageCount; pageNum++) {
+        @if (pageNum == Model.PageNumber) {
+        <a class="pagination-active">@pageNum</a>
+        } else {
+        <a href="/meals?pageNumber=@pageNum&sort=@(Model.Sort)">@pageNum</a>
+        }
+        }
+        @if (Model.PageNumber < Model.PageCount) {
+        <a href="/meals?pageNumber=@(Model.PageNumber + 1)&sort=@(Model.Sort)">&raquo;</a>
+        }
     </div>
+    }
 </div>
 <div class="smp-planner-add-new">
+    <form method="post" action="/meals">
+    @Html.AntiForgeryToken()
     <div>Description:</div>
-    <input type="text" class="smp-planner-add-new-description" />
+    <input type="text" name="description" class="smp-planner-add-new-description" />
 
     <div>Ingredients:</div>
-    <textarea class="smp-planner-add-new-ingredients" wrap="off"></textarea>
+    <textarea name="ingredients" class="smp-planner-add-new-ingredients" wrap="off"></textarea>
 
     <div>Notes:</div>
-    <textarea class="smp-planner-add-new-notes" wrap="off"></textarea>
+    <textarea name="notes" class="smp-planner-add-new-notes" wrap="off"></textarea>
 
-    <p><button>OK</button></p>
+    <p><button type="submit">Add</button></p>
+    </form>
 </div>
