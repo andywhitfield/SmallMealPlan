@@ -149,7 +149,7 @@ ul.smp-planner-list {
 }
 
 div.smp-planner-list-day {
-    width: 115px;
+    min-width: 115px;
 }
 
 div.smp-planner-list-day-selected {
@@ -184,12 +184,17 @@ ul.smp-planner-list-meal>li>div {
 
 div.smp-planner-list-meal-details {
     display: none;
+    margin-top: 3px;
 }
 
 div.smp-planner-list-meal-details ul {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+div.smp-planner-list-meal-details ul>li {
+    padding-bottom: 2px;
 }
 
 div.smp-planner-list-meal-details>:first-child,

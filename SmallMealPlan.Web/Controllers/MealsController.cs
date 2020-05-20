@@ -64,7 +64,7 @@ namespace SmallMealPlan.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            //await _mealRepository.AddNewMealAsync(user, addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
+            await _mealRepository.AddNewMealAsync(user, addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
             return Redirect("~/meals");
         }
     }

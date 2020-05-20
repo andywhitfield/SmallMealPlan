@@ -59,5 +59,23 @@ namespace SmallMealPlan.Data
                 .OrderBy(m => mealIds.MealIds.IndexOf(m.MealId))
                 .ToList(), mealIds.PageNumber, mealIds.PageCount);
         }
+
+        public async Task AddNewMealAsync(UserAccount user, string description, IEnumerable<string> ingredients, string notes)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            _context.Meals.Add(new Meal
+            {
+                Description = description,
+                Notes = notes,
+                User = user,
+                Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                {
+                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    SortOrder = idx
+                }).ToList()
+            });
+            await _context.SaveChangesAsync();
+        }
     }
 }
