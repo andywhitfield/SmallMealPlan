@@ -1,10 +1,10 @@
-﻿@model SmallMealPlan.Web.Model.Home.PlannerEditMealViewModel
+﻿@model SmallMealPlan.Web.Model.Meals.EditMealViewModel
 
 <p>
-    Edit meal <strong>@Model.Name</strong> on @Model.Day.ToString("dddd dd MMMM yyyy")
+    Edit meal <strong>@Model.Name</strong>
 </p>
 <p>
-    <form method="post" action="/planner/@(Model.Day.ToString("yyyyMMdd"))/edit/@(Model.PlannerMealId)">
+    <form method="post" action="/meal/edit/@(Model.MealId)">
     @Html.AntiForgeryToken()
     <div>Description:</div>
     <input type="text" name="description" class="smp-planner-add-new-description" value="@Model.Name" />

@@ -27,7 +27,7 @@ namespace SmallMealPlan.Data
 
         public async Task<Meal> GetAsync(int mealId)
         {
-            var meal = await _context.Meals.FindAsync(mealId);
+            var meal = await _context.Meals.Include(m => m.Ingredients).ThenInclude(mi => mi.Ingredient).Where(m => m.MealId == mealId).SingleOrDefaultAsync();
             return meal ?? throw new ArgumentException($"MealId {mealId} not found", nameof(mealId));
         }
 
@@ -76,6 +76,39 @@ namespace SmallMealPlan.Data
                     SortOrder = idx
                 }).ToList()
             });
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateMealAsync(UserAccount user, Meal meal, string description, IEnumerable<string> ingredients, string notes)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+            if (meal == null)
+                throw new ArgumentNullException(nameof(meal));
+
+            if (meal.User.UserAccountId != user.UserAccountId)
+                throw new SecurityException($"Cannot update meal id: {meal.MealId}");
+
+            meal.LastUpdateDateTime = DateTime.UtcNow;
+            meal.Description = description;
+            meal.Notes = notes;
+
+            if (
+                meal.Ingredients?.Count != ingredients.Count() ||
+                !meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
+            {
+                // for now, just delete the MealIngredient and create a a new set
+                if (meal.Ingredients?.Any() ?? false)
+                    _context.MealIngredients.RemoveRange(meal.Ingredients);
+                if (ingredients.Any())
+                {
+                    meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                    {
+                        Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                        SortOrder = idx
+                    }).ToList();
+                }
+            }
             await _context.SaveChangesAsync();
         }
 

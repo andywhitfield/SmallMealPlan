@@ -69,6 +69,49 @@ namespace SmallMealPlan.Web.Controllers
         }
 
         [Authorize]
+        [HttpGet("~/meal/edit/{mealId}")]
+        public async Task<IActionResult> Edit([FromRoute] int mealId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var meal = await _mealRepository.GetAsync(mealId);
+            if (meal.User != user)
+                return BadRequest();
+
+            return View(new EditMealViewModel(HttpContext, meal.MealId)
+            {
+                Name = meal.Description,
+                Ingredients = meal.Ingredients == null ? null : string.Join('\n', meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description)),
+                Notes = meal.Notes
+            });
+        }
+
+        [Authorize]
+        [HttpPost("~/meal/edit/{mealId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveEdit([FromRoute] int mealId, [FromForm] EditPlannerMealRequest editModel)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            if (editModel.Cancel ?? false)
+                return Redirect($"~/meals");
+
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var meal = await _mealRepository.GetAsync(mealId);
+            if (meal.User != user)
+                return BadRequest();
+
+            var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
+
+            if (editModel.SaveAsNew ?? false)
+                await _mealRepository.AddNewMealAsync(user, editModel.Description, ingredients, editModel.Notes);
+            else
+                await _mealRepository.UpdateMealAsync(user, meal, editModel.Description, ingredients, editModel.Notes);
+
+            return Redirect($"~/meals");
+        }
+
+        [Authorize]
         [HttpPost("~/meal/delete/{mealId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMeal([FromRoute] int mealId)

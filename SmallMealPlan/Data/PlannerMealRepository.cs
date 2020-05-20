@@ -182,7 +182,8 @@ namespace SmallMealPlan.Data
                 !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
             {
                 // for now, just delete the MealIngredient and create a a new set
-                _context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
+                if (plannerMeal.Meal.Ingredients?.Any() ?? false)
+                    _context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
                 if (ingredients.Any())
                 {
                     plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient

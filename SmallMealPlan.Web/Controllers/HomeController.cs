@@ -173,11 +173,14 @@ namespace SmallMealPlan.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
+            if (editModel.Cancel ?? false)
+                return Redirect($"~/planner/{date}");
+
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             var plannerMeal = await _plannerMealRepository.GetAsync(plannerMealId);
             if (plannerMeal.User != user)
                 return BadRequest();
-            
+
             var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
 
             if (editModel.SaveAsNew ?? false)
