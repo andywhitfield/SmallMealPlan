@@ -10,12 +10,12 @@ using SmallMealPlan.Model;
 
 namespace SmallMealPlan.Data
 {
-    public class DirectQueryService : IDirectQueryService
+    public class DirectDbService : IDirectDbService
     {
         private readonly SqliteDataContext _context;
-        private readonly ILogger<DirectQueryService> _logger;
+        private readonly ILogger<DirectDbService> _logger;
 
-        public DirectQueryService(SqliteDataContext context, ILogger<DirectQueryService> logger)
+        public DirectDbService(SqliteDataContext context, ILogger<DirectDbService> logger)
         {
             _context = context;
             _logger = logger;
@@ -53,6 +53,9 @@ namespace SmallMealPlan.Data
 
             return (mealIds, pagination.PageIndex + 1, pagination.PageCount);
         }
+
+        public Task RemovePlannerMealByMealIdAsync(int mealId) => _context.Database.GetDbConnection().ExecuteAsync(
+                "delete from PlannerMeals where MealId = @mealId", new { mealId });
 
         private (int PageIndex, int PageCount) GetPagination(int totalCount, int pageSize, int pageNumber)
         {

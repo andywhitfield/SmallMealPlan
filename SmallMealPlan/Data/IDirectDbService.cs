@@ -4,9 +4,10 @@ using SmallMealPlan.Model;
 
 namespace SmallMealPlan.Data
 {
-    public interface IDirectQueryService
+    public interface IDirectDbService
     {
         Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, int pageSize);
         Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByNameAsync(UserAccount user, int pageNumber, int pageSize);
+        Task RemovePlannerMealByMealIdAsync(int mealId);
     }
 }

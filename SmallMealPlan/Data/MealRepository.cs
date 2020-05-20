@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,14 +15,14 @@ namespace SmallMealPlan.Data
 
         private readonly SqliteDataContext _context;
         private readonly ILogger<MealRepository> _logger;
-        private readonly IDirectQueryService _directQueryService;
+        private readonly IDirectDbService _directDbService;
 
         public MealRepository(SqliteDataContext context, ILogger<MealRepository> logger,
-            IDirectQueryService directQueryService)
+            IDirectDbService directDbService)
         {
             _context = context;
             _logger = logger;
-            _directQueryService = directQueryService;
+            _directDbService = directDbService;
         }
 
         public async Task<Meal> GetAsync(int mealId)
@@ -32,7 +33,7 @@ namespace SmallMealPlan.Data
 
         public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByMostRecentlyUsedAsync(UserAccount user, int pageNumber)
         {
-            var mealIds = await _directQueryService.GetMealIdsByMostRecentlyUsedAsync(user, pageNumber, PageSize);
+            var mealIds = await _directDbService.GetMealIdsByMostRecentlyUsedAsync(user, pageNumber, PageSize);
             return ((
                 await _context
                     .Meals
@@ -47,7 +48,7 @@ namespace SmallMealPlan.Data
 
         public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByNameAsync(UserAccount user, int pageNumber)
         {
-            var mealIds = await _directQueryService.GetMealIdsByNameAsync(user, pageNumber, PageSize);
+            var mealIds = await _directDbService.GetMealIdsByNameAsync(user, pageNumber, PageSize);
             return ((
                 await _context
                     .Meals
@@ -75,6 +76,21 @@ namespace SmallMealPlan.Data
                     SortOrder = idx
                 }).ToList()
             });
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteMealAsync(UserAccount user, Meal meal)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+            if (meal == null)
+                throw new ArgumentNullException(nameof(meal));
+
+            if (meal.User.UserAccountId != user.UserAccountId)
+                throw new SecurityException($"Cannot delete meal id: {meal.MealId}");
+
+            await _directDbService.RemovePlannerMealByMealIdAsync(meal.MealId);
+            _context.Meals.Remove(meal);
             await _context.SaveChangesAsync();
         }
     }

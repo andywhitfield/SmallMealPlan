@@ -57,7 +57,7 @@ namespace SmallMealPlan.Web.Controllers
         }
 
         [Authorize]
-        [HttpPost("/meals")]
+        [HttpPost("~/meals")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddNewMeal([FromForm] AddMealRequest addModel)
         {
@@ -65,6 +65,17 @@ namespace SmallMealPlan.Web.Controllers
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             await _mealRepository.AddNewMealAsync(user, addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
+            return Redirect("~/meals");
+        }
+
+        [Authorize]
+        [HttpPost("~/meal/delete/{mealId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMeal([FromRoute] int mealId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var meal = await _mealRepository.GetAsync(mealId);
+            await _mealRepository.DeleteMealAsync(user, meal);
             return Redirect("~/meals");
         }
     }
