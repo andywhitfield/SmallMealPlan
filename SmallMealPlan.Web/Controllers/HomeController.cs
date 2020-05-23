@@ -90,7 +90,7 @@ namespace SmallMealPlan.Web.Controllers
             List<Meal> meals;
             int page;
             int pageCount;
-            var sortByName = sort == PlannerViewModel.SortByName;
+            var sortByName = sort == Pagination.SortByName;
             if (sortByName)
                 (meals, page, pageCount) = await _mealRepository.GetMealsByNameAsync(user, pageNumber ?? 1);
             else
@@ -98,9 +98,7 @@ namespace SmallMealPlan.Web.Controllers
 
             return View(new PlannerViewModel(HttpContext, date.ParseDateOrToday())
             {
-                PageCount = pageCount,
-                PageNumber = page,
-                Sort = sortByName ? PlannerViewModel.SortByName : PlannerViewModel.SortByRecentlyUsed,
+                Pagination = new Pagination(page, pageCount, sort),
                 Meals = meals
                 .Select(m => new PlannerDayMealViewModel(m.MealId)
                 {

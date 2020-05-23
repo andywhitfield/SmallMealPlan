@@ -218,7 +218,7 @@ textarea.smp-planner-add-new-notes {
     display: inline-block;
 }
 
-.pagination a {
+.pagination * {
     float: left;
     padding: 5px 10px;
     text-decoration: none;
