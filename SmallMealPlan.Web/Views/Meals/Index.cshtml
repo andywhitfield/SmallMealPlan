@@ -35,7 +35,7 @@
             </div>
             <div>
                 <button data-href="/meal/edit/@(meal.Id)" title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
-                <form method="post" action="/meal/delete/@(meal.Id)">@Html.AntiForgeryToken()<button title="Delete" type="submit"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
+                <form data-confirm="Are you sure you want to delete this meal? Note that this will also delete any planner entries for this meal." method="post" action="/meal/delete/@(meal.Id)">@Html.AntiForgeryToken()<button title="Delete" type="submit"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
             </div>
         </li>
         }

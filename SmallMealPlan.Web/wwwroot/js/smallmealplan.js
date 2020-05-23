@@ -54,6 +54,13 @@ function smpInitialise() {
             });
         }, 1000));
     });
+
+    $('form[data-confirm]').submit(function(event) {
+        if (!confirm($(this).attr('data-confirm'))) {
+            event.preventDefault();
+            return false;
+        }
+    });
 }
 
 function smpInitialiseNav() {

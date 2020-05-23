@@ -32,7 +32,7 @@
                 </div>
                 <div>
                     <button data-href="/planner/@(day.Day.ToString("yyyyMMdd"))/edit/@(meal.Id)" title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
-                    <form method="post" action="/planner/@(day.Day.ToString("yyyyMMdd"))/delete/@(meal.Id)">@Html.AntiForgeryToken()<button title="Delete" type="submit"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
+                    <form data-confirm="Are you sure you want to delete this meal from your planner?" method="post" action="/planner/@(day.Day.ToString("yyyyMMdd"))/delete/@(meal.Id)">@Html.AntiForgeryToken()<button title="Delete" type="submit"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
                 </div>
             </li>
             }
