@@ -10,8 +10,15 @@ function smpInitialise() {
             _super(item, container, event);
 
             let mealMoved = item.attr('data-meal');
+            if (typeof mealMoved === 'undefined')
+                return;
+
             let newDate = item.parent('ul').attr('data-day');
+            if (typeof newDate === 'undefined')
+                return;
+
             let prevMeal = parseInt(item.prev('li').attr('data-meal'));
+
             $.ajax({
                 url: '/api/planner/' + mealMoved + '/move',
                 type: 'PUT',

@@ -1,3 +1,41 @@
 ﻿@model SmallMealPlan.Web.Model.ShoppingList.IndexViewModel
 
-TODO
+<div class="smp-planner-add-header">
+    <span class="selected" data-select=".smp-shoplist-current">My list</span>
+    <span data-select=".smp-shoplist-add-from-planner">Add from planner</span>
+    <span data-select=".smp-shoplist-bought">Bought</span>
+</div>
+<div class="smp-shoplist-current">
+    <ul class="smp-planner-list">
+        <li class="smp-planner-list">
+            <ul class="smp-planner-list-meal">
+                <li class="smp-planner-list-meal">
+                    <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
+                    <div></div>
+                    <div>Wholegrain pasta (85g)</div>
+                    <div>
+                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        <button title="Bought"><img src="/images/close.png" height="15" width="15" /> Bought</button>
+                    </div>
+                </li>
+                <li class="smp-planner-list-meal">
+                    <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
+                    <div></div>
+                    <div>Tomatoes</div>
+                    <div>
+                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        <button title="Bought"><img src="/images/close.png" height="15" width="15" /> Bought</button>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="smp-shoplist-add-from-planner">
+ADD FROM PLANNER
+</div>
+
+<div class="smp-shoplist-bought">
+DONE / DELETED / BOUGHT
+</div>

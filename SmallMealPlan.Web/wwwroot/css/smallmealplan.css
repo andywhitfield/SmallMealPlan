@@ -294,6 +294,9 @@ div.smp-planner-add-header>span.selected {
 
 div.smp-planner-add-recent,
 div.smp-planner-add-new,
+div.smp-shoplist-current,
+div.smp-shoplist-add-from-planner,
+div.smp-shoplist-bought,
 div.smp-planner-add-header>span {
     border: 1px solid #ffd700;
 }
@@ -311,7 +314,9 @@ div.smp-planner-add-recent>ul>li {
     padding: 5px;
 }
 
-div.smp-planner-add-new {
+div.smp-planner-add-new,
+div.smp-shoplist-add-from-planner,
+div.smp-shoplist-bought {
     display: none;
     padding: 5px;
 }
@@ -348,6 +353,9 @@ div.smp-planner-add-new {
     }
     article {
         background-color: black;
+        color: white;
+    }
+    footer {
         color: white;
     }
     .smp-planner-add-recent>a,
