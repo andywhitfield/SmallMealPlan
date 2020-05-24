@@ -9,33 +9,69 @@
     <ul class="smp-planner-list">
         <li class="smp-planner-list">
             <ul class="smp-planner-list-meal">
+                @foreach (var shoppingListItem in Model.MyList) {
                 <li class="smp-planner-list-meal">
                     <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div></div>
-                    <div>Wholegrain pasta (85g)</div>
+                    <div>@shoppingListItem.Description</div>
                     <div>
-                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                        <form method="post" action="/shoppinglist/bought/@shoppingListItem.ShoppingListItemId">
+                        @Html.AntiForgeryToken()
                         <button title="Bought"><img src="/images/close.png" height="15" width="15" /> Bought</button>
+                        </form>
                     </div>
                 </li>
+                }
+            </ul>
+        </li>
+    </ul>
+    <div>
+    <form method="post" action="/shoppinglist">
+    @Html.AntiForgeryToken()
+    <input type="text" name="description" class="smp-planner-add-new-description" /> <button type="submit">Add to my shopping list</button>
+    </form>
+    </div>
+</div>
+
+<div class="smp-shoplist-add-from-planner">
+    <button title="Select all">Select all</button> <button title="Add all selected">Add selected to my shopping list</button>
+    <ul class="smp-planner-list">
+        <li class="smp-planner-list">
+            <ul class="smp-planner-list-meal">
                 <li class="smp-planner-list-meal">
-                    <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div></div>
+                    <div><input type="checkbox"></div>
+                    <div>Wholegrain pasta (85g)</div>
+                    <div><button title="Add"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
+                </li>
+                <li class="smp-planner-list-meal">
+                    <div></div>
+                    <div><input type="checkbox"></div>
                     <div>Tomatoes</div>
-                    <div>
-                        <button title="Edit"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
-                        <button title="Bought"><img src="/images/close.png" height="15" width="15" /> Bought</button>
-                    </div>
+                    <div><button title="Add"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
                 </li>
             </ul>
         </li>
     </ul>
 </div>
 
-<div class="smp-shoplist-add-from-planner">
-ADD FROM PLANNER
-</div>
-
 <div class="smp-shoplist-bought">
-DONE / DELETED / BOUGHT
+    <ul class="smp-planner-list">
+        <li class="smp-planner-list">
+            <ul class="smp-planner-list-meal">
+                <li class="smp-planner-list-meal">
+                    <div></div>
+                    <div></div>
+                    <div>Wholegrain pasta (85g)</div>
+                    <div><button title="Add back onto my shopping list"><img src="/images/add.png" height="15" width="15" /> Add back onto list</button></div>
+                </li>
+                <li class="smp-planner-list-meal">
+                    <div></div>
+                    <div></div>
+                    <div>Tomatoes</div>
+                    <div><button title="Add back onto my shopping list"><img src="/images/add.png" height="15" width="15" /> Add back onto list</button></div>
+                </li>
+            </ul>
+        </li>
+    </ul>
 </div>

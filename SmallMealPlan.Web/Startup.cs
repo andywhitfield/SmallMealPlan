@@ -94,6 +94,7 @@ namespace SmallMealPlan.Web
                 .AddScoped<IUserAccountRepository, UserAccountRepository>()
                 .AddScoped<IPlannerMealRepository, PlannerMealRepository>()
                 .AddScoped<IMealRepository, MealRepository>()
+                .AddScoped<IShoppingListRepository, ShoppingListRepository>()
                 .AddScoped<INoteRepository, NoteRepository>()
                 .AddScoped<IDirectDbService, DirectDbService>();
 

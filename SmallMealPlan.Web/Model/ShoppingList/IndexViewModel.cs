@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
 namespace SmallMealPlan.Web.Model.ShoppingList
@@ -8,5 +9,7 @@ namespace SmallMealPlan.Web.Model.ShoppingList
         {
             SelectedArea = SmpArea.ShoppingList;
         }
+
+        public IEnumerable<ShoppingListItemModel> MyList { get; set; } = new List<ShoppingListItemModel>();
     }
 }
