@@ -34,6 +34,11 @@ namespace SmallMealPlan.Web.Controllers
                 {
                     ShoppingListItemId = i.ShoppingListItemId,
                     Description = i.Ingredient.Description
+                }),
+                BoughtList = (await _shoppingListRepository.GetBoughtItemsAsync(user, 1)).Select(i => new ShoppingListItemModel
+                {
+                    ShoppingListItemId = i.ShoppingListItemId,
+                    Description = i.Ingredient.Description
                 })
             });
         }
@@ -47,6 +52,19 @@ namespace SmallMealPlan.Web.Controllers
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             await _shoppingListRepository.AddAsync(user, addModel.Description);
+            return Redirect("~/shoppinglist");
+        }
+
+        [Authorize]
+        [HttpGet("~/shoppinglist/add/{shoppingListItemId}")]
+        public async Task<IActionResult> MakeAsNotBought(int shoppingListItemId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var shoppingListItem = await _shoppingListRepository.GetAsync(shoppingListItemId);
+            if (shoppingListItem.User != user)
+                return BadRequest();
+            if (shoppingListItem.BoughtDateTime != null)
+                await _shoppingListRepository.MarkAsActiveAsync(user, shoppingListItem);
             return Redirect("~/shoppinglist");
         }
 

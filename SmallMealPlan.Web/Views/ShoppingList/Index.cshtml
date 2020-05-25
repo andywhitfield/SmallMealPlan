@@ -59,19 +59,23 @@
     <ul class="smp-planner-list">
         <li class="smp-planner-list">
             <ul class="smp-planner-list-meal">
+                @foreach (var boughtListItem in Model.BoughtList) {
                 <li class="smp-planner-list-meal">
                     <div></div>
                     <div></div>
-                    <div>Wholegrain pasta (85g)</div>
-                    <div><button title="Add back onto my shopping list"><img src="/images/add.png" height="15" width="15" /> Add back onto list</button></div>
+                    <div>@boughtListItem.Description</div>
+                    <div><button title="Add back onto my shopping list" data-href="/shoppinglist/add/@boughtListItem.ShoppingListItemId"><img src="/images/add.png" height="15" width="15" /> Add back onto list</button></div>
                 </li>
-                <li class="smp-planner-list-meal">
-                    <div></div>
-                    <div></div>
-                    <div>Tomatoes</div>
-                    <div><button title="Add back onto my shopping list"><img src="/images/add.png" height="15" width="15" /> Add back onto list</button></div>
-                </li>
+                }
             </ul>
         </li>
     </ul>
 </div>
+
+@section Scripts {
+<script type="text/javascript">
+    $(function() { 
+        $('input[name="description"]').focus();
+    })
+</script>
+}
