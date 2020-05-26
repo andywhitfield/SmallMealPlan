@@ -10,22 +10,35 @@ function smpInitialise() {
             _super(item, container, event);
 
             let mealMoved = item.attr('data-meal');
-            if (typeof mealMoved === 'undefined')
-                return;
-
             let newDate = item.parent('ul').attr('data-day');
-            if (typeof newDate === 'undefined')
+            if (typeof mealMoved !== 'undefined' && typeof newDate !== 'undefined') {
+                let prevMeal = parseInt(item.prev('li').attr('data-meal'));
+
+                $.ajax({
+                    url: '/api/planner/' + mealMoved + '/move',
+                    type: 'PUT',
+                    data: JSON.stringify({ date: newDate, sortOrderPreviousPlannerMealId: prevMeal == NaN ? null : prevMeal }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json'
+                });
+
                 return;
+            }
 
-            let prevMeal = parseInt(item.prev('li').attr('data-meal'));
+            let shoppingListItemMoved = item.attr('data-shoppinglistitem');
+            if (typeof shoppingListItemMoved !== 'undefined') {
+                let prevShoppingListItem = parseInt(item.prev('li').attr('data-shoppinglistitem'));
 
-            $.ajax({
-                url: '/api/planner/' + mealMoved + '/move',
-                type: 'PUT',
-                data: JSON.stringify({ date: newDate, sortOrderPreviousPlannerMealId: prevMeal == NaN ? null : prevMeal }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json'
-            });
+                $.ajax({
+                    url: '/api/shoppinglist/' + shoppingListItemMoved + '/move',
+                    type: 'PUT',
+                    data: JSON.stringify({ sortOrderPreviousShoppingListItemId: prevShoppingListItem == NaN ? null : prevShoppingListItem }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json'
+                });
+
+                return;
+            }
         }
     });
 

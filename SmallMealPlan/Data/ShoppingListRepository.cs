@@ -82,7 +82,64 @@ namespace SmallMealPlan.Data
             await _context.SaveChangesAsync();
         }
 
+        public async Task ReorderAsync(UserAccount user, int shoppingListItemId, int? sortOrderPreviousShoppingListItemId)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            var shoppingListItem = await _context.ShoppingListItems.FindAsync(shoppingListItemId);
+            if (shoppingListItem == null)
+                return;
+
+            if (shoppingListItem.User.UserAccountId != user.UserAccountId)
+                throw new SecurityException($"Cannot update shopping list item id: {shoppingListItem.ShoppingListItemId}");
+
+            _logger.LogDebug($"Update shopping list item id: {shoppingListItem.ShoppingListItemId} to be after {sortOrderPreviousShoppingListItemId}");
+
+            var shoppingListItems = _context.ShoppingListItems
+                .Where(pm => pm.User == user)
+                .Where(pm => pm.BoughtDateTime == null)
+                .Where(pm => pm.DeletedDateTime == null)
+                .OrderBy(pm => pm.SortOrder)
+                .AsAsyncEnumerable();
+
+            int? sortOrder = null;
+            if (!sortOrderPreviousShoppingListItemId.HasValue)
+            {
+                sortOrder = 0;
+                shoppingListItem.SortOrder = sortOrder.Value;
+                sortOrder++;
+            }
+
+            ShoppingListItem lastShoppingListItem = null;
+            await foreach (var sli in shoppingListItems)
+            {
+                if (sli.ShoppingListItemId == shoppingListItem.ShoppingListItemId)
+                    continue;
+
+                if (sortOrderPreviousShoppingListItemId == sli.ShoppingListItemId)
+                {
+                    sortOrder = sli.SortOrder + 1;
+                    shoppingListItem.SortOrder = sortOrder.Value;
+                    sortOrder++;
+                }
+                else if (sortOrder.HasValue)
+                {
+                    sli.SortOrder = sortOrder.Value;
+                    sortOrder++;
+                }
+
+                lastShoppingListItem = sli;
+            }
+
+            shoppingListItem.LastUpdateDateTime = DateTime.UtcNow;
+            if (!sortOrder.HasValue)
+                shoppingListItem.SortOrder = lastShoppingListItem?.SortOrder ?? 0;
+
+            await _context.SaveChangesAsync();
+        }
+
         private async Task<int> GetMaxSortOrder(UserAccount user) =>
-            (await _context.ShoppingListItems.Where(s => s.User == user && s.BoughtDateTime == null && s.DeletedDateTime == null).MaxAsync(s => (int?)s.SortOrder)) ?? 0;
+            (await _context.ShoppingListItems.Where(s => s.User == user && s.BoughtDateTime == null && s.DeletedDateTime == null).MaxAsync(s => (int?)s.SortOrder)) ?? -1;
     }
 }

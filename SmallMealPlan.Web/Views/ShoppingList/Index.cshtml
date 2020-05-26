@@ -10,7 +10,7 @@
         <li class="smp-planner-list">
             <ul class="smp-planner-list-meal">
                 @foreach (var shoppingListItem in Model.MyList) {
-                <li class="smp-planner-list-meal">
+                <li class="smp-planner-list-meal" data-shoppinglistitem="@shoppingListItem.ShoppingListItemId">
                     <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                     <div></div>
                     <div>@shoppingListItem.Description</div>

@@ -12,5 +12,6 @@ namespace SmallMealPlan.Data
         Task AddAsync(UserAccount user, string description);
         Task MarkAsActiveAsync(UserAccount user, ShoppingListItem shoppingListItem);
         Task MarkAsBoughtAsync(UserAccount user, ShoppingListItem shoppingListItem);
+        Task ReorderAsync(UserAccount user, int shoppingListItemId, int? sortOrderPreviousShoppingListItemId);
     }
 }
