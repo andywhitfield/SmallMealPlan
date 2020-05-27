@@ -34,25 +34,24 @@
 </div>
 
 <div class="smp-shoplist-add-from-planner">
-    <button title="Select all">Select all</button> <button title="Add all selected">Add selected to my shopping list</button>
+    <form method="post" action="/shoppinglist/add/planner">
+    @Html.AntiForgeryToken()
+    <button title="Select all" name="selectall" type="button">Select all</button> <button title="Select none" name="selectnone" type="button">Select none</button> <button title="Add all selected" name="addselected" type="submit">Add selected to my shopping list</button>
     <ul class="smp-planner-list">
         <li class="smp-planner-list">
             <ul class="smp-planner-list-meal">
+                @foreach (var ingredient in Model.IngredientFromPlannerList) {
                 <li class="smp-planner-list-meal">
                     <div></div>
-                    <div><input type="checkbox"></div>
-                    <div>Wholegrain pasta (85g)</div>
-                    <div><button title="Add"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
+                    <div><input type="checkbox" name="ingredientid" value="@ingredient.IngredientId"></div>
+                    <div>@ingredient.Description</div>
+                    <div><button data-href="/shoppinglist/add/planner/@ingredient.IngredientId" type="button" type="button"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
                 </li>
-                <li class="smp-planner-list-meal">
-                    <div></div>
-                    <div><input type="checkbox"></div>
-                    <div>Tomatoes</div>
-                    <div><button title="Add"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
-                </li>
+                }
             </ul>
         </li>
     </ul>
+    </form>
 </div>
 
 <div class="smp-shoplist-bought">
@@ -76,6 +75,30 @@
 <script type="text/javascript">
     $(function() { 
         $('input[name="description"]').focus();
+
+        $('button[name="selectall"]').click(function() {
+            $('.smp-planner-list input[type="checkbox"]').prop('checked', true);
+            setAddSelectedButton();
+        });
+        $('button[name="selectnone"]').click(function() {
+            $('.smp-planner-list input[type="checkbox"]').prop('checked', false);
+            setAddSelectedButton();
+        });
+        $('.smp-planner-list input[type="checkbox"]').change(setAddSelectedButton);
+        setAddSelectedButton();
+
+        $('button[name="addselected"]').click(function() {
+            var array = []; 
+            $('.smp-planner-list input:checked').each(function() {
+                array.push($(this).val());
+            });
+            console.log(JSON.stringify({ add: array }));
+        });
     })
+
+    function setAddSelectedButton() {
+        var noneChecked = $('.smp-planner-list input:checked').length == 0;
+        $('button[name="addselected"]').prop('disabled', noneChecked);
+    }
 </script>
 }

@@ -11,6 +11,7 @@ using SmallMealPlan.Web.Model.Request;
 
 namespace SmallMealPlan.Web.Controllers
 {
+    [Authorize]
     public class MealsController : Controller
     {
         private readonly ILogger<MealsController> _logger;
@@ -26,7 +27,6 @@ namespace SmallMealPlan.Web.Controllers
             _mealRepository = mealRepository;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] int? pageNumber, [FromQuery] string sort)
         {
@@ -54,7 +54,6 @@ namespace SmallMealPlan.Web.Controllers
             });
         }
 
-        [Authorize]
         [HttpPost("~/meals")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddNewMeal([FromForm] AddMealRequest addModel)
@@ -66,7 +65,6 @@ namespace SmallMealPlan.Web.Controllers
             return Redirect("~/meals");
         }
 
-        [Authorize]
         [HttpGet("~/meal/edit/{mealId}")]
         public async Task<IActionResult> Edit([FromRoute] int mealId)
         {
@@ -83,7 +81,6 @@ namespace SmallMealPlan.Web.Controllers
             });
         }
 
-        [Authorize]
         [HttpPost("~/meal/edit/{mealId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveEdit([FromRoute] int mealId, [FromForm] EditPlannerMealRequest editModel)
@@ -109,7 +106,6 @@ namespace SmallMealPlan.Web.Controllers
             return Redirect($"~/meals");
         }
 
-        [Authorize]
         [HttpPost("~/meal/delete/{mealId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMeal([FromRoute] int mealId)

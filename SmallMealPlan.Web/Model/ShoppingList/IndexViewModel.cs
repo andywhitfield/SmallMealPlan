@@ -11,6 +11,7 @@ namespace SmallMealPlan.Web.Model.ShoppingList
         }
 
         public IEnumerable<ShoppingListItemModel> MyList { get; set; } = new List<ShoppingListItemModel>();
+        public IEnumerable<IngredientItemModel> IngredientFromPlannerList { get; set; } = new List<IngredientItemModel>();
         public IEnumerable<ShoppingListItemModel> BoughtList { get; set; } = new List<ShoppingListItemModel>();
     }
 }

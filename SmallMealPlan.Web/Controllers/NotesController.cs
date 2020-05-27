@@ -7,6 +7,7 @@ using SmallMealPlan.Web.Model.Notes;
 
 namespace SmallMealPlan.Web.Controllers
 {
+    [Authorize]
     public class NotesController : Controller
     {
         private readonly ILogger<NotesController> _logger;
@@ -22,7 +23,6 @@ namespace SmallMealPlan.Web.Controllers
             _noteRepository = noteRepository;
         }
 
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);

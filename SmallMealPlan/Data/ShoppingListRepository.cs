@@ -33,6 +33,24 @@ namespace SmallMealPlan.Data
                 .OrderBy(s => s.SortOrder)
                 .ToListAsync();
 
+        public async Task<List<Ingredient>> GetUnboughtIngredientsFromPlannerAsync(UserAccount user) =>
+            (await _context
+                .PlannerMeals
+                .Include(pm => pm.Meal)
+                .ThenInclude(m => m.Ingredients)
+                .ThenInclude(mi => mi.Ingredient)
+                .Where(pm => pm.User == user)
+                .Where(pm => pm.Date >= DateTime.UtcNow.Date)
+                .Where(pm => pm.DeletedDateTime == null)
+                .OrderBy(pm => pm.Date)
+                .ThenBy(pm => pm.SortOrder)
+                .ToListAsync())
+            .SelectMany(pm => pm.Meal.Ingredients)
+            .Where(mi => mi.DeletedDateTime == null && mi.Ingredient.DeletedDateTime == null)
+            .Select(mi => mi.Ingredient)
+            .Except((await GetActiveItemsAsync(user)).Select(sli => sli.Ingredient))
+            .ToList();
+
         public Task<List<ShoppingListItem>> GetBoughtItemsAsync(UserAccount user, int pageNumber) =>
             _context.ShoppingListItems
                 .Include(s => s.Ingredient)
@@ -41,7 +59,7 @@ namespace SmallMealPlan.Data
                 .Take(50) // TODO: implement pagination
                 .ToListAsync();
 
-        public async Task AddAsync(UserAccount user, string description)
+        public async Task AddNewIngredientAsync(UserAccount user, string description)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (description == null) throw new ArgumentNullException(nameof(description));
@@ -60,6 +78,38 @@ namespace SmallMealPlan.Data
                 SortOrder = maxSortOrder + 1
             });
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AddIngredientAsync(UserAccount user, int ingredientId)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            await InternalAddIngredientAsync(user, ingredientId);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddIngredientsAsync(UserAccount user, params int[] ingredientIds)
+        {
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (ingredientIds == null) return;
+            foreach (var ingredientId in ingredientIds)
+                await InternalAddIngredientAsync(user, ingredientId);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task InternalAddIngredientAsync(UserAccount user, int ingredientId)
+        {
+            var ingredient = (await _context.Ingredients.FindAsync(ingredientId)) ?? throw new ArgumentException($"Ingredient {ingredientId} not found", nameof(ingredientId));
+            if (ingredient.DeletedDateTime != null)
+                throw new ArgumentException($"Ingredient {ingredientId} not valid", nameof(ingredientId));
+
+            var maxSortOrder = await GetMaxSortOrder(user);
+            await _context.ShoppingListItems.AddAsync(new ShoppingListItem
+            {
+                User = user,
+                CreatedDateTime = DateTime.UtcNow,
+                Ingredient = ingredient,
+                SortOrder = maxSortOrder + 1
+            });
         }
 
         public Task MarkAsBoughtAsync(UserAccount user, ShoppingListItem shoppingListItem)

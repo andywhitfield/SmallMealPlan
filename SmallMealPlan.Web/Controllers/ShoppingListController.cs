@@ -9,6 +9,7 @@ using SmallMealPlan.Web.Model.ShoppingList;
 
 namespace SmallMealPlan.Web.Controllers
 {
+    [Authorize]
     public class ShoppingListController : Controller
     {
         private readonly ILogger<ShoppingListController> _logger;
@@ -24,7 +25,6 @@ namespace SmallMealPlan.Web.Controllers
             _shoppingListRepository = shoppingListRepository;
         }
 
-        [Authorize]
         public async Task<IActionResult> Index()
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
@@ -35,6 +35,11 @@ namespace SmallMealPlan.Web.Controllers
                     ShoppingListItemId = i.ShoppingListItemId,
                     Description = i.Ingredient.Description
                 }),
+                IngredientFromPlannerList = (await _shoppingListRepository.GetUnboughtIngredientsFromPlannerAsync(user)).Select(i => new IngredientItemModel
+                {
+                    IngredientId = i.IngredientId,
+                    Description = i.Description
+                }),
                 BoughtList = (await _shoppingListRepository.GetBoughtItemsAsync(user, 1)).Select(i => new ShoppingListItemModel
                 {
                     ShoppingListItemId = i.ShoppingListItemId,
@@ -43,7 +48,6 @@ namespace SmallMealPlan.Web.Controllers
             });
         }
 
-        [Authorize]
         [HttpPost("~/shoppinglist")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem([FromForm] AddItemToShoppingListRequest addModel)
@@ -51,11 +55,32 @@ namespace SmallMealPlan.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _shoppingListRepository.AddAsync(user, addModel.Description);
+            await _shoppingListRepository.AddNewIngredientAsync(user, addModel.Description);
             return Redirect("~/shoppinglist");
         }
 
-        [Authorize]
+        [HttpPost("~/shoppinglist/add/planner")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddIngredientsFromPlanner([FromForm] AddItemToShoppingListFromPlannerRequest addModel)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogTrace($"Adding ingredients [{string.Join(',', addModel.IngredientId)}] from planner");
+            await _shoppingListRepository.AddIngredientsAsync(user, addModel.IngredientId);
+            return Redirect("~/shoppinglist");
+        }
+
+        [HttpGet("~/shoppinglist/add/planner/{ingredientId}")]
+        public async Task<IActionResult> AddSingleIngredientFromPlanner([FromRoute] int ingredientId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogTrace($"Adding ingredient {ingredientId} from planner");
+            await _shoppingListRepository.AddIngredientsAsync(user, ingredientId);
+            return Redirect("~/shoppinglist");
+        }
+        
         [HttpGet("~/shoppinglist/add/{shoppingListItemId}")]
         public async Task<IActionResult> MakeAsNotBought(int shoppingListItemId)
         {
@@ -68,7 +93,6 @@ namespace SmallMealPlan.Web.Controllers
             return Redirect("~/shoppinglist");
         }
 
-        [Authorize]
         [HttpPost("~/shoppinglist/bought/{shoppingListItemId}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAsBought([FromRoute] int shoppingListItemId)
