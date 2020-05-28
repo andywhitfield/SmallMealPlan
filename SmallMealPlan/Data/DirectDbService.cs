@@ -24,7 +24,7 @@ namespace SmallMealPlan.Data
         public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, int pageSize)
         {
             var meals = await GetAsync(user);
-            var pagination = GetPagination(meals.Count, pageSize, pageNumber);
+            var pagination = Paging.GetPageInfo(meals.Count, pageSize, pageNumber);
 
             var mealIds = meals
                 .OrderByDescending(m => m.DateOnPlanner ?? DateTime.MinValue)
@@ -40,7 +40,7 @@ namespace SmallMealPlan.Data
         public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByNameAsync(UserAccount user, int pageNumber, int pageSize)
         {
             var meals = await GetAsync(user);
-            var pagination = GetPagination(meals.Count, pageSize, pageNumber);
+            var pagination = Paging.GetPageInfo(meals.Count, pageSize, pageNumber);
 
             var mealIds = meals
                 .OrderBy(m => m.MealDescription)
@@ -56,14 +56,6 @@ namespace SmallMealPlan.Data
 
         public Task RemovePlannerMealByMealIdAsync(int mealId) => _context.Database.GetDbConnection().ExecuteAsync(
                 "delete from PlannerMeals where MealId = @mealId", new { mealId });
-
-        private (int PageIndex, int PageCount) GetPagination(int totalCount, int pageSize, int pageNumber)
-        {
-            var pageCount = totalCount / pageSize;
-            if (totalCount % pageSize != 0) pageCount++;
-            var pageIndex = Math.Min(pageCount - 1, Math.Max(0, pageNumber - 1));
-            return (pageIndex, pageCount);
-        }
 
         private async Task<List<(int MealId, DateTime MealCreatedDate, DateTime? DateOnPlanner, string MealDescription)>> GetAsync(UserAccount user)
         {

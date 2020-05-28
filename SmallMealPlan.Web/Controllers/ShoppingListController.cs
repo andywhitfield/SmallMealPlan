@@ -25,9 +25,10 @@ namespace SmallMealPlan.Web.Controllers
             _shoppingListRepository = shoppingListRepository;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var (boughtItems, boughtItemsPage, boughtItemsPageCount) = await _shoppingListRepository.GetBoughtItemsAsync(user, boughtItemsPageNumber ?? 1);
             return View(new IndexViewModel(HttpContext)
             {
                 MyList = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(i => new ShoppingListItemModel
@@ -40,11 +41,12 @@ namespace SmallMealPlan.Web.Controllers
                     IngredientId = i.IngredientId,
                     Description = i.Description
                 }),
-                BoughtList = (await _shoppingListRepository.GetBoughtItemsAsync(user, 1)).Select(i => new ShoppingListItemModel
+                BoughtList = boughtItems.Select(i => new ShoppingListItemModel
                 {
                     ShoppingListItemId = i.ShoppingListItemId,
                     Description = i.Ingredient.Description
-                })
+                }),
+                BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed)
             });
         }
 

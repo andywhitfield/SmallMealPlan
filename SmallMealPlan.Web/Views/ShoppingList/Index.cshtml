@@ -69,12 +69,39 @@
             </ul>
         </li>
     </ul>
+
+    @if (Model.BoughtListPagination.PageCount > 1) {
+    <div class="pagination">
+        @if (Model.BoughtListPagination.PageNumber > 1) {
+        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber - 1)&tab=smp-shoplist-bought">&laquo;</a>
+        }
+        @foreach (var pg in Model.BoughtListPagination.Pages) {
+        @if (pg.IsSelected) {
+        <a class="pagination-active">@pg.PageNumber</a>
+        } else {
+        <a href="/shoppinglist?boughtItemsPageNumber=@pg.PageNumber&tab=smp-shoplist-bought">@pg.PageNumber</a>
+        }
+        @if (pg.IsNextPageSkipped) {
+        <span>&bull;&bull;</span>
+        }
+        }
+        @if (Model.BoughtListPagination.PageNumber < Model.BoughtListPagination.PageCount) {
+        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber + 1)&tab=smp-shoplist-bought">&raquo;</a>
+        }
+    </div>
+    }
 </div>
 
 @section Scripts {
 <script type="text/javascript">
     $(function() { 
-        $('input[name="description"]').focus();
+        let urlParams = new URLSearchParams(window.location.search);
+        let activeTab = urlParams.get('tab');
+        if (activeTab != null) {
+            $('div.smp-planner-add-header > span[data-select=".' + activeTab + '"]').click();
+        } else {
+            $('input[name="description"]').focus();
+        }
 
         $('button[name="selectall"]').click(function() {
             $('.smp-planner-list input[type="checkbox"]').prop('checked', true);

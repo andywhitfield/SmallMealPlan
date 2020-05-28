@@ -12,7 +12,7 @@ namespace SmallMealPlan
         {
             PageNumber = pageNumber;
             PageCount = pageCount;
-            Sort = SortByRecentlyUsed;
+            Sort = sort;
 
             if (PageCount <= 10)
             {

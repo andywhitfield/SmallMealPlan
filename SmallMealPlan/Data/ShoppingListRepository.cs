@@ -11,6 +11,8 @@ namespace SmallMealPlan.Data
 {
     public class ShoppingListRepository : IShoppingListRepository
     {
+        private const int BoughtItemsPageSize = 10;
+
         private readonly SqliteDataContext _context;
         private readonly ILogger<ShoppingListRepository> _logger;
 
@@ -51,13 +53,22 @@ namespace SmallMealPlan.Data
             .Except((await GetActiveItemsAsync(user)).Select(sli => sli.Ingredient))
             .ToList();
 
-        public Task<List<ShoppingListItem>> GetBoughtItemsAsync(UserAccount user, int pageNumber) =>
-            _context.ShoppingListItems
+        public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber)
+        {
+            var total = await _context.ShoppingListItems
+                .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
+                .CountAsync();
+            var pagination = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
+            _logger.LogTrace($"Getting page index {pagination.PageIndex} of {pagination.PageCount} total pages, total items: {total}, requested page: {pageNumber}");
+            
+            return (await _context.ShoppingListItems
                 .Include(s => s.Ingredient)
                 .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
                 .OrderByDescending(s => s.BoughtDateTime)
-                .Take(50) // TODO: implement pagination
-                .ToListAsync();
+                .Skip(pagination.PageIndex * BoughtItemsPageSize)
+                .Take(BoughtItemsPageSize)
+                .ToListAsync(), pagination.PageIndex + 1, pagination.PageCount);
+        }
 
         public async Task AddNewIngredientAsync(UserAccount user, string description)
         {
