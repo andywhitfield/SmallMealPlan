@@ -214,6 +214,11 @@ textarea.smp-planner-add-new-notes {
     height: 75px;
 }
 
+div.note-unsaved {
+    color: red;
+    font-weight: bold;
+}
+
 .pagination {
     display: inline-block;
 }

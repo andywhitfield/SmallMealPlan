@@ -61,17 +61,28 @@ function smpInitialise() {
 
     $('textarea.notes').on('change input paste keyup', function() {
         let updatedText = $(this).val();
+        if (updatedText === $(this).data('saved-value'))
+            return;
+
+        $('div.note-info').text('Saving...').addClass('note-unsaved');
         let timeout = $(this).data('throttle');
         if (typeof timeout !== 'undefined')
             clearTimeout(timeout);
         $(this).data('throttle', setTimeout(function() {
             $.ajax({
-                url: '/api/note',
-                type: 'PUT',
-                data: JSON.stringify({ noteText: updatedText }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json'
-            });
+                    url: '/api/note',
+                    type: 'PUT',
+                    data: JSON.stringify({ noteText: updatedText }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json'
+                })
+                .done(function() {
+                    $('textarea.notes').data('saved-value', updatedText);
+                    $('div.note-info').text('Up to date').removeClass('note-unsaved');
+                })
+                .fail(function() {
+                    $('div.note-info').text('Error saving note!');
+                });
         }, 1000));
     });
 
