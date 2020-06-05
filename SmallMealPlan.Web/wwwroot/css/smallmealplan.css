@@ -319,6 +319,10 @@ div.smp-planner-add-recent>ul>li {
     padding: 5px;
 }
 
+div.smp-planner-add-recent form {
+    display: inline;
+}
+
 div.smp-planner-add-new,
 div.smp-shoplist-add-from-planner,
 div.smp-shoplist-bought {

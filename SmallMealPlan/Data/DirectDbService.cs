@@ -21,9 +21,9 @@ namespace SmallMealPlan.Data
             _logger = logger;
         }
 
-        public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, int pageSize)
+        public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, int pageSize, string filter)
         {
-            var meals = await GetAsync(user);
+            var meals = await GetAsync(user, filter);
             var pagination = Paging.GetPageInfo(meals.Count, pageSize, pageNumber);
 
             var mealIds = meals
@@ -37,9 +37,9 @@ namespace SmallMealPlan.Data
             return (mealIds, pagination.PageIndex + 1, pagination.PageCount);
         }
 
-        public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByNameAsync(UserAccount user, int pageNumber, int pageSize)
+        public async Task<(List<int> MealIds, int PageNumber, int PageCount)> GetMealIdsByNameAsync(UserAccount user, int pageNumber, int pageSize, string filter)
         {
-            var meals = await GetAsync(user);
+            var meals = await GetAsync(user, filter);
             var pagination = Paging.GetPageInfo(meals.Count, pageSize, pageNumber);
 
             var mealIds = meals
@@ -57,11 +57,11 @@ namespace SmallMealPlan.Data
         public Task RemovePlannerMealByMealIdAsync(int mealId) => _context.Database.GetDbConnection().ExecuteAsync(
                 "delete from PlannerMeals where MealId = @mealId", new { mealId });
 
-        private async Task<List<(int MealId, DateTime MealCreatedDate, DateTime? DateOnPlanner, string MealDescription)>> GetAsync(UserAccount user)
+        private async Task<List<(int MealId, DateTime MealCreatedDate, DateTime? DateOnPlanner, string MealDescription)>> GetAsync(UserAccount user, string filter)
         {
             var mealIds = new List<(int, DateTime, DateTime?, string)>();
             foreach (var mealInfo in await _context.Database.GetDbConnection().QueryAsync(
-                @"select m.MealId, m.CreatedDateTime, pm.Date, m.Description
+                $@"select m.MealId, m.CreatedDateTime, pm.Date, m.Description
                 from Meals m
                 left join (
                     select max(Date) Date, MealId
@@ -72,7 +72,8 @@ namespace SmallMealPlan.Data
                 ) pm
                 on m.MealId = pm.MealId
                 where m.UserAccountId = @UserAccountId
-                and m.DeletedDateTime is null", new { user.UserAccountId }))
+                and m.DeletedDateTime is null
+                {(string.IsNullOrWhiteSpace(filter) ? "" : "and m.Description like @Filter")}", new { user.UserAccountId, Filter = $"%{filter}%" }))
                 mealIds.Add(((int)mealInfo.MealId, ToDateTime(mealInfo.CreatedDateTime) ?? DateTime.MinValue, ToDateTime(mealInfo.Date)?.Date, (string)mealInfo.Description));
 
             return mealIds;

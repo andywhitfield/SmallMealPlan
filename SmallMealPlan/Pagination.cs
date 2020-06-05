@@ -8,11 +8,12 @@ namespace SmallMealPlan
         public const string SortByName = "name";
         public const string SortByRecentlyUsed = "recent";
 
-        public Pagination(int pageNumber, int pageCount, string sort)
+        public Pagination(int pageNumber, int pageCount, string sort, string filter)
         {
             PageNumber = pageNumber;
             PageCount = pageCount;
             Sort = sort;
+            Filter = filter;
 
             if (PageCount <= 10)
             {
@@ -64,6 +65,7 @@ namespace SmallMealPlan
         public string Sort { get; }
         public bool SortedByName => Sort == SortByName;
         public bool SortedByRecentlyUsed => !SortedByName;
+        public string Filter { get; }
         public IEnumerable<Page> Pages { get; }
     }
 }

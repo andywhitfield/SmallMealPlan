@@ -28,7 +28,7 @@ namespace SmallMealPlan.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] int? pageNumber, [FromQuery] string sort)
+        public async Task<IActionResult> Index([FromQuery] int? pageNumber, [FromQuery] string sort, [FromQuery] string filter)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             List<Meal> meals;
@@ -36,13 +36,13 @@ namespace SmallMealPlan.Web.Controllers
             int pageCount;
             var sortByName = sort == Pagination.SortByName;
             if (sortByName)
-                (meals, page, pageCount) = await _mealRepository.GetMealsByNameAsync(user, pageNumber ?? 1);
+                (meals, page, pageCount) = await _mealRepository.GetMealsByNameAsync(user, pageNumber ?? 1, filter);
             else
-                (meals, page, pageCount) = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1);
+                (meals, page, pageCount) = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1, filter);
 
             return View(new IndexViewModel(HttpContext)
             {
-                Pagination = new Pagination(page, pageCount, sortByName ? Pagination.SortByName : Pagination.SortByRecentlyUsed),
+                Pagination = new Pagination(page, pageCount, sortByName ? Pagination.SortByName : Pagination.SortByRecentlyUsed, filter),
                 Meals = meals
                 .Select(m => new Model.Home.PlannerDayMealViewModel(m.MealId)
                 {

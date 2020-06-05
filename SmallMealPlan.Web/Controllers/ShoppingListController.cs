@@ -46,7 +46,7 @@ namespace SmallMealPlan.Web.Controllers
                     ShoppingListItemId = i.ShoppingListItemId,
                     Description = i.Ingredient.Description
                 }),
-                BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed)
+                BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, "")
             });
         }
 

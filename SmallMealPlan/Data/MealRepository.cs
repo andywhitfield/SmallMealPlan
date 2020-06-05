@@ -31,9 +31,9 @@ namespace SmallMealPlan.Data
             return meal ?? throw new ArgumentException($"MealId {mealId} not found", nameof(mealId));
         }
 
-        public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByMostRecentlyUsedAsync(UserAccount user, int pageNumber)
+        public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, string filter)
         {
-            var mealIds = await _directDbService.GetMealIdsByMostRecentlyUsedAsync(user, pageNumber, PageSize);
+            var mealIds = await _directDbService.GetMealIdsByMostRecentlyUsedAsync(user, pageNumber, PageSize, filter);
             return ((
                 await _context
                     .Meals
@@ -46,9 +46,9 @@ namespace SmallMealPlan.Data
                 .ToList(), mealIds.PageNumber, mealIds.PageCount);
         }
 
-        public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByNameAsync(UserAccount user, int pageNumber)
+        public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByNameAsync(UserAccount user, int pageNumber, string filter)
         {
-            var mealIds = await _directDbService.GetMealIdsByNameAsync(user, pageNumber, PageSize);
+            var mealIds = await _directDbService.GetMealIdsByNameAsync(user, pageNumber, PageSize, filter);
             return ((
                 await _context
                     .Meals

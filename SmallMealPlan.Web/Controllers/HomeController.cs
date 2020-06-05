@@ -84,7 +84,7 @@ namespace SmallMealPlan.Web.Controllers
 
         [Authorize]
         [HttpGet("~/planner/{date}/add")]
-        public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber, [FromQuery] string sort)
+        public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber, [FromQuery] string sort, [FromQuery] string filter)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             List<Meal> meals;
@@ -92,13 +92,13 @@ namespace SmallMealPlan.Web.Controllers
             int pageCount;
             var sortByName = sort == Pagination.SortByName;
             if (sortByName)
-                (meals, page, pageCount) = await _mealRepository.GetMealsByNameAsync(user, pageNumber ?? 1);
+                (meals, page, pageCount) = await _mealRepository.GetMealsByNameAsync(user, pageNumber ?? 1, filter);
             else
-                (meals, page, pageCount) = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1);
+                (meals, page, pageCount) = await _mealRepository.GetMealsByMostRecentlyUsedAsync(user, pageNumber ?? 1, filter);
 
             return View(new PlannerViewModel(HttpContext, date.ParseDateOrToday())
             {
-                Pagination = new Pagination(page, pageCount, sort),
+                Pagination = new Pagination(page, pageCount, sort, filter),
                 Meals = meals
                 .Select(m => new PlannerDayMealViewModel(m.MealId)
                 {
