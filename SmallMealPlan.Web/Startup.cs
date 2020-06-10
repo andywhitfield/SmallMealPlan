@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using SmallMealPlan.Data;
+using SmallMealPlan.RememberTheMilk;
 
 namespace SmallMealPlan.Web
 {
@@ -96,7 +97,9 @@ namespace SmallMealPlan.Web
                 .AddScoped<IMealRepository, MealRepository>()
                 .AddScoped<IShoppingListRepository, ShoppingListRepository>()
                 .AddScoped<INoteRepository, NoteRepository>()
-                .AddScoped<IDirectDbService, DirectDbService>();
+                .AddScoped<IDirectDbService, DirectDbService>()
+                .AddSingleton<RtmConfig>(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey"), Configuration.GetValue<string>("RememberTheMilk:SharedSecret")))
+                .AddScoped<IRtmClient, RtmClient>(); // callback url: https://smallmealplan.nosuchblogger.com/rtm
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             services.AddRazorPages();
