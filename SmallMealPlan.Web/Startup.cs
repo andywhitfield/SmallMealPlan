@@ -91,6 +91,7 @@ namespace SmallMealPlan.Web
                 serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
                 options.UseSqlite(sqliteConnectionString);                
             });
+            services.AddHttpClient(RtmClient.HttpClientName);
             services
                 .AddScoped<IUserAccountRepository, UserAccountRepository>()
                 .AddScoped<IPlannerMealRepository, PlannerMealRepository>()

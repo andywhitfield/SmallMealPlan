@@ -5,7 +5,7 @@ namespace SmallMealPlan.RememberTheMilk
 {
     public interface IRtmClient
     {
-        Task<RtmAuthGetTokenResponse> GetTokenAsync(string frob);
-        Task<RtmListsGetListResponse> GetListsAsync(string authToken);
+        Task<RtmAuth> GetTokenAsync(string frob);
+        Task<RtmLists> GetListsAsync(string authToken);
     }
 }

@@ -23,7 +23,7 @@ namespace SmallMealPlan.RememberTheMilk
             _config = config;
         }
 
-        public async Task<RtmAuthGetTokenResponse> GetTokenAsync(string frob)
+        public async Task<RtmAuth> GetTokenAsync(string frob)
         {
             var queryParams = new Dictionary<string, string>{
                 {"method", "rtm.auth.getToken"},
@@ -45,10 +45,12 @@ namespace SmallMealPlan.RememberTheMilk
             });
             if (!responseObj.IsSuccess)
                 throw new ApplicationException($"Error getting token from frob: {responseString}");
-            return responseObj.Rsp;
+            if (responseObj.Rsp.Auth == null)
+                throw new ApplicationException($"Error getting auth details from frob response: {responseString}");
+            return responseObj.Rsp.Auth;
         }
 
-        public async Task<RtmListsGetListResponse> GetListsAsync(string authToken)
+        public async Task<RtmLists> GetListsAsync(string authToken)
         {
             var queryParams = new Dictionary<string, string>{
                 {"method", "rtm.lists.getList"},
@@ -70,7 +72,9 @@ namespace SmallMealPlan.RememberTheMilk
             });
             if (!responseObj.IsSuccess)
                 throw new ApplicationException($"Error getting lists: {responseString}");
-            return responseObj.Rsp;
+            if (responseObj.Rsp.Lists == null)
+                throw new ApplicationException($"Error getting lists from response: {responseString}");
+            return responseObj.Rsp.Lists;
         }
     }
 }
