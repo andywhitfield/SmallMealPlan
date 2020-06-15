@@ -302,6 +302,7 @@ div.smp-planner-add-new,
 div.smp-shoplist-current,
 div.smp-shoplist-add-from-planner,
 div.smp-shoplist-bought,
+div.smp-shoplist-rtm,
 div.smp-planner-add-header>span {
     border: 1px solid #ffd700;
 }
@@ -325,7 +326,8 @@ div.smp-planner-add-recent form {
 
 div.smp-planner-add-new,
 div.smp-shoplist-add-from-planner,
-div.smp-shoplist-bought {
+div.smp-shoplist-bought,
+div.smp-shoplist-rtm {
     display: none;
     padding: 5px;
 }

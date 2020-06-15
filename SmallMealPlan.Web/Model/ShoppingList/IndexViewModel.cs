@@ -14,5 +14,6 @@ namespace SmallMealPlan.Web.Model.ShoppingList
         public IEnumerable<IngredientItemModel> IngredientFromPlannerList { get; set; } = new List<IngredientItemModel>();
         public IEnumerable<ShoppingListItemModel> BoughtList { get; set; } = new List<ShoppingListItemModel>();
         public Pagination BoughtListPagination { get; set; }
+        public bool HasRtmToken { get; set; }
     }
 }

@@ -1,9 +1,12 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
+using SmallMealPlan.Model;
+using SmallMealPlan.RememberTheMilk;
 using SmallMealPlan.Web.Model.Request;
 using SmallMealPlan.Web.Model.ShoppingList;
 
@@ -15,14 +18,17 @@ namespace SmallMealPlan.Web.Controllers
         private readonly ILogger<ShoppingListController> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IShoppingListRepository _shoppingListRepository;
+        private readonly IRtmClient _rtmClient;
 
         public ShoppingListController(ILogger<ShoppingListController> logger,
             IUserAccountRepository userAccountRepository,
-            IShoppingListRepository shoppingListRepository)
+            IShoppingListRepository shoppingListRepository,
+            IRtmClient rtmClient)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _shoppingListRepository = shoppingListRepository;
+            _rtmClient = rtmClient;
         }
 
         public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber)
@@ -46,7 +52,8 @@ namespace SmallMealPlan.Web.Controllers
                     ShoppingListItemId = i.ShoppingListItemId,
                     Description = i.Ingredient.Description
                 }),
-                BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, "")
+                BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),
+                HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken)
             });
         }
 
@@ -106,5 +113,39 @@ namespace SmallMealPlan.Web.Controllers
             await _shoppingListRepository.MarkAsBoughtAsync(user, shoppingListItem);
             return Redirect("~/shoppinglist");
         }
+
+        [HttpPost("~/shoppinglist/rtm")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RememberTheMilk([FromForm] SyncWithRememberTheMilkRequest requestModel)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogTrace($"Sync with RTM: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
+
+            if (requestModel.Export ?? false)
+                await ExportToRtmAsync(user, requestModel.List);
+
+            return Redirect("~/shoppinglist");
+        }
+
+        private async Task ExportToRtmAsync(UserAccount user, string listId)
+        {
+            var itemsToExport = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(x => x.Ingredient.Description);
+
+            var listTasks = await _rtmClient.GetTaskListsAsync(user.RememberTheMilkToken, listId);
+            if (listTasks.List == null)
+            {
+                _logger.LogInformation($"HERE: listTasks.List is null");
+                return;
+            }
+
+            var timelineTask = new Lazy<Task<string>>(() => _rtmClient.CreateTimelineAsync(user.RememberTheMilkToken));
+            var existingItemsInList = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name);
+            foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
+            {
+                var timeline = await timelineTask.Value;
+                _logger.LogTrace($"Adding item [{itemToAddToList}] to shopping list [{listId}] using timeline [{timeline}]");
+                await _rtmClient.AddTaskAsync(user.RememberTheMilkToken, timeline, listId, itemToAddToList);
+            }
+         }
     }
 }
