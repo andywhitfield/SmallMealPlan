@@ -89,7 +89,7 @@ namespace SmallMealPlan.Web.Controllers
             await _shoppingListRepository.AddIngredientsAsync(user, ingredientId);
             return Redirect("~/shoppinglist");
         }
-        
+
         [HttpGet("~/shoppinglist/add/{shoppingListItemId}")]
         public async Task<IActionResult> MakeAsNotBought(int shoppingListItemId)
         {
@@ -123,6 +123,10 @@ namespace SmallMealPlan.Web.Controllers
 
             if (requestModel.Export ?? false)
                 await ExportToRtmAsync(user, requestModel.List);
+            else if (requestModel.Import ?? false)
+                await ImportFromRtmAsync(user, requestModel.List);
+            else
+                return BadRequest();
 
             return Redirect("~/shoppinglist");
         }
@@ -133,19 +137,31 @@ namespace SmallMealPlan.Web.Controllers
 
             var listTasks = await _rtmClient.GetTaskListsAsync(user.RememberTheMilkToken, listId);
             if (listTasks.List == null)
-            {
-                _logger.LogInformation($"HERE: listTasks.List is null");
                 return;
-            }
 
             var timelineTask = new Lazy<Task<string>>(() => _rtmClient.CreateTimelineAsync(user.RememberTheMilkToken));
             var existingItemsInList = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name);
             foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
             {
                 var timeline = await timelineTask.Value;
-                _logger.LogTrace($"Adding item [{itemToAddToList}] to shopping list [{listId}] using timeline [{timeline}]");
+                _logger.LogTrace($"Adding item [{itemToAddToList}] to RTM list [{listId}] using timeline [{timeline}]");
                 await _rtmClient.AddTaskAsync(user.RememberTheMilkToken, timeline, listId, itemToAddToList);
             }
-         }
+        }
+
+        private async Task ImportFromRtmAsync(UserAccount user, string listId)
+        {
+            var listTasks = await _rtmClient.GetTaskListsAsync(user.RememberTheMilkToken, listId);
+            if (listTasks.List == null)
+                return;
+            var itemsToImport = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name);
+            
+            var currentList = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description);
+            foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))
+            {
+                _logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
+                await _shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
+            }
+        }
     }
 }
