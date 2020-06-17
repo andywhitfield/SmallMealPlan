@@ -150,8 +150,8 @@
 
         let rtmLists = $('form[name="rtm"] select[name="list"]');
         let rtmImportExportBtns = $('form[name="rtm"] button[type="submit"]');
-        rtmImportExportBtns.prop("disabled", true);
-        rtmLists.prop("disabled", true);
+        rtmImportExportBtns.prop('disabled', true);
+        rtmLists.prop('disabled', true);
         $('form[name="rtm"] button[name="load"]').click(function() {
             $.ajax({ url: '/api/rtm' })
                 .done(function(data) {
@@ -161,11 +161,11 @@
                             text : item.text 
                         }));
                     });
-                    rtmImportExportBtns.prop("disabled", data.options.length == 0);
-                    rtmLists.prop("disabled", data.options.length == 0);
+                    rtmImportExportBtns.prop('disabled', data.options.length == 0);
+                    rtmLists.prop('disabled', data.options.length == 0);
                 })
                 .fail(function() {
-                    // TODO: error
+                    console.log('Error getting RTM lists!');
                 });
         });
     })
