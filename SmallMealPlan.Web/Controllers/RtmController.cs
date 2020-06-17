@@ -34,7 +34,7 @@ namespace SmallMealPlan.Web.Controllers
 
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             var tokenResponse = await _rtmClient.GetTokenAsync(frob);
-            // TODO: update user with the RTM token
+            await _userAccountRepository.UpdateRememberTheMilkTokenAsync(user, tokenResponse.Token);
             _logger.LogInformation($"Updating user {user.UserAccountId} with token: {tokenResponse.Token}");
             return Redirect("~/shoppinglist");
         }
@@ -45,6 +45,16 @@ namespace SmallMealPlan.Web.Controllers
             var rtmAuthUri = RtmAuthenticationHelper.BuildAuthenticationUri(_rtmConfig, RtmPermission.Write);
             _logger.LogTrace($"Redirecting to RTM: {rtmAuthUri}");
             return Redirect(rtmAuthUri.ToString());
+        }
+
+        [HttpPost("~/rtm/unlink")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unlink()
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            await _userAccountRepository.UpdateRememberTheMilkTokenAsync(user, null);
+            _logger.LogInformation($"Clearing RTM token from user {user.UserAccountId}");
+            return Redirect("~/shoppinglist");
         }
     }
 }

@@ -39,5 +39,11 @@ namespace SmallMealPlan.Data
 
             return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri && ua.DeletedDateTime == null);
         }
+
+        public Task UpdateRememberTheMilkTokenAsync(UserAccount user, string rememberTheMilkToken)
+        {
+            user.RememberTheMilkToken = rememberTheMilkToken;
+            return _context.SaveChangesAsync();
+        }
     }
 }
