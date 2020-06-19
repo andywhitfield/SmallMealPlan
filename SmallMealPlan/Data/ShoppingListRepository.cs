@@ -132,6 +132,15 @@ namespace SmallMealPlan.Data
             return _context.SaveChangesAsync();
         }
 
+        public Task DeleteAsync(UserAccount user, ShoppingListItem shoppingListItem)
+        {
+            if (shoppingListItem.User.UserAccountId != user.UserAccountId)
+                throw new SecurityException($"Cannot delete shopping list item id: {shoppingListItem.ShoppingListItemId}");
+
+            shoppingListItem.DeletedDateTime = DateTime.UtcNow;
+            return _context.SaveChangesAsync();
+        }
+
         public async Task MarkAsActiveAsync(UserAccount user, ShoppingListItem shoppingListItem)
         {
             if (shoppingListItem.User.UserAccountId != user.UserAccountId)

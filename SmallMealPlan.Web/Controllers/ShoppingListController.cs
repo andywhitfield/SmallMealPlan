@@ -114,6 +114,18 @@ namespace SmallMealPlan.Web.Controllers
             return Redirect("~/shoppinglist");
         }
 
+        [HttpPost("~/shoppinglist/delete/{shoppingListItemId}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete([FromRoute] int shoppingListItemId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var shoppingListItem = await _shoppingListRepository.GetAsync(shoppingListItemId);
+            if (shoppingListItem.User != user)
+                return BadRequest();
+            await _shoppingListRepository.DeleteAsync(user, shoppingListItem);
+            return Redirect("~/shoppinglist");
+        }
+
         [HttpPost("~/shoppinglist/rtm")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RememberTheMilk([FromForm] SyncWithRememberTheMilkRequest requestModel)

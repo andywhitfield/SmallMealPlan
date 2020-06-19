@@ -18,7 +18,11 @@
                     <div>
                         <form method="post" action="/shoppinglist/bought/@shoppingListItem.ShoppingListItemId">
                         @Html.AntiForgeryToken()
-                        <button title="Bought"><img src="/images/close.png" height="15" width="15" /> Bought</button>
+                        <button title="Bought"><img src="/images/tick.png" height="15" width="15" /> Bought</button>
+                        </form>
+                        <form data-confirm="Are you sure you want to delete this from your shopping list?" method="post" action="/shoppinglist/delete/@shoppingListItem.ShoppingListItemId">
+                        @Html.AntiForgeryToken()
+                        <button title="Delete"><img src="/images/close.png" height="15" width="15" /> Delete</button>
                         </form>
                     </div>
                 </li>
