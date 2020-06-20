@@ -58,7 +58,7 @@ namespace SmallMealPlan.RememberTheMilk
             return taskListResponse.Tasks;
         }
 
-        public async Task<RtmList> AddTaskAsync(string authToken, string timeline, string listId, string itemToAddToList)
+        public async Task<RtmTasksList> AddTaskAsync(string authToken, string timeline, string listId, string itemToAddToList)
         {
             var addResponse = await CallRtmMethodAsync<RtmTasksAddResponse>(new Dictionary<string, string>{
                 {"method", "rtm.tasks.add"},
