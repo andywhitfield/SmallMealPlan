@@ -35,7 +35,7 @@ namespace SmallMealPlan.Data
                 .OrderBy(s => s.SortOrder)
                 .ToListAsync();
 
-        public async Task<List<Ingredient>> GetUnboughtIngredientsFromPlannerAsync(UserAccount user) =>
+        public async Task<List<(Meal Meal, Ingredient Ingredient)>> GetFutureMealIngredientsFromPlannerAsync(UserAccount user) =>
             (await _context
                 .PlannerMeals
                 .Include(pm => pm.Meal)
@@ -49,8 +49,7 @@ namespace SmallMealPlan.Data
                 .ToListAsync())
             .SelectMany(pm => pm.Meal.Ingredients)
             .Where(mi => mi.DeletedDateTime == null && mi.Ingredient.DeletedDateTime == null)
-            .Select(mi => mi.Ingredient)
-            .Except((await GetActiveItemsAsync(user)).Select(sli => sli.Ingredient))
+            .Select(mi => (mi.Meal, mi.Ingredient))
             .ToList();
 
         public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber)

@@ -45,13 +45,21 @@
     <ul class="smp-planner-list">
         <li class="smp-planner-list">
             <ul class="smp-planner-list-meal">
-                @foreach (var ingredient in Model.IngredientFromPlannerList) {
+                @foreach (var meal in Model.MealFromPlannerList) {
                 <li class="smp-planner-list-meal">
                     <div></div>
-                    <div><input type="checkbox" name="ingredientid" value="@ingredient.IngredientId"></div>
-                    <div>@ingredient.Description</div>
-                    <div><button data-href="/shoppinglist/add/planner/@ingredient.IngredientId" type="button" type="button"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
+                    <div><input type="checkbox" data-mealid="@meal.MealId"></div>
+                    <div><em>@meal.Description</em></div>
+                    <div><button data-href="/shoppinglist/add/planner/meal/@meal.MealId" type="button"><img src="/images/add.png" height="15" width="15" /> Add Meal Ingredients</button></div>
                 </li>
+                @foreach (var ingredient in meal.Ingredients) {
+                <li class="smp-planner-list-meal">
+                    <div>&nbsp;&nbsp;</div>
+                    <div><input type="checkbox" name="ingredientid" value="@ingredient.IngredientId" data-ingredientmealid="@meal.MealId"></div>
+                    <div>@ingredient.Description</div>
+                    <div><button data-href="/shoppinglist/add/planner/@ingredient.IngredientId" type="button"><img src="/images/add.png" height="15" width="15" /> Add</button></div>
+                </li>
+                }
                 }
             </ul>
         </li>
@@ -150,6 +158,17 @@
             $('.smp-planner-list input:checked').each(function() {
                 array.push($(this).val());
             });
+        });
+
+        $('input[type="checkbox"][data-mealid]').click(function() {
+            let selectMealId = $(this).attr("data-mealid");
+            $('input[type="checkbox"][data-ingredientmealid="' + selectMealId + '"]').prop('checked', $(this).prop('checked'));
+        });
+        $('input[type="checkbox"][data-ingredientmealid]').click(function() {
+            let selectMealId = $(this).attr("data-ingredientmealid");
+            let ingredientsForMeal = $('input[type="checkbox"][data-ingredientmealid="' + selectMealId + '"]');
+            let checkedIngredients = $('input[type="checkbox"][data-ingredientmealid="' + selectMealId + '"]:checked');
+            $('input[type="checkbox"][data-mealid="' + selectMealId + '"]').prop('checked', ingredientsForMeal.length == checkedIngredients.length);
         });
 
         let rtmLists = $('form[name="rtm"] select[name="list"]');

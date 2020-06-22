@@ -18,35 +18,49 @@ namespace SmallMealPlan.Web.Controllers
         private readonly ILogger<ShoppingListController> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly IShoppingListRepository _shoppingListRepository;
+        private readonly IMealRepository _mealRepository;
         private readonly IRtmClient _rtmClient;
 
         public ShoppingListController(ILogger<ShoppingListController> logger,
             IUserAccountRepository userAccountRepository,
             IShoppingListRepository shoppingListRepository,
+            IMealRepository mealRepository,
             IRtmClient rtmClient)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _shoppingListRepository = shoppingListRepository;
+            _mealRepository = mealRepository;
             _rtmClient = rtmClient;
         }
 
         public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var activeShoppingList = await _shoppingListRepository.GetActiveItemsAsync(user);
+            var shoppingListItems = activeShoppingList.Select(mi => mi.Ingredient.Description).ToHashSet();
+            var futureMealIngredients = await _shoppingListRepository.GetFutureMealIngredientsFromPlannerAsync(user);
             var (boughtItems, boughtItemsPage, boughtItemsPageCount) = await _shoppingListRepository.GetBoughtItemsAsync(user, boughtItemsPageNumber ?? 1);
             return View(new IndexViewModel(HttpContext)
             {
-                MyList = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(i => new ShoppingListItemModel
+                MyList = activeShoppingList.Select(i => new ShoppingListItemModel
                 {
                     ShoppingListItemId = i.ShoppingListItemId,
                     Description = i.Ingredient.Description
                 }),
-                IngredientFromPlannerList = (await _shoppingListRepository.GetUnboughtIngredientsFromPlannerAsync(user)).Select(i => new IngredientItemModel
-                {
-                    IngredientId = i.IngredientId,
-                    Description = i.Description
-                }),
+                MealFromPlannerList = futureMealIngredients
+                    .Where(mi => !shoppingListItems.Contains(mi.Ingredient.Description, StringComparer.InvariantCultureIgnoreCase))
+                    .GroupBy(mi => mi.Meal)
+                    .Select(g => new MealItemModel
+                    {
+                        MealId = g.Key.MealId,
+                        Description = g.Key.Description,
+                        Ingredients = g.Select(i => new IngredientItemModel
+                        {
+                            IngredientId = i.Ingredient.IngredientId,
+                            Description = i.Ingredient.Description
+                        })
+                    }),
                 BoughtList = boughtItems.Select(i => new ShoppingListItemModel
                 {
                     ShoppingListItemId = i.ShoppingListItemId,
@@ -87,6 +101,26 @@ namespace SmallMealPlan.Web.Controllers
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             _logger.LogTrace($"Adding ingredient {ingredientId} from planner");
             await _shoppingListRepository.AddIngredientsAsync(user, ingredientId);
+            return Redirect("~/shoppinglist");
+        }
+
+        [HttpGet("~/shoppinglist/add/planner/meal/{mealId}")]
+        public async Task<IActionResult> AddIngredientsForMeal([FromRoute] int mealId)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogTrace($"Adding ingredients for meal {mealId}");
+            var meal = await _mealRepository.GetAsync(mealId);
+            if (meal.User != user)
+                return BadRequest();
+
+            var activeShoppingList = await _shoppingListRepository.GetActiveItemsAsync(user);
+            var shoppingListItems = activeShoppingList.Select(mi => mi.Ingredient.Description).ToHashSet();
+
+            await _shoppingListRepository.AddIngredientsAsync(
+                user, meal
+                    .Ingredients
+                    .Where(i => !shoppingListItems.Contains(i.Ingredient.Description, StringComparer.InvariantCultureIgnoreCase))
+                    .Select(li => li.Ingredient.IngredientId).ToArray());
             return Redirect("~/shoppinglist");
         }
 
@@ -167,7 +201,7 @@ namespace SmallMealPlan.Web.Controllers
             if (listTasks.List == null)
                 return;
             var itemsToImport = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name);
-            
+
             var currentList = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description);
             foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))
             {

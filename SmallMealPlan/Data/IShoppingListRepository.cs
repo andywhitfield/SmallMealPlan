@@ -8,7 +8,7 @@ namespace SmallMealPlan.Data
     {
         Task<ShoppingListItem> GetAsync(int shoppingListItemId);
         Task<List<ShoppingListItem>> GetActiveItemsAsync(UserAccount user);
-        Task<List<Ingredient>> GetUnboughtIngredientsFromPlannerAsync(UserAccount user);
+        Task<List<(Meal Meal, Ingredient Ingredient)>> GetFutureMealIngredientsFromPlannerAsync(UserAccount user);
         Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber);
         Task AddNewIngredientAsync(UserAccount user, string description);
         Task AddIngredientAsync(UserAccount user, int ingredientId);
