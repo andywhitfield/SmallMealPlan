@@ -204,6 +204,10 @@ div.smp-planner-add-new>div {
     font-size: 11pt;
 }
 
+img.smp-planner-list-meal-oc {
+    padding-top: 3px;
+}
+
 div.smp-meal-notes {
     white-space: pre-line;
 }
