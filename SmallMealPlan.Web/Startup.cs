@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,9 +30,11 @@ namespace SmallMealPlan.Web
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+            Environment = env;
         }
 
         public IConfigurationRoot Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -46,8 +50,8 @@ namespace SmallMealPlan.Web
                     o.LoginPath = "/signin";
                     o.LogoutPath = "/signout";
                     o.Cookie.HttpOnly = true;
-                    o.Cookie.MaxAge = TimeSpan.FromDays(150);
-                    o.ExpireTimeSpan = TimeSpan.FromDays(150);
+                    o.Cookie.MaxAge = TimeSpan.FromDays(1);
+                    o.ExpireTimeSpan = TimeSpan.FromDays(1);
                     o.SlidingExpiration = true;
                 })
                 .AddOpenIdConnect(options =>
@@ -72,6 +76,11 @@ namespace SmallMealPlan.Web
 
                     options.AccessDeniedPath = "/";
                 });
+
+            services
+                .AddDataProtection()
+                .SetApplicationName(typeof(Startup).Namespace)
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Environment.ContentRootPath, ".keys")));
 
             services.AddLogging(logging =>
             {
