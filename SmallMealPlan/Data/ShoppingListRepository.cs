@@ -50,6 +50,7 @@ namespace SmallMealPlan.Data
             .SelectMany(pm => pm.Meal.Ingredients)
             .Where(mi => mi.DeletedDateTime == null && mi.Ingredient.DeletedDateTime == null)
             .Select(mi => (mi.Meal, mi.Ingredient))
+            .Distinct()
             .ToList();
 
         public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber)

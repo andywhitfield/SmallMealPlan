@@ -166,3 +166,4 @@ pip-log.txt
 .vscode
 *.db
 *.db-*
+.keys
