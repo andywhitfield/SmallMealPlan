@@ -61,7 +61,7 @@ namespace SmallMealPlan.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _mealRepository.AddNewMealAsync(user, addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
+            await _mealRepository.AddNewMealAsync(user, addModel.Description?.Trim(), addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes?.Trim());
             return Redirect("~/meals");
         }
 
@@ -99,9 +99,9 @@ namespace SmallMealPlan.Web.Controllers
             var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
 
             if (editModel.SaveAsNew ?? false)
-                await _mealRepository.AddNewMealAsync(user, editModel.Description, ingredients, editModel.Notes);
+                await _mealRepository.AddNewMealAsync(user, editModel.Description?.Trim(), ingredients, editModel.Notes?.Trim());
             else
-                await _mealRepository.UpdateMealAsync(user, meal, editModel.Description, ingredients, editModel.Notes);
+                await _mealRepository.UpdateMealAsync(user, meal, editModel.Description?.Trim(), ingredients, editModel.Notes?.Trim());
 
             return Redirect($"~/meals");
         }

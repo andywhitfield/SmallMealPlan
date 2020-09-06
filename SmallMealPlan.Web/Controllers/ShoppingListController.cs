@@ -78,7 +78,7 @@ namespace SmallMealPlan.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _shoppingListRepository.AddNewIngredientAsync(user, addModel.Description);
+            await _shoppingListRepository.AddNewIngredientAsync(user, addModel.Description?.Trim());
             return Redirect("~/shoppinglist");
         }
 
