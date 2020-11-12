@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using SmallMealPlan.Data;
 using SmallMealPlan.RememberTheMilk;
@@ -84,7 +85,7 @@ namespace SmallMealPlan.Web
 
             services.AddLogging(logging =>
             {
-                logging.AddConsole(opt => opt.TimestampFormat = "[HH:mm:ss] ");
+                logging.AddConsole();
                 logging.AddDebug();
                 logging.SetMinimumLevel(LogLevel.Trace);
             });

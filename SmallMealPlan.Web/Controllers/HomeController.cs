@@ -197,11 +197,11 @@ namespace SmallMealPlan.Web.Controllers
         public IActionResult Error() => View(new ErrorViewModel(HttpContext));
 
         [HttpGet("~/signin")]
-        public IActionResult SignIn() => View("Login", new LoginViewModel(HttpContext));
+        public IActionResult Signin() => View("Login", new LoginViewModel(HttpContext));
 
         [HttpPost("~/signin")]
         [ValidateAntiForgeryToken]
-        public IActionResult SignInChallenge() => Challenge(new AuthenticationProperties { RedirectUri = "/signedin" }, OpenIdConnectDefaults.AuthenticationScheme);
+        public IActionResult SigninChallenge() => Challenge(new AuthenticationProperties { RedirectUri = "/signedin" }, OpenIdConnectDefaults.AuthenticationScheme);
 
         [Authorize]
         [HttpGet("~/signedin")]
@@ -213,7 +213,7 @@ namespace SmallMealPlan.Web.Controllers
         }
 
         [HttpGet("~/signout"), HttpPost("~/signout")]
-        public IActionResult SignOut()
+        public IActionResult Signout()
         {
             HttpContext.Session.Clear();
             return SignOut(CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme);
