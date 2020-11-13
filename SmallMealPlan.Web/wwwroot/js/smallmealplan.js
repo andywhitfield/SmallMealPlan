@@ -59,6 +59,21 @@ function smpInitialise() {
         $(selectEl).show();
     });
 
+    $('button[data-depends]').prop('disabled', true).each(function() {
+        let btnWithDependency = $(this);
+        let dependentFormObject = $(btnWithDependency.attr('data-depends'));
+        dependentFormObject.on('keypress', function(e) {
+            if (btnWithDependency.attr('disabled') && (e.keyCode || e.which) === 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        dependentFormObject.on('change input paste keyup', function() {
+            let dependentValue = $(this).val();
+            btnWithDependency.prop('disabled', dependentValue === null || dependentValue.match(/^\s*$/) !== null);
+        });
+    });
+
     $('textarea.notes').on('change input paste keyup', function() {
         let updatedText = $(this).val();
         if (updatedText === $(this).data('saved-value'))

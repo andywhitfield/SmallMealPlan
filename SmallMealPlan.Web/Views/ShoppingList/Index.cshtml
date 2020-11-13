@@ -33,7 +33,7 @@
     <div>
     <form method="post" action="/shoppinglist">
     @Html.AntiForgeryToken()
-    <input type="text" name="description" class="smp-planner-add-new-description" /> <button type="submit">Add to my shopping list</button>
+    <input type="text" name="description" class="smp-planner-add-new-description" /> <button type="submit" data-depends="input.smp-planner-add-new-description">Add to my shopping list</button>
     </form>
     </div>
 </div>
