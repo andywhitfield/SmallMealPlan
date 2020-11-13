@@ -59,7 +59,7 @@ function smpInitialise() {
         $(selectEl).show();
     });
 
-    $('button[data-depends]').prop('disabled', true).each(function() {
+    $('button[data-depends]').each(function() {
         let btnWithDependency = $(this);
         let dependentFormObject = $(btnWithDependency.attr('data-depends'));
         dependentFormObject.on('keypress', function(e) {
@@ -72,6 +72,7 @@ function smpInitialise() {
             let dependentValue = $(this).val();
             btnWithDependency.prop('disabled', dependentValue === null || dependentValue.match(/^\s*$/) !== null);
         });
+        dependentFormObject.trigger('change');
     });
 
     $('textarea.notes').on('change input paste keyup', function() {

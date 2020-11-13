@@ -16,8 +16,8 @@
     <textarea name="notes" class="smp-planner-add-new-notes" wrap="off">@Model.Notes</textarea>
 
     <p>
-        <button name="save" value="true" type="submit">Save</button>
-        <button name="saveasnew" value="true" type="submit">Save as new meal</button>
+        <button name="save" value="true" type="submit" data-depends="input.smp-planner-add-new-description">Save</button>
+        <button name="saveasnew" value="true" type="submit" data-depends="input.smp-planner-add-new-description">Save as new meal</button>
         <button name="cancel" value="true" type="submit">Cancel</button>
     </p>
     </form>
