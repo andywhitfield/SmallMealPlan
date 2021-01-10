@@ -9,6 +9,7 @@ namespace SmallMealPlan.Model
         public int MealId { get; set; }
         [Required]
         public UserAccount User { get; set; }
+        public int UserAccountId { get; set; }
         [Required]
         public string Description { get; set; }
         public List<MealIngredient> Ingredients { get; set; }

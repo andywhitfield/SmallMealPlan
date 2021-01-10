@@ -311,6 +311,7 @@ div.smp-shoplist-current,
 div.smp-shoplist-add-from-planner,
 div.smp-shoplist-bought,
 div.smp-shoplist-rtm,
+div.smp-shoplist-sml,
 div.smp-planner-add-header>span {
     border: 1px solid #ffd700;
 }

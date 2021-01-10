@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
 using SmallMealPlan.RememberTheMilk;
+using SmallMealPlan.SmallLister;
 using SmallMealPlan.Web.Model.Request;
 using SmallMealPlan.Web.Model.ShoppingList;
 
@@ -20,18 +21,21 @@ namespace SmallMealPlan.Web.Controllers
         private readonly IShoppingListRepository _shoppingListRepository;
         private readonly IMealRepository _mealRepository;
         private readonly IRtmClient _rtmClient;
+        private readonly ISmallListerClient _smlClient;
 
         public ShoppingListController(ILogger<ShoppingListController> logger,
             IUserAccountRepository userAccountRepository,
             IShoppingListRepository shoppingListRepository,
             IMealRepository mealRepository,
-            IRtmClient rtmClient)
+            IRtmClient rtmClient,
+            ISmallListerClient smlClient)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
             _shoppingListRepository = shoppingListRepository;
             _mealRepository = mealRepository;
             _rtmClient = rtmClient;
+            _smlClient = smlClient;
         }
 
         public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber)
@@ -67,7 +71,8 @@ namespace SmallMealPlan.Web.Controllers
                     Description = i.Ingredient.Description
                 }),
                 BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),
-                HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken)
+                HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken),
+                HasSmallListerToken = !string.IsNullOrEmpty(user.SmallListerToken)
             });
         }
 
@@ -162,7 +167,7 @@ namespace SmallMealPlan.Web.Controllers
 
         [HttpPost("~/shoppinglist/rtm")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RememberTheMilk([FromForm] SyncWithRememberTheMilkRequest requestModel)
+        public async Task<IActionResult> RememberTheMilk([FromForm] SyncRequest requestModel)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             _logger.LogTrace($"Sync with RTM: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
@@ -201,6 +206,54 @@ namespace SmallMealPlan.Web.Controllers
             if (listTasks.List == null)
                 return;
             var itemsToImport = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name);
+
+            var currentList = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description);
+            foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))
+            {
+                _logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
+                await _shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
+            }
+        }
+
+        [HttpPost("~/shoppinglist/sml")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SmallLister([FromForm] SyncRequest requestModel)
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogTrace($"Sync with SML: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
+
+            if (requestModel.Export ?? false)
+                await ExportToSmlAsync(user, requestModel.List);
+            else if (requestModel.Import ?? false)
+                await ImportFromSmlAsync(user, requestModel.List);
+            else
+                return BadRequest();
+
+            return Redirect("~/shoppinglist");
+        }
+
+        private async Task ExportToSmlAsync(UserAccount user, string listId)
+        {
+            var itemsToExport = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(x => x.Ingredient.Description);
+
+            var list = await _smlClient.GetListAsync(user.SmallListerToken, listId);
+            if (list == null)
+                return;
+
+            var existingItemsInList = list.Items.Select(x => x.Description);
+            foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
+            {
+                _logger.LogTrace($"Adding item [{itemToAddToList}] to SmallLister list [{listId}]");
+                await _smlClient.AddItemAsync(user.SmallListerToken, listId, itemToAddToList);
+            }
+        }
+
+        private async Task ImportFromSmlAsync(UserAccount user, string listId)
+        {
+            var list = await _smlClient.GetListAsync(user.SmallListerToken, listId);
+            if (list == null)
+                return;
+            var itemsToImport = list.Items.Select(x => x.Description);
 
             var currentList = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description);
             foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))

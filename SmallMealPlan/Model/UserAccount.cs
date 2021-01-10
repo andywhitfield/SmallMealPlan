@@ -15,5 +15,6 @@ namespace SmallMealPlan.Model
         public DateTime? LastUpdateDateTime { get; set; }
         public DateTime? DeletedDateTime { get; set; }
         public string RememberTheMilkToken { get; set; }
+        public string SmallListerToken { get; set; }
     }
 }

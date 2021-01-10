@@ -13,5 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SmallMealPlan\SmallMealPlan.csproj" />
     <ProjectReference Include="..\SmallMealPlan.RememberTheMilk\SmallMealPlan.RememberTheMilk.csproj" />
+    <ProjectReference Include="..\SmallMealPlan.SmallLister\SmallMealPlan.SmallLister.csproj" />
   </ItemGroup>
 </Project>

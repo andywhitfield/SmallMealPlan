@@ -9,8 +9,10 @@ namespace SmallMealPlan.Model
         public DateTime Date { get; set; }
         [Required]
         public Meal Meal { get; set; }
+        public int MealId { get; set; }
         [Required]
         public UserAccount User { get; set; }
+        public int UserAccountId { get; set; }
         public int SortOrder { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public DateTime? LastUpdateDateTime { get; set; }

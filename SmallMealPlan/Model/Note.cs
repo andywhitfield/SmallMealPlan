@@ -8,6 +8,7 @@ namespace SmallMealPlan.Model
         public int NoteId { get; set; }
         [Required]
         public UserAccount User { get; set; }
+        public int UserAccountId { get; set; }
         [Required]
         public string NoteText { get; set; }
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;

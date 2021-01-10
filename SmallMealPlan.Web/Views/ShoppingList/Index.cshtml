@@ -5,6 +5,7 @@
     <span data-select=".smp-shoplist-add-from-planner">Add from planner</span>
     <span data-select=".smp-shoplist-bought">Bought</span>
     <span data-select=".smp-shoplist-rtm">RTM</span>
+    <span data-select=".smp-shoplist-sml">Small:Lister</span>
 </div>
 <div class="smp-shoplist-current">
     <ul class="smp-planner-list">
@@ -108,7 +109,7 @@
 <div class="smp-shoplist-rtm">
     @if (Model.HasRtmToken) {
     <div>
-    Import or export from one of your RTM lists:
+    Import or export from one of your RememberTheMilk lists:
     <form name="rtm" method="post" action="/shoppinglist/rtm">
     @Html.AntiForgeryToken()
     <select name="list">
@@ -128,6 +129,32 @@
     </div>
     } else {
     <div>To enable import or export of your shopping list with RememberTheMilk, first <button data-href="/rtm/link">link your account</button></div>
+    }
+</div>
+
+<div class="smp-shoplist-sml">
+    @if (Model.HasSmallListerToken) {
+    <div>
+    Import or export from one of your Small:Lister lists:
+    <form name="sml" method="post" action="/shoppinglist/sml">
+    @Html.AntiForgeryToken()
+    <select name="list">
+    </select>
+    <button name="load" type="button">Load your Small:Lister lists</button>
+    <br/>
+    <button name="import" value="true" type="submit">Import from List</button>
+    <button name="export" value="true" type="submit">Export to List</button>
+    </form>
+    </div>
+    <hr/>
+    <div>
+    <form method="post" action="/sml/unlink">
+    @Html.AntiForgeryToken()
+    <button type="submit">Unlink your account</button>
+    </form>
+    </div>
+    } else {
+    <div>To enable import or export of your shopping list with Small:Lister, first <button data-href="/sml/link">link your account</button></div>
     }
 </div>
 
@@ -189,6 +216,27 @@
                 })
                 .fail(function() {
                     console.log('Error getting RTM lists!');
+                });
+        });
+
+        let smlLists = $('form[name="sml"] select[name="list"]');
+        let smlImportExportBtns = $('form[name="sml"] button[type="submit"]');
+        smlImportExportBtns.prop('disabled', true);
+        smlLists.prop('disabled', true);
+        $('form[name="sml"] button[name="load"]').click(function() {
+            $.ajax({ url: '/api/sml' })
+                .done(function(data) {
+                    $.each(data.options, function (i, item) {
+                        smlLists.append($('<option>', { 
+                            value: item.value,
+                            text : item.text 
+                        }));
+                    });
+                    smlImportExportBtns.prop('disabled', data.options.length == 0);
+                    smlLists.prop('disabled', data.options.length == 0);
+                })
+                .fail(function() {
+                    console.log('Error getting SmallLister lists!');
                 });
         });
     })

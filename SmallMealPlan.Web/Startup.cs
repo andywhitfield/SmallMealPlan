@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using SmallMealPlan.Data;
 using SmallMealPlan.RememberTheMilk;
+using SmallMealPlan.SmallLister;
 
 namespace SmallMealPlan.Web
 {
@@ -110,7 +111,9 @@ namespace SmallMealPlan.Web
                 .AddScoped<INoteRepository, NoteRepository>()
                 .AddScoped<IDirectDbService, DirectDbService>()
                 .AddSingleton<RtmConfig>(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey"), Configuration.GetValue<string>("RememberTheMilk:SharedSecret")))
-                .AddScoped<IRtmClient, RtmClient>(); // callback url: https://smallmealplan.nosuchblogger.com/rtm
+                .AddScoped<IRtmClient, RtmClient>() // callback url: https://smallmealplan.nosuchblogger.com/rtm
+                .AddSingleton<SmallListerConfig>(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri"), Configuration.GetValue<string>("SmallLister:AppKey"), Configuration.GetValue<string>("SmallLister:AppSecret")))
+                .AddScoped<ISmallListerClient, SmallListerClient>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
             services.AddRazorPages();
