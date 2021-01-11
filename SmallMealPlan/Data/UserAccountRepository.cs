@@ -43,6 +43,14 @@ namespace SmallMealPlan.Data
         public Task UpdateRememberTheMilkTokenAsync(UserAccount user, string rememberTheMilkToken)
         {
             user.RememberTheMilkToken = rememberTheMilkToken;
+            user.LastUpdateDateTime = DateTime.UtcNow;
+            return _context.SaveChangesAsync();
+        }
+
+        public Task UpdateSmallListerTokenAsync(UserAccount user, string refreshToken)
+        {
+            user.SmallListerToken = refreshToken;
+            user.LastUpdateDateTime = DateTime.UtcNow;
             return _context.SaveChangesAsync();
         }
     }

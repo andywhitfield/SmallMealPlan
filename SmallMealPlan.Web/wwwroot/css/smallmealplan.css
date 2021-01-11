@@ -336,7 +336,8 @@ div.smp-planner-add-recent form {
 div.smp-planner-add-new,
 div.smp-shoplist-add-from-planner,
 div.smp-shoplist-bought,
-div.smp-shoplist-rtm {
+div.smp-shoplist-rtm,
+div.smp-shoplist-sml {
     display: none;
     padding: 5px;
 }

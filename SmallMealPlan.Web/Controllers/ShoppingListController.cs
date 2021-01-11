@@ -235,10 +235,12 @@ namespace SmallMealPlan.Web.Controllers
         private async Task ExportToSmlAsync(UserAccount user, string listId)
         {
             var itemsToExport = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(x => x.Ingredient.Description);
-
             var list = await _smlClient.GetListAsync(user.SmallListerToken, listId);
             if (list == null)
+            {
+                _logger.LogInformation($"could not get list {listId}");
                 return;
+            }
 
             var existingItemsInList = list.Items.Select(x => x.Description);
             foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
