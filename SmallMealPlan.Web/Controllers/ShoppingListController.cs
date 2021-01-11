@@ -234,7 +234,7 @@ namespace SmallMealPlan.Web.Controllers
 
         private async Task ExportToSmlAsync(UserAccount user, string listId)
         {
-            var itemsToExport = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(x => x.Ingredient.Description);
+            var itemsToExport = (await _shoppingListRepository.GetActiveItemsAsync(user)).Select(x => x.Ingredient.Description.Trim());
             var list = await _smlClient.GetListAsync(user.SmallListerToken, listId);
             if (list == null)
             {
@@ -242,8 +242,8 @@ namespace SmallMealPlan.Web.Controllers
                 return;
             }
 
-            var existingItemsInList = list.Items.Select(x => x.Description);
-            foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
+            var existingItemsInList = list.Items.Select(x => x.Description.Trim());
+            foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList, StringComparer.OrdinalIgnoreCase))
             {
                 _logger.LogTrace($"Adding item [{itemToAddToList}] to SmallLister list [{listId}]");
                 await _smlClient.AddItemAsync(user.SmallListerToken, listId, itemToAddToList);
