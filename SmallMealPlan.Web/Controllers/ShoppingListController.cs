@@ -149,7 +149,19 @@ namespace SmallMealPlan.Web.Controllers
             var shoppingListItem = await _shoppingListRepository.GetAsync(shoppingListItemId);
             if (shoppingListItem.User != user)
                 return BadRequest();
-            await _shoppingListRepository.MarkAsBoughtAsync(user, shoppingListItem);
+            await _shoppingListRepository.MarkAsBoughtAsync(user, new[] { shoppingListItem });
+            return Redirect("~/shoppinglist");
+        }
+
+        [HttpPost("~/shoppinglist/bought")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAllAsBought()
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            var shoppingListItems = await _shoppingListRepository.GetActiveItemsAsync(user);
+            if (shoppingListItems.Any(sli => sli.User != user))
+                return BadRequest();
+            await _shoppingListRepository.MarkAsBoughtAsync(user, shoppingListItems);
             return Redirect("~/shoppinglist");
         }
 

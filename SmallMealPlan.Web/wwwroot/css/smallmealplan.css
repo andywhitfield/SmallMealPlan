@@ -310,8 +310,7 @@ div.smp-planner-add-new,
 div.smp-shoplist-current,
 div.smp-shoplist-add-from-planner,
 div.smp-shoplist-bought,
-div.smp-shoplist-rtm,
-div.smp-shoplist-sml,
+div.smp-shoplist-sync,
 div.smp-planner-add-header>span {
     border: 1px solid #ffd700;
 }
@@ -336,10 +335,21 @@ div.smp-planner-add-recent form {
 div.smp-planner-add-new,
 div.smp-shoplist-add-from-planner,
 div.smp-shoplist-bought,
-div.smp-shoplist-rtm,
-div.smp-shoplist-sml {
+div.smp-shoplist-sync {
     display: none;
     padding: 5px;
+}
+
+div.smp-shoplist-actions {
+    display: flex;
+}
+
+div.smp-shoplist-actions>div:first-child {
+    flex: 100%;
+}
+
+div.smp-shoplist-actions>div:last-child {
+    width: 145px;
 }
 
 @media (max-width: 600px) {

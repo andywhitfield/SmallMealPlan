@@ -123,12 +123,15 @@ namespace SmallMealPlan.Data
             });
         }
 
-        public Task MarkAsBoughtAsync(UserAccount user, ShoppingListItem shoppingListItem)
+        public Task MarkAsBoughtAsync(UserAccount user, IEnumerable<ShoppingListItem> shoppingListItems)
         {
-            if (shoppingListItem.User.UserAccountId != user.UserAccountId)
-                throw new SecurityException($"Cannot update shopping list item id: {shoppingListItem.ShoppingListItemId}");
+            if (shoppingListItems.Any(sli => sli.User.UserAccountId != user.UserAccountId))
+                throw new SecurityException($"Cannot update shopping list item where the item's owner is not the specifid user");
 
-            shoppingListItem.LastUpdateDateTime = shoppingListItem.BoughtDateTime = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            foreach (var shoppingListItem in shoppingListItems)
+                shoppingListItem.LastUpdateDateTime = shoppingListItem.BoughtDateTime = now;
+
             return _context.SaveChangesAsync();
         }
 

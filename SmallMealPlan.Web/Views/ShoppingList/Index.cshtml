@@ -4,8 +4,7 @@
     <span class="selected" data-select=".smp-shoplist-current">My list</span>
     <span data-select=".smp-shoplist-add-from-planner">Add from planner</span>
     <span data-select=".smp-shoplist-bought">Bought</span>
-    <span data-select=".smp-shoplist-rtm">RTM</span>
-    <span data-select=".smp-shoplist-sml">Small:Lister</span>
+    <span data-select=".smp-shoplist-sync">Sync</span>
 </div>
 <div class="smp-shoplist-current">
     <ul class="smp-planner-list">
@@ -31,11 +30,22 @@
             </ul>
         </li>
     </ul>
+    <div class="smp-shoplist-actions">
     <div>
     <form method="post" action="/shoppinglist">
     @Html.AntiForgeryToken()
     <input type="text" name="description" class="smp-planner-add-new-description" /> <button type="submit" data-depends="input.smp-planner-add-new-description">Add to my shopping list</button>
     </form>
+    </div>
+
+    @if (Model.MyList.Any()) {
+    <div>
+    <form name="smp-shoplist-bought-all" method="post" action="/shoppinglist/bought">
+    @Html.AntiForgeryToken()
+    <button title="Bought All"><img src="/images/tick.png" height="15" width="15" /> Bought All</button>
+    </form>
+    </div>
+    }
     </div>
 </div>
 
@@ -106,7 +116,8 @@
     }
 </div>
 
-<div class="smp-shoplist-rtm">
+<div class="smp-shoplist-sync">
+    <p>
     @if (Model.HasRtmToken) {
     <div>
     Import or export from one of your RememberTheMilk lists:
@@ -120,19 +131,19 @@
     <button name="export" value="true" type="submit">Export to List</button>
     </form>
     </div>
-    <hr/>
-    <div>
+    
+    <p>
     <form method="post" action="/rtm/unlink">
     @Html.AntiForgeryToken()
-    <button type="submit">Unlink your account</button>
+    <button type="submit">Unlink your RTM account</button>
     </form>
-    </div>
+    </p>
     } else {
     <div>To enable import or export of your shopping list with RememberTheMilk, first <button data-href="/rtm/link">link your account</button></div>
     }
-</div>
-
-<div class="smp-shoplist-sml">
+    </p>
+    <hr />
+    <p>
     @if (Model.HasSmallListerToken) {
     <div>
     Import or export from one of your Small:Lister lists:
@@ -146,16 +157,17 @@
     <button name="export" value="true" type="submit">Export to List</button>
     </form>
     </div>
-    <hr/>
-    <div>
+
+    <p>
     <form method="post" action="/sml/unlink">
     @Html.AntiForgeryToken()
-    <button type="submit">Unlink your account</button>
+    <button type="submit">Unlink your Small:Lister account</button>
     </form>
-    </div>
+    </p>
     } else {
     <div>To enable import or export of your shopping list with Small:Lister, first <button data-href="/sml/link">link your account</button></div>
     }
+    </p>
 </div>
 
 @section Scripts {
