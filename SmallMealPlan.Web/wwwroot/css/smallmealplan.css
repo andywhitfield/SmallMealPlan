@@ -342,6 +342,7 @@ div.smp-shoplist-sync {
 
 div.smp-shoplist-actions {
     display: flex;
+    flex-direction: row;
 }
 
 div.smp-shoplist-actions>div:first-child {
@@ -364,6 +365,9 @@ div.smp-shoplist-actions>div:last-child {
         display: inline;
     }
     ul.smp-planner-list-meal>li {
+        flex-direction: column;
+    }
+    div.smp-shoplist-actions {
         flex-direction: column;
     }
 }
