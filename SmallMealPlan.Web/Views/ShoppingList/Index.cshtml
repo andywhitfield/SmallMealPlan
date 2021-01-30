@@ -129,6 +129,7 @@
     <br/>
     <button name="import" value="true" type="submit">Import from List</button>
     <button name="export" value="true" type="submit">Export to List</button>
+    <label for="deleteafterexport-rtm" title="Mark all items as bought after exporting"><input type="checkbox" id="deleteafterexport-rtm" name="deleteafterexport" value="true" /> Delete after export</label>
     </form>
     </div>
     
@@ -155,6 +156,7 @@
     <br/>
     <button name="import" value="true" type="submit">Import from List</button>
     <button name="export" value="true" type="submit">Export to List</button>
+    <label for="deleteafterexport-smalllister" title="Mark all items as bought after exporting"><input type="checkbox" id="deleteafterexport-smalllister" name="deleteafterexport" value="true" /> Delete after export</label>
     </form>
     </div>
 
@@ -212,8 +214,10 @@
 
         let rtmLists = $('form[name="rtm"] select[name="list"]');
         let rtmImportExportBtns = $('form[name="rtm"] button[type="submit"]');
+        let rtmInputs = $('form[name="rtm"] input');
         rtmImportExportBtns.prop('disabled', true);
         rtmLists.prop('disabled', true);
+        rtmInputs.prop('disabled', true);
         $('form[name="rtm"] button[name="load"]').click(function() {
             $.ajax({ url: '/api/rtm' })
                 .done(function(data) {
@@ -225,6 +229,7 @@
                     });
                     rtmImportExportBtns.prop('disabled', data.options.length == 0);
                     rtmLists.prop('disabled', data.options.length == 0);
+                    rtmInputs.prop('disabled', data.options.length == 0);
                 })
                 .fail(function() {
                     console.log('Error getting RTM lists!');
@@ -233,8 +238,10 @@
 
         let smlLists = $('form[name="sml"] select[name="list"]');
         let smlImportExportBtns = $('form[name="sml"] button[type="submit"]');
+        let smlInputs = $('form[name="sml"] input');
         smlImportExportBtns.prop('disabled', true);
         smlLists.prop('disabled', true);
+        smlInputs.prop('disabled', true);
         $('form[name="sml"] button[name="load"]').click(function() {
             $.ajax({ url: '/api/sml' })
                 .done(function(data) {
@@ -246,6 +253,7 @@
                     });
                     smlImportExportBtns.prop('disabled', data.options.length == 0);
                     smlLists.prop('disabled', data.options.length == 0);
+                    smlInputs.prop('disabled', data.options.length == 0);
                 })
                 .fail(function() {
                     console.log('Error getting SmallLister lists!');

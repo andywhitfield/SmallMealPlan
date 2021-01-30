@@ -8,5 +8,6 @@ namespace SmallMealPlan.Web.Model.Request
         public string List { get; set; }
         public bool? Import { get; set; }
         public bool? Export { get; set; }
+        public bool? DeleteAfterExport { get; set; }
     }
 }

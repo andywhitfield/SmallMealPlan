@@ -185,7 +185,11 @@ namespace SmallMealPlan.Web.Controllers
             _logger.LogTrace($"Sync with RTM: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
 
             if (requestModel.Export ?? false)
+            {
                 await ExportToRtmAsync(user, requestModel.List);
+                if (requestModel.DeleteAfterExport ?? false)
+                    await MarkAllAsBought();
+            }
             else if (requestModel.Import ?? false)
                 await ImportFromRtmAsync(user, requestModel.List);
             else
@@ -235,7 +239,11 @@ namespace SmallMealPlan.Web.Controllers
             _logger.LogTrace($"Sync with SML: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
 
             if (requestModel.Export ?? false)
+            {
                 await ExportToSmlAsync(user, requestModel.List);
+                if (requestModel.DeleteAfterExport ?? false)
+                    await MarkAllAsBought();
+            }
             else if (requestModel.Import ?? false)
                 await ImportFromSmlAsync(user, requestModel.List);
             else
