@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
@@ -60,8 +61,10 @@ namespace SmallMealPlan.Data
         private async Task<List<(int MealId, DateTime MealCreatedDate, DateTime? DateOnPlanner, string MealDescription)>> GetAsync(UserAccount user, string filter)
         {
             var mealIds = new List<(int, DateTime, DateTime?, string)>();
-            foreach (var mealInfo in await _context.Database.GetDbConnection().QueryAsync(
-                $@"select m.MealId, m.CreatedDateTime, pm.Date, m.Description
+            var hasTextFilter = !string.IsNullOrWhiteSpace(filter);
+            var mealQuery = new StringBuilder();
+            mealQuery.AppendLine(
+                @"select distinct m.MealId, m.CreatedDateTime, pm.Date, m.Description
                 from Meals m
                 left join (
                     select max(Date) Date, MealId
@@ -70,10 +73,28 @@ namespace SmallMealPlan.Data
                     and DeletedDateTime is null
                     group by MealId
                 ) pm
-                on m.MealId = pm.MealId
-                where m.UserAccountId = @UserAccountId
-                and m.DeletedDateTime is null
-                {(string.IsNullOrWhiteSpace(filter) ? "" : "and m.Description like @Filter")}", new { user.UserAccountId, Filter = $"%{filter}%" }))
+                on m.MealId = pm.MealId");
+
+            if (hasTextFilter)
+            {
+                mealQuery.AppendLine(
+                    @"left join MealIngredients mi on m.MealId = mi.MealId
+                    left join Ingredients i on mi.IngredientId = i.IngredientId");
+            }
+
+            mealQuery.AppendLine(
+                @"where m.UserAccountId = @UserAccountId
+                and m.DeletedDateTime is null");
+
+            if (hasTextFilter)
+            {
+                mealQuery.AppendLine(
+                    @"and (m.Description like @Filter
+                    or m.Notes like @Filter
+                    or i.Description like @Filter)");
+            }
+
+            foreach (var mealInfo in await _context.Database.GetDbConnection().QueryAsync(mealQuery.ToString(), new { user.UserAccountId, Filter = $"%{filter?.Trim()}%" }))
                 mealIds.Add(((int)mealInfo.MealId, ToDateTime(mealInfo.CreatedDateTime) ?? DateTime.MinValue, ToDateTime(mealInfo.Date)?.Date, (string)mealInfo.Description));
 
             return mealIds;
@@ -82,7 +103,6 @@ namespace SmallMealPlan.Data
                 val is string s
                 ? (DateTime.TryParseExact(s, new[] { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss.ffffff" }, null, DateTimeStyles.AssumeUniversal, out var d) ? (DateTime?)d : null)
                 : null;
-
         }
     }
 }
