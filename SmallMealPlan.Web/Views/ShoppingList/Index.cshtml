@@ -134,7 +134,7 @@
     </div>
     
     <p>
-    <form method="post" action="/rtm/unlink">
+    <form method="post" action="/rtm/unlink" data-confirm="Are you sure you want to unlink your account?">
     @Html.AntiForgeryToken()
     <button type="submit">Unlink your RTM account</button>
     </form>
@@ -161,7 +161,7 @@
     </div>
 
     <p>
-    <form method="post" action="/sml/unlink">
+    <form method="post" action="/sml/unlink" data-confirm="Are you sure you want to unlink your account?">
     @Html.AntiForgeryToken()
     <button type="submit">Unlink your Small:Lister account</button>
     </form>
