@@ -353,6 +353,10 @@ div.smp-shoplist-actions>div:last-child {
     width: 145px;
 }
 
+div.smp-shoplist-actions>div:first-child button {
+    white-space: nowrap;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;
