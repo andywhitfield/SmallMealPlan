@@ -40,7 +40,7 @@ namespace SmallMealPlan.Web.Controllers
             if (rtmList.List == null)
                 return new GetListsResponse();
 
-            return new GetListsResponse { Options = rtmList.List.Select(l => new GetListsResponse.ListItem(l.Id, l.Name)).ToArray() };
+            return new GetListsResponse { Options = rtmList.List.Select(l => new GetListsResponse.ListItem(l.Id, l.Name, !string.IsNullOrEmpty(user.RememberTheMilkLastListId) && user.RememberTheMilkLastListId == l.Id)).ToArray() };
         }
     }
 }

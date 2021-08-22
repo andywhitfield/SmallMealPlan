@@ -34,7 +34,8 @@ namespace SmallMealPlan.Web.Controllers
 
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             var tokenResponse = await _rtmClient.GetTokenAsync(frob);
-            await _userAccountRepository.UpdateRememberTheMilkTokenAsync(user, tokenResponse.Token);
+            user.RememberTheMilkToken = tokenResponse.Token;
+            await _userAccountRepository.UpdateAsync(user);
             _logger.LogInformation($"Updating user {user.UserAccountId} with token: {tokenResponse.Token}");
             return Redirect("~/shoppinglist");
         }
@@ -52,7 +53,9 @@ namespace SmallMealPlan.Web.Controllers
         public async Task<IActionResult> Unlink()
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _userAccountRepository.UpdateRememberTheMilkTokenAsync(user, null);
+            user.RememberTheMilkToken = null;
+            user.RememberTheMilkLastListId = null;
+            await _userAccountRepository.UpdateAsync(user);
             _logger.LogInformation($"Clearing RTM token from user {user.UserAccountId}");
             return Redirect("~/shoppinglist");
         }

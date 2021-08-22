@@ -32,7 +32,8 @@ namespace SmallMealPlan.Web.Controllers
                 return BadRequest();
 
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _userAccountRepository.UpdateSmallListerTokenAsync(user, refreshToken);
+            user.SmallListerToken = refreshToken;
+            await _userAccountRepository.UpdateAsync(user);
             _logger.LogInformation($"Updating user {user.UserAccountId} with token: {refreshToken}");
             return Redirect("~/shoppinglist");
         }
@@ -50,7 +51,9 @@ namespace SmallMealPlan.Web.Controllers
         public async Task<IActionResult> Unlink()
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _userAccountRepository.UpdateSmallListerTokenAsync(user, null);
+            user.SmallListerToken = null;
+            user.SmallListerLastListId = null;
+            await _userAccountRepository.UpdateAsync(user);
             _logger.LogInformation($"Clearing SmallLister token from user {user.UserAccountId}");
             return Redirect("~/shoppinglist");
         }

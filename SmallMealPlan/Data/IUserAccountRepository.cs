@@ -9,7 +9,6 @@ namespace SmallMealPlan.Data
         Task CreateNewUserAsync(ClaimsPrincipal user);
         Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user);
         Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user);
-        Task UpdateRememberTheMilkTokenAsync(UserAccount user, string rememberTheMilkToken);
-        Task UpdateSmallListerTokenAsync(UserAccount user, string refreshToken);
+        Task UpdateAsync(UserAccount user);
     }
 }

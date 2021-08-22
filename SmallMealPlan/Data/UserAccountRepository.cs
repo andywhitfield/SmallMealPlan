@@ -40,16 +40,8 @@ namespace SmallMealPlan.Data
             return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri && ua.DeletedDateTime == null);
         }
 
-        public Task UpdateRememberTheMilkTokenAsync(UserAccount user, string rememberTheMilkToken)
+        public Task UpdateAsync(UserAccount user)
         {
-            user.RememberTheMilkToken = rememberTheMilkToken;
-            user.LastUpdateDateTime = DateTime.UtcNow;
-            return _context.SaveChangesAsync();
-        }
-
-        public Task UpdateSmallListerTokenAsync(UserAccount user, string refreshToken)
-        {
-            user.SmallListerToken = refreshToken;
             user.LastUpdateDateTime = DateTime.UtcNow;
             return _context.SaveChangesAsync();
         }

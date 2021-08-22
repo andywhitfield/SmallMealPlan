@@ -195,6 +195,9 @@ namespace SmallMealPlan.Web.Controllers
             else
                 return BadRequest();
 
+            user.RememberTheMilkLastListId = requestModel.List;
+            await _userAccountRepository.UpdateAsync(user);
+
             return Redirect("~/shoppinglist");
         }
 
@@ -248,6 +251,9 @@ namespace SmallMealPlan.Web.Controllers
                 await ImportFromSmlAsync(user, requestModel.List);
             else
                 return BadRequest();
+
+            user.SmallListerLastListId = requestModel.List;
+            await _userAccountRepository.UpdateAsync(user);
 
             return Redirect("~/shoppinglist");
         }

@@ -222,10 +222,13 @@
             $.ajax({ url: '/api/rtm' })
                 .done(function(data) {
                     $.each(data.options, function (i, item) {
-                        rtmLists.append($('<option>', { 
+                        let opt = $('<option>', { 
                             value: item.value,
-                            text : item.text 
-                        }));
+                            text : item.text
+                        });
+                        if (item.isSelected)
+                            opt.prop('selected', 'selected');
+                        rtmLists.append(opt);
                     });
                     rtmImportExportBtns.prop('disabled', data.options.length == 0);
                     rtmLists.prop('disabled', data.options.length == 0);
@@ -246,10 +249,13 @@
             $.ajax({ url: '/api/sml' })
                 .done(function(data) {
                     $.each(data.options, function (i, item) {
-                        smlLists.append($('<option>', { 
+                        let opt = $('<option>', { 
                             value: item.value,
-                            text : item.text 
-                        }));
+                            text : item.text
+                        });
+                        if (item.isSelected)
+                            opt.prop('selected', 'selected');
+                        smlLists.append(opt);
                     });
                     smlImportExportBtns.prop('disabled', data.options.length == 0);
                     smlLists.prop('disabled', data.options.length == 0);
