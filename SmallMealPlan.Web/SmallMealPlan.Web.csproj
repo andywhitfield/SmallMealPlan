@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BuildBundlerMinifier" Version="*" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.*" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="5.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.*" PrivateAssets="All"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="6.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.*" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SmallMealPlan\SmallMealPlan.csproj" />

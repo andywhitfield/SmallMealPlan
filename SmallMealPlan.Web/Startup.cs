@@ -60,7 +60,7 @@ namespace SmallMealPlan.Web
                 {
                     options.ClientId = "smallmealplan";
                     options.ClientSecret = "a00b51b9-28f4-417e-8a7f-940e91a998ee";
-
+                    
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.SaveTokens = true;
                     options.ResponseType = OpenIdConnectResponseType.Code;
@@ -115,7 +115,7 @@ namespace SmallMealPlan.Web
                 .AddSingleton<SmallListerConfig>(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri"), Configuration.GetValue<string>("SmallLister:AppKey"), Configuration.GetValue<string>("SmallLister:AppSecret")))
                 .AddScoped<ISmallListerClient, SmallListerClient>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddSessionStateTempDataProvider();
+            services.AddMvc().AddSessionStateTempDataProvider();
             services.AddRazorPages();
             services.AddCors();
             services.AddDistributedMemoryCache();
