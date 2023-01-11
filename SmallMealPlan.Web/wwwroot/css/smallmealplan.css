@@ -42,6 +42,13 @@ header {
     border-bottom: solid #20b2aa 2px;
 }
 
+input,
+select,
+button {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
 nav.navbar-header {
     min-width: 200px;
     -webkit-flex: 0;
