@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.SmallLister;
 using SmallMealPlan.Web.Model.ShoppingList;
@@ -14,15 +13,13 @@ namespace SmallMealPlan.Web.Controllers
     [Authorize]
     public class SmallListerApiController : ControllerBase
     {
-        private readonly ILogger<SmallListerApiController> _logger;
         private readonly IUserAccountRepository _userAccountRepository;
         private readonly ISmallListerClient _smlClient;
 
-        public SmallListerApiController(ILogger<SmallListerApiController> logger,
+        public SmallListerApiController(
             IUserAccountRepository userAccountRepository,
             ISmallListerClient smlClient)
         {
-            _logger = logger;
             _userAccountRepository = userAccountRepository;
             _smlClient = smlClient;
         }

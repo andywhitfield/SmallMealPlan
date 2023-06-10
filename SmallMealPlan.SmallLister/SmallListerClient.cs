@@ -12,7 +12,7 @@ namespace SmallMealPlan.SmallLister
     public class SmallListerClient : ISmallListerClient
     {
         public const string HttpClientName = nameof(SmallListerClient);
-        private static JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
         private readonly ILogger<SmallListerClient> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -54,20 +54,18 @@ namespace SmallMealPlan.SmallLister
                 var requestMessage = new HttpRequestMessage(HttpMethod.Post, new Uri(_config.BaseUri, "/api/v1/token"));
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{_config.AppKey}:{_config.AppSecret}")));
                 requestMessage.Content = new StringContent(JsonSerializer.Serialize(new { refreshToken }), Encoding.UTF8, "application/json");
-                using (var response = await httpClient.SendAsync(requestMessage))
-                {
-                    if (!response.IsSuccessStatusCode)
-                        throw new ApplicationException($"Error calling SmallLister: {response.StatusCode}: {(await response.Content.ReadAsStringAsync())}");
+                using var response = await httpClient.SendAsync(requestMessage);
+                if (!response.IsSuccessStatusCode)
+                    throw new ApplicationException($"Error calling SmallLister: {response.StatusCode}: {(await response.Content.ReadAsStringAsync())}");
 
-                    var responseString = await response.Content.ReadAsStringAsync();
-                    _logger.LogTrace($"Received SmallLister token response: {responseString}");
+                var responseString = await response.Content.ReadAsStringAsync();
+                _logger.LogTrace($"Received SmallLister token response: {responseString}");
 
-                    var tokenResponse = JsonSerializer.Deserialize<SmallListerTokenResponse>(responseString, DefaultJsonSerializerOptions);
-                    if (tokenResponse.AccessToken == null)
-                        throw new ApplicationException($"Could not get access token from SmallLister: {response.StatusCode}: {responseString}");
+                var tokenResponse = JsonSerializer.Deserialize<SmallListerTokenResponse>(responseString, DefaultJsonSerializerOptions);
+                if (tokenResponse.AccessToken == null)
+                    throw new ApplicationException($"Could not get access token from SmallLister: {response.StatusCode}: {responseString}");
 
-                    _accessToken = tokenResponse.AccessToken;
-                }
+                _accessToken = tokenResponse.AccessToken;
             }
 
             return _accessToken;
@@ -83,15 +81,13 @@ namespace SmallMealPlan.SmallLister
             if (jsonContent != null)
                 requestMessage.Content = new StringContent(JsonSerializer.Serialize(jsonContent), Encoding.UTF8, "application/json");
 
-            using (var response = await httpClient.SendAsync(requestMessage))
-            {
-                if (!response.IsSuccessStatusCode)
-                    throw new ApplicationException($"Error calling SmallLister: {response.StatusCode}: {(await response.Content.ReadAsStringAsync())}");
+            using var response = await httpClient.SendAsync(requestMessage);
+            if (!response.IsSuccessStatusCode)
+                throw new ApplicationException($"Error calling SmallLister: {response.StatusCode}: {(await response.Content.ReadAsStringAsync())}");
 
-                var responseString = await response.Content.ReadAsStringAsync();
-                _logger.LogTrace($"Received SmallLister list response: {responseString}");
-                return responseString;
-            }
+            var responseString = await response.Content.ReadAsStringAsync();
+            _logger.LogTrace($"Received SmallLister list response: {responseString}");
+            return responseString;
         }
     }
 }
