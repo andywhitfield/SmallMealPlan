@@ -49,8 +49,16 @@ namespace SmallMealPlan.SmallLister
 
         public async Task RegisterWebhookAsync(string refreshToken, Uri webhookBaseUri, string userId)
         {
+            await CallApiAsync(refreshToken, HttpMethod.Delete, "/api/v1/webhook/ListChange");
+            await CallApiAsync(refreshToken, HttpMethod.Delete, "/api/v1/webhook/ListItemChange");
             await CallApiAsync(refreshToken, HttpMethod.Post, "/api/v1/webhook", new { Webhook = new Uri(webhookBaseUri, $"api/webhook/{userId}/smalllister/list"), WebhookType = "ListChange" });
             await CallApiAsync(refreshToken, HttpMethod.Post, "/api/v1/webhook", new { Webhook = new Uri(webhookBaseUri, $"api/webhook/{userId}/smalllister/listitem"), WebhookType = "ListItemChange" });
+        }
+
+        public async Task UnregisterWebhookAsync(string refreshToken)
+        {
+            await CallApiAsync(refreshToken, HttpMethod.Delete, "/api/v1/webhook/ListChange");
+            await CallApiAsync(refreshToken, HttpMethod.Delete, "/api/v1/webhook/ListItemChange");
         }
 
         private async Task<string> GetOrCreateAccessTokenAsync(HttpClient httpClient, string refreshToken)

@@ -10,5 +10,6 @@ namespace SmallMealPlan.SmallLister
         Task AddItemAsync(string refreshToken, string listId, string itemToAddToList);
         Task<IEnumerable<SmallListerList>> GetListsAsync(string refreshToken);
         Task RegisterWebhookAsync(string refreshToken, Uri webhookBaseUri, string userId);
+        Task UnregisterWebhookAsync(string refreshToken);
     }
 }

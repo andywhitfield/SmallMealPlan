@@ -244,7 +244,7 @@ namespace SmallMealPlan.Web.Controllers
         public async Task<IActionResult> SmallLister([FromForm] SyncRequest requestModel)
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            _logger.LogTrace($"Sync with SML: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
+            _logger.LogTrace($"Sync with SML: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}; sync={requestModel.Sync}");
 
             if (requestModel.Export ?? false)
             {
@@ -253,16 +253,37 @@ namespace SmallMealPlan.Web.Controllers
                     await MarkAllAsBought();
             }
             else if (requestModel.Import ?? false)
+            {
                 await ImportFromSmlAsync(user, requestModel.List);
+            }
             else if (requestModel.Sync ?? false)
+            {
                 await SyncWithSmlListAsync(user, requestModel.List);
+                return Redirect("~/shoppinglist?tab=smp-shoplist-sync");
+            }
             else
+            {
                 return BadRequest();
+            }
 
             user.SmallListerLastListId = requestModel.List;
             await _userAccountRepository.UpdateAsync(user);
 
             return Redirect("~/shoppinglist");
+        }
+
+        [HttpPost("~/shoppinglist/sml/unsync")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SmallListerUnsync()
+        {
+            var user = await _userAccountRepository.GetUserAccountAsync(User);
+            _logger.LogTrace("Stop syncing list with SML");
+
+            await _smlClient.UnregisterWebhookAsync(user.SmallListerToken);
+            user.SmallListerSyncListId = user.SmallListerSyncListName = null;
+            await _userAccountRepository.UpdateAsync(user);
+
+            return Redirect("~/shoppinglist?tab=smp-shoplist-sync");
         }
 
         private async Task ExportToSmlAsync(UserAccount user, string listId)
@@ -308,6 +329,8 @@ namespace SmallMealPlan.Web.Controllers
             user.SmallListerSyncListId = listId;
             user.SmallListerSyncListName = list.Name;
             await _userAccountRepository.UpdateAsync(user);
+
+            // TODO: do a sync now
         }
     }
 }
