@@ -8,13 +8,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using SmallMealPlan.Data;
 using SmallMealPlan.RememberTheMilk;
@@ -43,6 +41,7 @@ namespace SmallMealPlan.Web
             services.AddSingleton<IConfiguration>(Configuration);
 
             services
+                .ConfigureApplicationCookie(c => c.Cookie.Name = "smallmealplan")
                 .AddAuthentication(o =>
                 {
                     o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -51,6 +50,7 @@ namespace SmallMealPlan.Web
                 {
                     o.LoginPath = "/signin";
                     o.LogoutPath = "/signout";
+                    o.Cookie.Name = "smallmealplan";
                     o.Cookie.HttpOnly = true;
                     o.Cookie.MaxAge = TimeSpan.FromDays(1);
                     o.ExpireTimeSpan = TimeSpan.FromDays(1);
@@ -60,7 +60,7 @@ namespace SmallMealPlan.Web
                 {
                     options.ClientId = "smallmealplan";
                     options.ClientSecret = "a00b51b9-28f4-417e-8a7f-940e91a998ee";
-                    
+
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.SaveTokens = true;
                     options.ResponseType = OpenIdConnectResponseType.Code;
@@ -91,6 +91,7 @@ namespace SmallMealPlan.Web
                 logging.SetMinimumLevel(LogLevel.Trace);
             });
 
+            services.Configure<SmallMealPlanConfig>(Configuration);
             services.Configure<CookiePolicyOptions>(o =>
             {
                 o.CheckConsentNeeded = context => false;
@@ -122,7 +123,7 @@ namespace SmallMealPlan.Web
             services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(5));
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();

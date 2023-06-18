@@ -146,14 +146,24 @@
     <hr />
     <p>
     @if (Model.HasSmallListerToken) {
+    @if (Model.HasSmallListerSyncList) {
+    <p>
+    <div>Currently syncing with list: @Model.SmallListerSyncListName</div>
+    <form name="sml-sync" method="post" action="/shoppinglist/sml/unsync" data-confirm="Are you sure you want to stop syncing with this list?">
+    @Html.AntiForgeryToken()
+    <button type="submit">Stop syncing with this list</button>
+    </form>
+    </p>
+    }
     <div>
-    Import or export from one of your Small:Lister lists:
+    Sync, import or export from one of your Small:Lister lists:
     <form name="sml" method="post" action="/shoppinglist/sml">
     @Html.AntiForgeryToken()
     <select name="list">
     </select>
     <button name="load" type="button">Load your Small:Lister lists</button>
     <br/>
+    <button name="sync" value="true" type="submit">Sync with this List</button>
     <button name="import" value="true" type="submit">Import from List</button>
     <button name="export" value="true" type="submit">Export to List</button>
     <label for="deleteafterexport-smalllister" title="Mark all items as bought after exporting"><input type="checkbox" id="deleteafterexport-smalllister" name="deleteafterexport" value="true" /> Delete after export</label>

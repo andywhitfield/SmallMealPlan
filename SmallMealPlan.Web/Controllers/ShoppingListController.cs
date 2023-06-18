@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
 using SmallMealPlan.RememberTheMilk;
@@ -22,13 +23,15 @@ namespace SmallMealPlan.Web.Controllers
         private readonly IMealRepository _mealRepository;
         private readonly IRtmClient _rtmClient;
         private readonly ISmallListerClient _smlClient;
+        private readonly IOptions<SmallMealPlanConfig> _options;
 
         public ShoppingListController(ILogger<ShoppingListController> logger,
             IUserAccountRepository userAccountRepository,
             IShoppingListRepository shoppingListRepository,
             IMealRepository mealRepository,
             IRtmClient rtmClient,
-            ISmallListerClient smlClient)
+            ISmallListerClient smlClient,
+            IOptions<SmallMealPlanConfig> options)
         {
             _logger = logger;
             _userAccountRepository = userAccountRepository;
@@ -36,6 +39,7 @@ namespace SmallMealPlan.Web.Controllers
             _mealRepository = mealRepository;
             _rtmClient = rtmClient;
             _smlClient = smlClient;
+            _options = options;
         }
 
         public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber)
@@ -72,7 +76,8 @@ namespace SmallMealPlan.Web.Controllers
                 }),
                 BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),
                 HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken),
-                HasSmallListerToken = !string.IsNullOrEmpty(user.SmallListerToken)
+                HasSmallListerToken = !string.IsNullOrEmpty(user.SmallListerToken),
+                SmallListerSyncListName = string.IsNullOrEmpty(user.SmallListerSyncListId) ? null : user.SmallListerSyncListName
             });
         }
 
@@ -249,6 +254,8 @@ namespace SmallMealPlan.Web.Controllers
             }
             else if (requestModel.Import ?? false)
                 await ImportFromSmlAsync(user, requestModel.List);
+            else if (requestModel.Sync ?? false)
+                await SyncWithSmlListAsync(user, requestModel.List);
             else
                 return BadRequest();
 
@@ -289,6 +296,18 @@ namespace SmallMealPlan.Web.Controllers
                 _logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
                 await _shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
             }
+        }
+
+        private async Task SyncWithSmlListAsync(UserAccount user, string listId)
+        {
+            var list = await _smlClient.GetListAsync(user.SmallListerToken, listId);
+            if (list == null)
+                return;
+
+            await _smlClient.RegisterWebhookAsync(user.SmallListerToken, _options.Value.WebhookBaseUri, user.UserAccountId.ToString());
+            user.SmallListerSyncListId = listId;
+            user.SmallListerSyncListName = list.Name;
+            await _userAccountRepository.UpdateAsync(user);
         }
     }
 }

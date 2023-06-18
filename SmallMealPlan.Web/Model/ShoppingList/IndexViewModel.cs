@@ -16,5 +16,7 @@ namespace SmallMealPlan.Web.Model.ShoppingList
         public Pagination BoughtListPagination { get; set; }
         public bool HasRtmToken { get; set; }
         public bool HasSmallListerToken { get; set; }
+        public bool HasSmallListerSyncList => !string.IsNullOrEmpty(SmallListerSyncListName);
+        public string SmallListerSyncListName { get; set; }
     }
 }

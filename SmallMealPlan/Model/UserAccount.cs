@@ -18,5 +18,7 @@ namespace SmallMealPlan.Model
         public string RememberTheMilkLastListId { get; set; }
         public string SmallListerToken { get; set; }
         public string SmallListerLastListId { get; set; }
+        public string SmallListerSyncListId { get; set; }
+        public string SmallListerSyncListName { get; set; }
     }
 }

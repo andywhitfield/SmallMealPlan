@@ -14,7 +14,7 @@ public class SmallListerWebhookApiController : ControllerBase
 
     public SmallListerWebhookApiController(ILogger<SmallListerWebhookApiController> logger) => _logger = logger;
 
-    [HttpPost("~/api/webhook/(userid)/smalllister/list")]
+    [HttpPost("~/api/webhook/{userid}/smalllister/list")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult HandleListChange(int userid, ListChange request)
     {
@@ -22,7 +22,7 @@ public class SmallListerWebhookApiController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("~/api/webhook/(userid)/smalllister/listitem")]
+    [HttpPost("~/api/webhook/{userid}/smalllister/listitem")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult HandleListItemChange(int userid, ListItemChange request)
     {
