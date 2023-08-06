@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
+using SmallMealPlan.Model;
 using SmallMealPlan.SmallLister;
 using SmallMealPlan.SmallLister.Webhook;
 
@@ -86,31 +87,33 @@ public class SmallListerWebhookApiController : ControllerBase
         }
 
         if (request.Any(itemChange => itemChange.ListId == user.SmallListerSyncListId))
-        {
-            var smlList = await _smlClient.GetListAsync(user.SmallListerToken, user.SmallListerSyncListId);
-            if (smlList == null)
-            {
-                _logger.LogWarning($"Could not get list from small:lister {user.SmallListerSyncListId}");
-                // TODO: should we do anything here? perhaps we should return a BadRequest / InternalServerError?
-                // Maybe need to turn off the sync with this list id...perhaps it's gone (although that should raise a list change event webhook)
-                return Ok();
-            }
-
-            var currentList = await _shoppingListRepository.GetActiveItemsAsync(user);
-            foreach (var itemToAddToShoppingList in smlList.Items.Select(i => i.Description).Except(currentList.Select(i => i.Ingredient.Description), StringComparer.InvariantCultureIgnoreCase))
-            {
-                _logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
-                await _shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
-            }
-
-            _logger.LogTrace("Removing items from shopping list not in small:lister list");
-            await _shoppingListRepository.MarkAsBoughtAsync(user, currentList.ExceptBy(smlList.Items.Select(i => i.Description), sli => sli.Ingredient.Description, StringComparer.InvariantCultureIgnoreCase));
-        }
+            await SyncWithSmallListerAsync(_logger, _smlClient, _shoppingListRepository, user);
         else
-        {
             _logger.LogInformation($"No changes to items in the sync list ({user.SmallListerSyncListId}): [{string.Join(',', request.Select(r => $"{r.ListId}:{r.ListItemId}:{r.Event}"))}]");
-        }
 
         return Ok();
+    }
+
+    public static async Task SyncWithSmallListerAsync(ILogger logger, ISmallListerClient smlClient,
+        IShoppingListRepository shoppingListRepository, UserAccount user)
+    {
+        var smlList = await smlClient.GetListAsync(user.SmallListerToken, user.SmallListerSyncListId);
+        if (smlList == null)
+        {
+            logger.LogWarning($"Could not get list from small:lister {user.SmallListerSyncListId}");
+            // TODO: should we do anything here? perhaps we should return a BadRequest / InternalServerError?
+            // Maybe need to turn off the sync with this list id...perhaps it's gone (although that should raise a list change event webhook)
+            return;
+        }
+
+        var currentList = await shoppingListRepository.GetActiveItemsAsync(user);
+        foreach (var itemToAddToShoppingList in smlList.Items.Select(i => i.Description).Except(currentList.Select(i => i.Ingredient.Description), StringComparer.InvariantCultureIgnoreCase))
+        {
+            logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
+            await shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
+        }
+
+        logger.LogTrace("Removing items from shopping list not in small:lister list");
+        await shoppingListRepository.MarkAsBoughtAsync(user, currentList.ExceptBy(smlList.Items.Select(i => i.Description), sli => sli.Ingredient.Description, StringComparer.InvariantCultureIgnoreCase));
     }
 }

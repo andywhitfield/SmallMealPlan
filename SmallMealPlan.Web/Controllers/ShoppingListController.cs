@@ -330,7 +330,7 @@ namespace SmallMealPlan.Web.Controllers
             user.SmallListerSyncListName = list.Name;
             await _userAccountRepository.UpdateAsync(user);
 
-            // TODO: do a sync now
+            await SmallListerWebhookApiController.SyncWithSmallListerAsync(_logger, _smlClient, _shoppingListRepository, user);
         }
     }
 }
