@@ -34,6 +34,9 @@ namespace SmallMealPlan.Data
             return _context.UserAccounts.FirstOrDefaultAsync(ua => ua.AuthenticationUri == authenticationUri && ua.DeletedDateTime == null);
         }
 
+        public Task<UserAccount> GetUserAccountAsync(int userAccountId) =>
+            _context.UserAccounts.FirstOrDefaultAsync(ua => ua.UserAccountId == userAccountId && ua.DeletedDateTime == null);
+
         public Task UpdateAsync(UserAccount user)
         {
             user.LastUpdateDateTime = DateTime.UtcNow;

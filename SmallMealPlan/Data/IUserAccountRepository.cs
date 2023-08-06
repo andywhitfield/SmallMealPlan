@@ -7,6 +7,7 @@ namespace SmallMealPlan.Data
     public interface IUserAccountRepository
     {
         Task CreateNewUserAsync(ClaimsPrincipal user);
+        Task<UserAccount> GetUserAccountAsync(int userAccountId);
         Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user);
         Task<UserAccount> GetUserAccountOrNullAsync(ClaimsPrincipal user);
         Task UpdateAsync(UserAccount user);
