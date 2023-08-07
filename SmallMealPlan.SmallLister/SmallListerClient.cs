@@ -39,6 +39,13 @@ namespace SmallMealPlan.SmallLister
                 ListId = listId,
                 Description = itemToAddToList
             });
+        
+        public Task DeleteItemAsync(string refreshToken, string listId, string itemToAddToList) =>
+            CallApiAsync(refreshToken, HttpMethod.Delete, "/api/v1/item", new SmallListerItem
+            {
+                ListId = listId,
+                Description = itemToAddToList
+            });
 
         public async Task<IEnumerable<SmallListerList>> GetListsAsync(string refreshToken)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -88,7 +89,8 @@ namespace SmallMealPlan.Web.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
             var user = await _userAccountRepository.GetUserAccountAsync(User);
-            await _shoppingListRepository.AddNewIngredientAsync(user, addModel.Description?.Trim());
+            var shoppingListItem = await _shoppingListRepository.AddNewIngredientAsync(user, addModel.Description?.Trim());
+            await SyncWithSmallListerAsync(user, Enumerable.Repeat(shoppingListItem, 1), added: true);
             return Redirect("~/shoppinglist");
         }
 
@@ -101,7 +103,8 @@ namespace SmallMealPlan.Web.Controllers
 
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             _logger.LogTrace($"Adding ingredients [{string.Join(',', addModel.IngredientId)}] from planner");
-            await _shoppingListRepository.AddIngredientsAsync(user, addModel.IngredientId);
+            var shoppingListItems = await _shoppingListRepository.AddIngredientsAsync(user, addModel.IngredientId);
+            await SyncWithSmallListerAsync(user, shoppingListItems, added: true);
             return Redirect("~/shoppinglist");
         }
 
@@ -110,7 +113,8 @@ namespace SmallMealPlan.Web.Controllers
         {
             var user = await _userAccountRepository.GetUserAccountAsync(User);
             _logger.LogTrace($"Adding ingredient {ingredientId} from planner");
-            await _shoppingListRepository.AddIngredientsAsync(user, ingredientId);
+            var shoppingListItems = await _shoppingListRepository.AddIngredientsAsync(user, ingredientId);
+            await SyncWithSmallListerAsync(user, shoppingListItems, added: true);
             return Redirect("~/shoppinglist");
         }
 
@@ -126,11 +130,12 @@ namespace SmallMealPlan.Web.Controllers
             var activeShoppingList = await _shoppingListRepository.GetActiveItemsAsync(user);
             var shoppingListItems = activeShoppingList.Select(mi => mi.Ingredient.Description).ToHashSet();
 
-            await _shoppingListRepository.AddIngredientsAsync(
-                user, meal
+            var newShoppingListItems = await _shoppingListRepository.AddIngredientsAsync(user,
+                meal
                     .Ingredients
                     .Where(i => !shoppingListItems.Contains(i.Ingredient.Description, StringComparer.InvariantCultureIgnoreCase))
                     .Select(li => li.Ingredient.IngredientId).ToArray());
+            await SyncWithSmallListerAsync(user, newShoppingListItems, added: true);
             return Redirect("~/shoppinglist");
         }
 
@@ -142,7 +147,10 @@ namespace SmallMealPlan.Web.Controllers
             if (shoppingListItem.User != user)
                 return BadRequest();
             if (shoppingListItem.BoughtDateTime != null)
+            {
                 await _shoppingListRepository.MarkAsActiveAsync(user, shoppingListItem);
+                await SyncWithSmallListerAsync(user, Enumerable.Repeat(shoppingListItem, 1), added: true);
+            }
             return Redirect("~/shoppinglist");
         }
 
@@ -154,7 +162,8 @@ namespace SmallMealPlan.Web.Controllers
             var shoppingListItem = await _shoppingListRepository.GetAsync(shoppingListItemId);
             if (shoppingListItem.User != user)
                 return BadRequest();
-            await _shoppingListRepository.MarkAsBoughtAsync(user, new[] { shoppingListItem });
+            await _shoppingListRepository.MarkAsBoughtAsync(user, Enumerable.Repeat(shoppingListItem, 1));
+            await SyncWithSmallListerAsync(user, Enumerable.Repeat(shoppingListItem, 1), added: false);
             return Redirect("~/shoppinglist");
         }
 
@@ -167,6 +176,7 @@ namespace SmallMealPlan.Web.Controllers
             if (shoppingListItems.Any(sli => sli.User != user))
                 return BadRequest();
             await _shoppingListRepository.MarkAsBoughtAsync(user, shoppingListItems);
+            await SyncWithSmallListerAsync(user, shoppingListItems, added: false);
             return Redirect("~/shoppinglist");
         }
 
@@ -179,6 +189,7 @@ namespace SmallMealPlan.Web.Controllers
             if (shoppingListItem.User != user)
                 return BadRequest();
             await _shoppingListRepository.DeleteAsync(user, shoppingListItem);
+            await SyncWithSmallListerAsync(user, Enumerable.Repeat(shoppingListItem, 1), added: false);
             return Redirect("~/shoppinglist");
         }
 
@@ -319,6 +330,26 @@ namespace SmallMealPlan.Web.Controllers
             }
         }
 
+        private async Task SyncWithSmallListerAsync(UserAccount user, IEnumerable<ShoppingListItem> shoppingListItems, bool added)
+        {
+            if (!string.IsNullOrEmpty(user.SmallListerSyncListId))
+            {
+                foreach (var shoppingListItem in shoppingListItems)
+                {
+                    if (added)
+                    {
+                        _logger.LogInformation($"Added item {shoppingListItem.Ingredient.Description} to shopping list, syncing with small:lister");
+                        await _smlClient.AddItemAsync(user.SmallListerToken, user.SmallListerSyncListId, shoppingListItem.Ingredient.Description);
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"Remove item {shoppingListItem.Ingredient.Description} from shopping list, syncing with small:lister");
+                        await _smlClient.DeleteItemAsync(user.SmallListerToken, user.SmallListerSyncListId, shoppingListItem.Ingredient.Description);
+                    }
+                }
+            }
+        }
+
         private async Task SyncWithSmlListAsync(UserAccount user, string listId)
         {
             var list = await _smlClient.GetListAsync(user.SmallListerToken, listId);
@@ -330,6 +361,10 @@ namespace SmallMealPlan.Web.Controllers
             user.SmallListerSyncListName = list.Name;
             await _userAccountRepository.UpdateAsync(user);
 
+            // TODO: not sure this is right, i.e. I think we should do a merge rather than a replace on initial sync
+            // that is, normally we'd just want to take whatever is on small:lister, but on initial sync, we want to
+            // update small:lister with what we have and update ourselves with whatever small:lister has
+            // Which, as it happens means we can remove this public static method I reckon
             await SmallListerWebhookApiController.SyncWithSmallListerAsync(_logger, _smlClient, _shoppingListRepository, user);
         }
     }
