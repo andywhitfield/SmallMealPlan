@@ -58,8 +58,8 @@ namespace SmallMealPlan.Web
                 })
                 .AddOpenIdConnect(options =>
                 {
-                    options.ClientId = "smallmealplan";
-                    options.ClientSecret = "a00b51b9-28f4-417e-8a7f-940e91a998ee";
+                    options.ClientId = Configuration.GetValue<string>("OpenId:ClientId");
+                    options.ClientSecret = Configuration.GetValue<string>("OpenId:ClientSecret");
 
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.SaveTokens = true;
