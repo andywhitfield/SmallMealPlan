@@ -24,6 +24,7 @@ public class ShoppingListController : Controller
     private readonly IMealRepository _mealRepository;
     private readonly IRtmClient _rtmClient;
     private readonly ISmallListerClient _smlClient;
+    private readonly ISmallListerSendQueue _smallListerSendQueue;
     private readonly IOptions<SmallMealPlanConfig> _options;
 
     public ShoppingListController(ILogger<ShoppingListController> logger,
@@ -32,6 +33,7 @@ public class ShoppingListController : Controller
         IMealRepository mealRepository,
         IRtmClient rtmClient,
         ISmallListerClient smlClient,
+        ISmallListerSendQueue smallListerSendQueue,
         IOptions<SmallMealPlanConfig> options)
     {
         _logger = logger;
@@ -40,6 +42,7 @@ public class ShoppingListController : Controller
         _mealRepository = mealRepository;
         _rtmClient = rtmClient;
         _smlClient = smlClient;
+        _smallListerSendQueue = smallListerSendQueue;
         _options = options;
     }
 
@@ -336,16 +339,8 @@ public class ShoppingListController : Controller
         {
             foreach (var shoppingListItem in shoppingListItems)
             {
-                if (added)
-                {
-                    _logger.LogInformation($"Added item {shoppingListItem.Ingredient.Description} to shopping list, syncing with small:lister");
-                    await _smlClient.AddItemAsync(user.SmallListerToken, user.SmallListerSyncListId, shoppingListItem.Ingredient.Description);
-                }
-                else
-                {
-                    _logger.LogInformation($"Remove item {shoppingListItem.Ingredient.Description} from shopping list, syncing with small:lister");
-                    await _smlClient.DeleteItemAsync(user.SmallListerToken, user.SmallListerSyncListId, shoppingListItem.Ingredient.Description);
-                }
+                _logger.LogInformation($"{(added ? "Added" : "Removed")} item {shoppingListItem.Ingredient.Description} {(added ? "to" : "from")} shopping list, queued sync with small:lister");
+                await _smallListerSendQueue.QueueItemAsync(added, user.SmallListerToken, user.SmallListerSyncListId, shoppingListItem.Ingredient.Description);
             }
         }
     }

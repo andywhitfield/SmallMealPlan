@@ -111,10 +111,12 @@ namespace SmallMealPlan.Web
                 .AddScoped<IShoppingListRepository, ShoppingListRepository>()
                 .AddScoped<INoteRepository, NoteRepository>()
                 .AddScoped<IDirectDbService, DirectDbService>()
-                .AddSingleton<RtmConfig>(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey"), Configuration.GetValue<string>("RememberTheMilk:SharedSecret")))
-                .AddScoped<IRtmClient, RtmClient>() // callback url: https://smallmealplan.nosuchblogger.com/rtm
-                .AddSingleton<SmallListerConfig>(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri"), Configuration.GetValue<string>("SmallLister:AppKey"), Configuration.GetValue<string>("SmallLister:AppSecret")))
-                .AddScoped<ISmallListerClient, SmallListerClient>();
+                .AddSingleton(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey"), Configuration.GetValue<string>("RememberTheMilk:SharedSecret")))
+                .AddScoped<IRtmClient, RtmClient>()
+                .AddSingleton(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri"), Configuration.GetValue<string>("SmallLister:AppKey"), Configuration.GetValue<string>("SmallLister:AppSecret")))
+                .AddScoped<ISmallListerClient, SmallListerClient>()
+                .AddSingleton<ISmallListerSendQueue, SmallListerSendQueue>()
+                .AddHostedService<SmallListerSendQueueHostedService>();
 
             services.AddMvc().AddSessionStateTempDataProvider();
             services.AddRazorPages();
