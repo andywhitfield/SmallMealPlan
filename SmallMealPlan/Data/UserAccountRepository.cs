@@ -21,7 +21,7 @@ namespace SmallMealPlan.Data
             return _context.SaveChangesAsync();
         }
 
-        private static string GetIdentifierFromPrincipal(ClaimsPrincipal user) => user?.FindFirstValue("sub");
+        private static string GetIdentifierFromPrincipal(ClaimsPrincipal user) => user?.FindFirstValue("name");
 
         public Task<UserAccount> GetUserAccountAsync(ClaimsPrincipal user) => GetUserAccountOrNullAsync(user) ?? throw new ArgumentException($"No UserAccount for the user: {user}");
 

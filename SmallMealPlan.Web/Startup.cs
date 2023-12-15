@@ -67,12 +67,8 @@ namespace SmallMealPlan.Web
                     options.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
                     options.Authority = "https://smallauth.nosuchblogger.com/";
                     options.Scope.Add("roles");
-
-                    options.SecurityTokenValidator = new JwtSecurityTokenHandler
-                    {
-                        InboundClaimTypeMap = new Dictionary<string, string>()
-                    };
-
+                    options.TokenHandler = new JwtSecurityTokenHandler { InboundClaimTypeMap = new Dictionary<string, string>() };
+                    options.UseSecurityTokenValidator = true;
                     options.TokenValidationParameters.NameClaimType = "name";
                     options.TokenValidationParameters.RoleClaimType = "role";
 
@@ -98,10 +94,11 @@ namespace SmallMealPlan.Web
                 o.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<SqliteDataContext>((serviceProvider, options) => {
+            services.AddDbContext<SqliteDataContext>((serviceProvider, options) =>
+            {
                 var sqliteConnectionString = Configuration.GetConnectionString("SmallMealPlan");
                 serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
-                options.UseSqlite(sqliteConnectionString);                
+                options.UseSqlite(sqliteConnectionString);
             });
             services.AddHttpClient(RtmClient.HttpClientName);
             services
