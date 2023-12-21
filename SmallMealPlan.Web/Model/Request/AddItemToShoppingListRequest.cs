@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SmallMealPlan.Web.Model.Request
+namespace SmallMealPlan.Web.Model.Request;
+
+public class AddItemToShoppingListRequest
 {
-    public class AddItemToShoppingListRequest
-    {
-        [Required]
-        public string Description { get; set; }
-    }
+    [Required]
+    public required string Description { get; set; }
 }

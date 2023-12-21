@@ -5,59 +5,45 @@ using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.RememberTheMilk;
 
-namespace SmallMealPlan.Web.Controllers
+namespace SmallMealPlan.Web.Controllers;
+
+[Authorize]
+public class RtmController(ILogger<RtmController> logger,
+    IUserAccountRepository userAccountRepository,
+    IRtmClient rtmClient,
+    RtmConfig rtmConfig) : Controller
 {
-    [Authorize]
-    public class RtmController : Controller
+    [HttpGet]
+    public async Task<IActionResult> Index([FromQuery] string? frob)
     {
-        private readonly ILogger<RtmController> _logger;
-        private readonly IUserAccountRepository _userAccountRepository;
-        private readonly IRtmClient _rtmClient;
-        private readonly RtmConfig _rtmConfig;
+        if (string.IsNullOrEmpty(frob))
+            return BadRequest();
 
-        public RtmController(ILogger<RtmController> logger,
-            IUserAccountRepository userAccountRepository,
-            IRtmClient rtmClient,
-            RtmConfig rtmConfig)
-        {
-            _logger = logger;
-            _userAccountRepository = userAccountRepository;
-            _rtmClient = rtmClient;
-            _rtmConfig = rtmConfig;
-        }
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        var tokenResponse = await rtmClient.GetTokenAsync(frob);
+        user.RememberTheMilkToken = tokenResponse.Token;
+        await userAccountRepository.UpdateAsync(user);
+        logger.LogInformation($"Updating user {user.UserAccountId} with token: {tokenResponse.Token}");
+        return Redirect("~/shoppinglist");
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] string frob)
-        {
-            if (string.IsNullOrEmpty(frob))
-                return BadRequest();
+    [HttpGet("~/rtm/link")]
+    public IActionResult Link()
+    {
+        var rtmAuthUri = RtmAuthenticationHelper.BuildAuthenticationUri(rtmConfig, RtmPermission.Write);
+        logger.LogTrace($"Redirecting to RTM: {rtmAuthUri}");
+        return Redirect(rtmAuthUri.ToString());
+    }
 
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            var tokenResponse = await _rtmClient.GetTokenAsync(frob);
-            user.RememberTheMilkToken = tokenResponse.Token;
-            await _userAccountRepository.UpdateAsync(user);
-            _logger.LogInformation($"Updating user {user.UserAccountId} with token: {tokenResponse.Token}");
-            return Redirect("~/shoppinglist");
-        }
-
-        [HttpGet("~/rtm/link")]
-        public IActionResult Link()
-        {
-            var rtmAuthUri = RtmAuthenticationHelper.BuildAuthenticationUri(_rtmConfig, RtmPermission.Write);
-            _logger.LogTrace($"Redirecting to RTM: {rtmAuthUri}");
-            return Redirect(rtmAuthUri.ToString());
-        }
-
-        [HttpPost("~/rtm/unlink")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Unlink()
-        {
-            var user = await _userAccountRepository.GetUserAccountAsync(User);
-            user.RememberTheMilkToken = null;
-            user.RememberTheMilkLastListId = null;
-            await _userAccountRepository.UpdateAsync(user);
-            _logger.LogInformation($"Clearing RTM token from user {user.UserAccountId}");
-            return Redirect("~/shoppinglist");
-        }
+    [HttpPost("~/rtm/unlink")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Unlink()
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        user.RememberTheMilkToken = null;
+        user.RememberTheMilkLastListId = null;
+        await userAccountRepository.UpdateAsync(user);
+        logger.LogInformation($"Clearing RTM token from user {user.UserAccountId}");
+        return Redirect("~/shoppinglist");
     }
 }

@@ -28,7 +28,7 @@ public class HomeController(ILogger<HomeController> logger,
     [HttpGet("~/")]
     [HttpGet("~/planner")]
     [HttpGet("~/planner/{date}")]
-    public async Task<IActionResult> Index(string date)
+    public async Task<IActionResult> Index(string? date)
     {
         var monday = date.ParseDateOrToday();
         if (monday.DayOfWeek != DayOfWeek.Monday)
@@ -74,7 +74,7 @@ public class HomeController(ILogger<HomeController> logger,
 
     [Authorize]
     [HttpGet("~/planner/{date}/add")]
-    public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber, [FromQuery] string sort, [FromQuery] string filter)
+    public async Task<IActionResult> Planner(string date, [FromQuery] int? pageNumber, [FromQuery] string? sort, [FromQuery] string? filter)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
         List<Meal> meals;
