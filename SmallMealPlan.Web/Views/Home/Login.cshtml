@@ -1,11 +1,12 @@
 ﻿@model SmallMealPlan.Web.Model.Home.LoginViewModel
 
 <h1>Login</h1>
-
 <form action="/signin" method="post">
     <p>
-        Sign in using SmallAuth:
-        <button type="submit">Login</button>
+        <label for="email">Email address:</label>
+        <input type="email" id="email" name="email" />
+        <button type="submit">Next...</button>
     </p>
+    <input type="hidden" name="returnurl" value="@Model.ReturnUrl" />
     @Html.AntiForgeryToken()
 </form>

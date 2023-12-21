@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <NoWarn>CA2254</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

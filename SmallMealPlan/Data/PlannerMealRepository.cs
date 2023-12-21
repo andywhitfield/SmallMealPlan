@@ -7,193 +7,183 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Model;
 
-namespace SmallMealPlan.Data
+namespace SmallMealPlan.Data;
+
+public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMealRepository> logger) : IPlannerMealRepository
 {
-    public class PlannerMealRepository : IPlannerMealRepository
+    public Task<PlannerMeal> GetAsync(int plannerMealId) =>
+         context.PlannerMeals
+            .Include(pm => pm.Meal)
+            .ThenInclude(m => m.Ingredients)
+            .ThenInclude(mi => mi.Ingredient)
+            .Where(pm => pm.PlannerMealId == plannerMealId)
+            .SingleAsync();
+
+    public async Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal)
     {
-        private readonly SqliteDataContext _context;
-        private readonly ILogger<PlannerMealRepository> _logger;
+        if (user == null) throw new ArgumentNullException(nameof(user));
+        if (meal == null) throw new ArgumentNullException(nameof(user));
+        if (meal.User != user) throw new SecurityException($"User {user.UserAccountId} does not own meal {meal.MealId}, cannot add.");
 
-        public PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMealRepository> logger)
+        var currentMealsOnDate = await context.PlannerMeals
+            .Where(pm => pm.User == user)
+            .Where(pm => pm.Date == date.Date)
+            .Where(pm => pm.DeletedDateTime == null)
+            .CountAsync();
+
+        context.PlannerMeals.Add(new PlannerMeal
         {
-            _context = context;
-            _logger = logger;
-        }
+            Date = date.Date,
+            Meal = meal,
+            User = user,
+            SortOrder = currentMealsOnDate
+        });
+        await context.SaveChangesAsync();
+    }
 
-        public Task<PlannerMeal> GetAsync(int plannerMealId) =>
-             _context.PlannerMeals
-                .Include(pm => pm.Meal)
-                .ThenInclude(m => m.Ingredients)
-                .ThenInclude(mi => mi.Ingredient)
-                .Where(pm => pm.PlannerMealId == plannerMealId)
-                .SingleAsync();
+    public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+    {
+        if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public async Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal)
+        var currentMealsOnDate = await context.PlannerMeals
+            .Where(pm => pm.User == user)
+            .Where(pm => pm.Date == date.Date)
+            .Where(pm => pm.DeletedDateTime == null)
+            .CountAsync();
+
+        context.PlannerMeals.Add(new PlannerMeal
         {
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (meal == null) throw new ArgumentNullException(nameof(user));
-            if (meal.User != user) throw new SecurityException($"User {user.UserAccountId} does not own meal {meal.MealId}, cannot add.");
-
-            var currentMealsOnDate = await _context.PlannerMeals
-                .Where(pm => pm.User == user)
-                .Where(pm => pm.Date == date.Date)
-                .Where(pm => pm.DeletedDateTime == null)
-                .CountAsync();
-
-            _context.PlannerMeals.Add(new PlannerMeal
+            Date = date.Date,
+            Meal = new Meal
             {
-                Date = date.Date,
-                Meal = meal,
+                Description = description,
+                Notes = notes,
                 User = user,
-                SortOrder = currentMealsOnDate
-            });
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string notes)
-        {
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            var currentMealsOnDate = await _context.PlannerMeals
-                .Where(pm => pm.User == user)
-                .Where(pm => pm.Date == date.Date)
-                .Where(pm => pm.DeletedDateTime == null)
-                .CountAsync();
-
-            _context.PlannerMeals.Add(new PlannerMeal
-            {
-                Date = date.Date,
-                Meal = new Meal
+                Ingredients = ingredients.Select((i, idx) => new MealIngredient
                 {
-                    Description = description,
-                    Notes = notes,
-                    User = user,
-                    Ingredients = ingredients.Select((i, idx) => new MealIngredient
-                    {
-                        Ingredient = new Ingredient { Description = i, CreatedBy = user },
-                        SortOrder = idx
-                    }).ToList()
-                },
-                User = user,
-                SortOrder = currentMealsOnDate
-            });
-            await _context.SaveChangesAsync();
+                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    SortOrder = idx
+                }).ToList()
+            },
+            User = user,
+            SortOrder = currentMealsOnDate
+        });
+        await context.SaveChangesAsync();
+    }
+
+    public Task<List<PlannerMeal>> GetPlannerMealsAsync(UserAccount user, DateTime fromDateInclusive, DateTime toDateExclusive) =>
+        context.PlannerMeals
+            .Include(pm => pm.Meal)
+            .ThenInclude(m => m.Ingredients)
+            .ThenInclude(mi => mi.Ingredient)
+            .Where(pm => pm.User == user)
+            .Where(pm => pm.Date >= fromDateInclusive)
+            .Where(pm => pm.Date < toDateExclusive)
+            .Where(pm => pm.DeletedDateTime == null)
+            .OrderBy(pm => pm.Date)
+            .ThenBy(pm => pm.SortOrder)
+            .ToListAsync();
+
+    public async Task DeleteMealFromPlannerAsync(UserAccount user, int mealPlannerId)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+
+        var plannerMeal = await context.PlannerMeals.FindAsync(mealPlannerId);
+        if (plannerMeal == null)
+            return;
+
+        if (plannerMeal.User.UserAccountId != user.UserAccountId)
+            throw new SecurityException($"Cannot delete planner meal id: {plannerMeal.PlannerMealId}");
+
+        logger.LogDebug($"Deleting planner meal id: {plannerMeal.PlannerMealId}");
+        plannerMeal.DeletedDateTime = DateTime.UtcNow;
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(UserAccount user, int mealPlannerId, DateTime date, int? sortOrderPreviousPlannerMealId)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+
+        var plannerMeal = await context.PlannerMeals.FindAsync(mealPlannerId);
+        if (plannerMeal == null)
+            return;
+
+        if (plannerMeal.User.UserAccountId != user.UserAccountId)
+            throw new SecurityException($"Cannot update planner meal id: {plannerMeal.PlannerMealId}");
+
+        logger.LogDebug($"Update planner meal id: {plannerMeal.PlannerMealId} to be on date {date} and after {sortOrderPreviousPlannerMealId}");
+
+        var mealsOnDate = context.PlannerMeals
+            .Where(pm => pm.User == user)
+            .Where(pm => pm.Date == date.Date)
+            .Where(pm => pm.DeletedDateTime == null)
+            .OrderBy(pm => pm.SortOrder)
+            .AsAsyncEnumerable();
+
+        int? sortOrder = null;
+        PlannerMeal lastMealOnDate = null;
+        if (!sortOrderPreviousPlannerMealId.HasValue)
+        {
+            sortOrder = 0;
+            plannerMeal.SortOrder = sortOrder.Value;
+            sortOrder++;
         }
 
-        public Task<List<PlannerMeal>> GetPlannerMealsAsync(UserAccount user, DateTime fromDateInclusive, DateTime toDateExclusive) =>
-            _context.PlannerMeals
-                .Include(pm => pm.Meal)
-                .ThenInclude(m => m.Ingredients)
-                .ThenInclude(mi => mi.Ingredient)
-                .Where(pm => pm.User == user)
-                .Where(pm => pm.Date >= fromDateInclusive)
-                .Where(pm => pm.Date < toDateExclusive)
-                .Where(pm => pm.DeletedDateTime == null)
-                .OrderBy(pm => pm.Date)
-                .ThenBy(pm => pm.SortOrder)
-                .ToListAsync();
-
-        public async Task DeleteMealFromPlannerAsync(UserAccount user, int mealPlannerId)
+        await foreach (var mealOnDate in mealsOnDate)
         {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
+            if (mealOnDate.PlannerMealId == plannerMeal.PlannerMealId)
+                continue;
 
-            var plannerMeal = await _context.PlannerMeals.FindAsync(mealPlannerId);
-            if (plannerMeal == null)
-                return;
-
-            if (plannerMeal.User.UserAccountId != user.UserAccountId)
-                throw new SecurityException($"Cannot delete planner meal id: {plannerMeal.PlannerMealId}");
-
-            _logger.LogDebug($"Deleting planner meal id: {plannerMeal.PlannerMealId}");
-            plannerMeal.DeletedDateTime = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(UserAccount user, int mealPlannerId, DateTime date, int? sortOrderPreviousPlannerMealId)
-        {
-            if (user == null)
-                throw new ArgumentNullException(nameof(user));
-
-            var plannerMeal = await _context.PlannerMeals.FindAsync(mealPlannerId);
-            if (plannerMeal == null)
-                return;
-
-            if (plannerMeal.User.UserAccountId != user.UserAccountId)
-                throw new SecurityException($"Cannot update planner meal id: {plannerMeal.PlannerMealId}");
-
-            _logger.LogDebug($"Update planner meal id: {plannerMeal.PlannerMealId} to be on date {date} and after {sortOrderPreviousPlannerMealId}");
-
-            var mealsOnDate = _context.PlannerMeals
-                .Where(pm => pm.User == user)
-                .Where(pm => pm.Date == date.Date)
-                .Where(pm => pm.DeletedDateTime == null)
-                .OrderBy(pm => pm.SortOrder)
-                .AsAsyncEnumerable();
-
-            int? sortOrder = null;
-            PlannerMeal lastMealOnDate = null;
-            if (!sortOrderPreviousPlannerMealId.HasValue)
+            if (sortOrderPreviousPlannerMealId == mealOnDate.PlannerMealId)
             {
-                sortOrder = 0;
+                sortOrder = mealOnDate.SortOrder + 1;
                 plannerMeal.SortOrder = sortOrder.Value;
                 sortOrder++;
             }
-
-            await foreach (var mealOnDate in mealsOnDate)
+            else if (sortOrder.HasValue)
             {
-                if (mealOnDate.PlannerMealId == plannerMeal.PlannerMealId)
-                    continue;
-
-                if (sortOrderPreviousPlannerMealId == mealOnDate.PlannerMealId)
-                {
-                    sortOrder = mealOnDate.SortOrder + 1;
-                    plannerMeal.SortOrder = sortOrder.Value;
-                    sortOrder++;
-                }
-                else if (sortOrder.HasValue)
-                {
-                    mealOnDate.SortOrder = sortOrder.Value;
-                    sortOrder++;
-                }
-
-                lastMealOnDate = mealOnDate;
+                mealOnDate.SortOrder = sortOrder.Value;
+                sortOrder++;
             }
 
-            plannerMeal.Date = date.Date;
-            plannerMeal.LastUpdateDateTime = DateTime.UtcNow;
-            if (!sortOrder.HasValue)
-                plannerMeal.SortOrder = lastMealOnDate?.SortOrder ?? 0;
-
-            await _context.SaveChangesAsync();
+            lastMealOnDate = mealOnDate;
         }
 
-        public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+        plannerMeal.Date = date.Date;
+        plannerMeal.LastUpdateDateTime = DateTime.UtcNow;
+        if (!sortOrder.HasValue)
+            plannerMeal.SortOrder = lastMealOnDate?.SortOrder ?? 0;
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+    {
+        if (user == null) throw new ArgumentNullException(nameof(user));
+
+        var plannerMeal = await GetAsync(plannerMealId);
+        plannerMeal.Meal.LastUpdateDateTime = DateTime.UtcNow;
+        plannerMeal.Meal.Description = description;
+        plannerMeal.Meal.Notes = notes;
+
+        if (
+            plannerMeal.Meal.Ingredients?.Count != ingredients.Count() ||
+            !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
         {
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            var plannerMeal = await GetAsync(plannerMealId);
-            plannerMeal.Meal.LastUpdateDateTime = DateTime.UtcNow;
-            plannerMeal.Meal.Description = description;
-            plannerMeal.Meal.Notes = notes;
-
-            if (
-                plannerMeal.Meal.Ingredients?.Count != ingredients.Count() ||
-                !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
+            // for now, just delete the MealIngredient and create a a new set
+            if (plannerMeal.Meal.Ingredients?.Any() ?? false)
+                context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
+            if (ingredients.Any())
             {
-                // for now, just delete the MealIngredient and create a a new set
-                if (plannerMeal.Meal.Ingredients?.Any() ?? false)
-                    _context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
-                if (ingredients.Any())
+                plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
                 {
-                    plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
-                    {
-                        Ingredient = new Ingredient { Description = i, CreatedBy = user },
-                        SortOrder = idx
-                    }).ToList();
-                }
+                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    SortOrder = idx
+                }).ToList();
             }
-            await _context.SaveChangesAsync();
         }
+        await context.SaveChangesAsync();
     }
 }

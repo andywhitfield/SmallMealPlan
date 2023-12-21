@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Http;
 
-namespace SmallMealPlan.Web.Model.Home
+namespace SmallMealPlan.Web.Model.Home;
+
+public class LoginViewModel(HttpContext context, string? returnUrl) : BaseViewModel(context)
 {
-    public class LoginViewModel : BaseViewModel
-    {
-        public LoginViewModel(HttpContext context) : base(context) { }
-    }
+    public string? ReturnUrl { get; } = returnUrl;
 }
