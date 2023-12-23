@@ -1,6 +1,10 @@
 ﻿@model SmallMealPlan.Web.Model.Home.LoginVerifyViewModel
 
+@if (Model.IsReturningUser) {
 <h1>Login</h1>
+} else {
+<h1>Register</h1>
+}
 
 <form action="/signin/verify" method="post" id="signinVerifyForm">
     @if (Model.IsReturningUser) {
