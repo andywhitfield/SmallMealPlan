@@ -1,7 +1,6 @@
-namespace SmallMealPlan.RememberTheMilk.Contracts
+namespace SmallMealPlan.RememberTheMilk.Contracts;
+
+public class RtmListsGetListResponse : RtmRsp
 {
-    public class RtmListsGetListResponse : RtmRsp
-    {
-        public RtmLists Lists { get; set; }
-    }
+    public RtmLists? Lists { get; set; }
 }

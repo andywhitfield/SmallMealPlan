@@ -1,9 +1,8 @@
-namespace SmallMealPlan.RememberTheMilk.Contracts
+namespace SmallMealPlan.RememberTheMilk.Contracts;
+
+public class RtmUser
 {
-    public class RtmUser
-    {
-        public string Id { get; set; }
-        public string Username { get; set; }
-        public string Fullname { get; set; }
-    }
+    public string? Id { get; set; }
+    public string? Username { get; set; }
+    public string? Fullname { get; set; }
 }

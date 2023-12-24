@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 
-namespace SmallMealPlan.RememberTheMilk.Contracts
+namespace SmallMealPlan.RememberTheMilk.Contracts;
+
+public class RtmTasksList
 {
-    public class RtmTasksList
-    {
-        public string Id { get; set; }
-        public IEnumerable<RtmTaskSeries> TaskSeries { get; set; } = new List<RtmTaskSeries>();
-    }
+    public string? Id { get; set; }
+    public IEnumerable<RtmTaskSeries> TaskSeries { get; set; } = new List<RtmTaskSeries>();
 }

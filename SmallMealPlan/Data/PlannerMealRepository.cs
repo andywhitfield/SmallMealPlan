@@ -123,7 +123,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
             .AsAsyncEnumerable();
 
         int? sortOrder = null;
-        PlannerMeal lastMealOnDate = null;
+        PlannerMeal? lastMealOnDate = null;
         if (!sortOrderPreviousPlannerMealId.HasValue)
         {
             sortOrder = 0;

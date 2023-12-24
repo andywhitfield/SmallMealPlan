@@ -1,7 +1,6 @@
-namespace SmallMealPlan.RememberTheMilk.Contracts
+namespace SmallMealPlan.RememberTheMilk.Contracts;
+
+public class RtmTimelinesCreateResponse : RtmRsp
 {
-    public class RtmTimelinesCreateResponse : RtmRsp
-    {
-        public string Timeline { get; set; }
-    }
+    public string? Timeline { get; set; }
 }
