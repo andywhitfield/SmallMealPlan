@@ -1,13 +1,12 @@
 using System;
 
-namespace SmallMealPlan.SmallLister
+namespace SmallMealPlan.SmallLister;
+
+public class SmallListerItem
 {
-    public class SmallListerItem
-    {
-        public string ListId { get; set; }
-        public string ItemId { get; set; }
-        public string Description { get; set; }
-        public DateTime? DueDate { get; set; }
-        public string Notes { get; set; }
-    }
+    public string? ListId { get; set; }
+    public string? ItemId { get; set; }
+    public string? Description { get; set; }
+    public DateTime? DueDate { get; set; }
+    public string? Notes { get; set; }
 }
