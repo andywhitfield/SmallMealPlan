@@ -4,5 +4,5 @@ namespace SmallMealPlan.Web;
 
 public class SmallMealPlanConfig
 {
-    public Uri WebhookBaseUri { get; set; }
+    public Uri? WebhookBaseUri { get; set; }
 }

@@ -1,11 +1,11 @@
 ﻿@model SmallMealPlan.Web.Model.Home.IndexViewModel
 
 <p>
-    <button data-href="/planner/@(Model.PreviousWeekStart.ToString("yyyyMMdd"))" type="button"><img src="/images/up.png" height="18" width="18" />@Model.PreviousWeek</button>
+    <button data-href="/planner/@(Model.PreviousWeekStart?.ToString("yyyyMMdd"))" type="button"><img src="/images/up.png" height="18" width="18" />@Model.PreviousWeek</button>
 </p>
 <ul class="smp-planner-list">
-    @foreach (var day in Model.Days) {
-    <li class="smp-planner-list">
+    @foreach (var day in (Model.Days ?? Enumerable.Empty<SmallMealPlan.Web.Model.Home.PlannerDayViewModel>())) {
+        <li class="smp-planner-list">
         <div class="@Model.AppendCss(day.Day == DateTime.Today, "smp-planner-list-day", "smp-planner-list-day-selected")">@day.Day.ToString("dddd")<br/>@day.Day.ToString("dd") @day.Day.ToString("MMM")</div>
         <ul class="smp-planner-list-meal" data-day="@day.Day.ToString("yyyyMMdd")">
             <button data-href="/planner/@(day.Day.ToString("yyyyMMdd"))/add" type="button">Add</button>
@@ -19,7 +19,7 @@
                         @if (meal.HasIngredients) {
                         <div>Ingredients:</div>
                         <ul>
-                            @foreach (var ingredient in meal.Ingredients) {
+                            @foreach (var ingredient in (meal.Ingredients ?? Enumerable.Empty<string>())) {
                             <li>@ingredient</li>
                             }
                         </ul>
@@ -41,5 +41,5 @@
     }
 </ul>
 <p>
-    <button type="button" data-href="/planner/@(Model.NextWeekStart.ToString("yyyyMMdd"))"><img src="/images/down.png" height="16" width="16" />@Model.NextWeek</button>
+    <button type="button" data-href="/planner/@(Model.NextWeekStart?.ToString("yyyyMMdd"))"><img src="/images/down.png" height="16" width="16" />@Model.NextWeek</button>
 </p>

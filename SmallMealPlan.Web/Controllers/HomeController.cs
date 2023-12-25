@@ -22,7 +22,8 @@ public class HomeController(ILogger<HomeController> logger,
     IUserAccountRepository userAccountRepository,
     IPlannerMealRepository plannerMealRepository,
     IMealRepository mealRepository,
-    IAuthorisationHandler authorisationHandler) : Controller
+    IAuthorisationHandler authorisationHandler)
+    : Controller
 {
     [Authorize]
     [HttpGet("~/")]
@@ -120,7 +121,7 @@ public class HomeController(ILogger<HomeController> logger,
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes);
+        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? Array.Empty<string>(), addModel.Notes);
         return Redirect($"~/planner/{date}");
     }
 

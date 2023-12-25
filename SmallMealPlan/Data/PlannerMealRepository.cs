@@ -41,7 +41,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
         await context.SaveChangesAsync();
     }
 
-    public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+    public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string? notes)
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
 
@@ -159,7 +159,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string notes)
+    public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string? notes)
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
 

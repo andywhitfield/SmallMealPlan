@@ -55,7 +55,7 @@ public class Startup
 
         services
             .AddDataProtection()
-            .SetApplicationName(typeof(Startup).Namespace)
+            .SetApplicationName(typeof(Startup).Namespace ?? "")
             .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Environment.ContentRootPath, ".keys")));
 
         services.AddLogging(logging =>
@@ -87,9 +87,9 @@ public class Startup
             .AddScoped<INoteRepository, NoteRepository>()
             .AddScoped<IDirectDbService, DirectDbService>()
             .AddScoped<IAuthorisationHandler, AuthorisationHandler>()
-            .AddSingleton(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey"), Configuration.GetValue<string>("RememberTheMilk:SharedSecret")))
+            .AddSingleton(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey") ?? "", Configuration.GetValue<string>("RememberTheMilk:SharedSecret") ?? ""))
             .AddScoped<IRtmClient, RtmClient>()
-            .AddSingleton(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri"), Configuration.GetValue<string>("SmallLister:AppKey"), Configuration.GetValue<string>("SmallLister:AppSecret")))
+            .AddSingleton(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri") ?? throw new InvalidOperationException("Missing SmallLister:BaseUri config"), Configuration.GetValue<string>("SmallLister:AppKey") ?? "", Configuration.GetValue<string>("SmallLister:AppSecret") ?? ""))
             .AddScoped<ISmallListerClient, SmallListerClient>()
             .AddSingleton<ISmallListerSendQueue, SmallListerSendQueue>()
             .AddHostedService<SmallListerSendQueueHostedService>();

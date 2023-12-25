@@ -13,7 +13,8 @@ namespace SmallMealPlan.Web.Controllers;
 [Authorize]
 public class MealsController(
     IUserAccountRepository userAccountRepository,
-    IMealRepository mealRepository) : Controller
+    IMealRepository mealRepository)
+    : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] int? pageNumber, [FromQuery] string? sort, [FromQuery] string? filter)
@@ -49,7 +50,7 @@ public class MealsController(
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await mealRepository.AddNewMealAsync(user, addModel.Description?.Trim(), addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes?.Trim());
+        await mealRepository.AddNewMealAsync(user, addModel.Description.Trim(), addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes?.Trim());
         return Redirect("~/meals");
     }
 
@@ -87,9 +88,9 @@ public class MealsController(
         var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
 
         if (editModel.SaveAsNew ?? false)
-            await mealRepository.AddNewMealAsync(user, editModel.Description?.Trim(), ingredients, editModel.Notes?.Trim());
+            await mealRepository.AddNewMealAsync(user, editModel.Description.Trim(), ingredients, editModel.Notes?.Trim());
         else
-            await mealRepository.UpdateMealAsync(user, meal, editModel.Description?.Trim(), ingredients, editModel.Notes?.Trim());
+            await mealRepository.UpdateMealAsync(user, meal, editModel.Description.Trim(), ingredients, editModel.Notes?.Trim());
 
         return Redirect($"~/meals");
     }

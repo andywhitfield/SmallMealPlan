@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SmallMealPlan.Web.Model.Request
+namespace SmallMealPlan.Web.Model.Request;
+
+public class PlannerMealMoveRequest
 {
-    public class PlannerMealMoveRequest
-    {
-        [Required]
-        public string Date { get; set; }
-        public int? SortOrderPreviousPlannerMealId { get; set; }
-    }
+    [Required]
+    public required string Date { get; set; }
+    public int? SortOrderPreviousPlannerMealId { get; set; }
 }

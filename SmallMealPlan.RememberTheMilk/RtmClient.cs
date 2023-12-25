@@ -25,22 +25,22 @@ public class RtmClient(ILogger<RtmClient> logger, IHttpClientFactory httpClientF
         return tokenResponse.Auth;
     }
 
-    public async Task<RtmLists> GetListsAsync(string authToken)
+    public async Task<RtmLists> GetListsAsync(string? authToken)
     {
         var listResponse = await CallRtmMethodAsync<RtmListsGetListResponse>(new Dictionary<string, string?>{
             {"method", "rtm.lists.getList"},
-            {"auth_token", authToken}
+            {"auth_token", authToken ?? throw new ArgumentNullException(nameof(authToken))}
         });
         if (listResponse?.Lists == null)
             throw new ApplicationException($"Error getting lists from response: {listResponse?.InfoString}");
         return listResponse.Lists;
     }
 
-    public async Task<RtmTasks> GetTaskListsAsync(string authToken, string listId)
+    public async Task<RtmTasks> GetTaskListsAsync(string? authToken, string listId)
     {
         var taskListResponse = await CallRtmMethodAsync<RtmTasksGetListResponse>(new Dictionary<string, string?>{
             {"method", "rtm.tasks.getList"},
-            {"auth_token", authToken},
+            {"auth_token", authToken ?? throw new ArgumentNullException(nameof(authToken))},
             {"list_id", listId},
             {"filter", "status:incomplete"}
         });
@@ -49,11 +49,11 @@ public class RtmClient(ILogger<RtmClient> logger, IHttpClientFactory httpClientF
         return taskListResponse.Tasks;
     }
 
-    public async Task<RtmTasksList> AddTaskAsync(string authToken, string timeline, string listId, string itemToAddToList)
+    public async Task<RtmTasksList> AddTaskAsync(string? authToken, string timeline, string listId, string itemToAddToList)
     {
         var addResponse = await CallRtmMethodAsync<RtmTasksAddResponse>(new Dictionary<string, string?>{
             {"method", "rtm.tasks.add"},
-            {"auth_token", authToken},
+            {"auth_token", authToken ?? throw new ArgumentNullException(nameof(authToken))},
             {"timeline", timeline},
             {"list_id", listId},
             {"name", itemToAddToList}
@@ -63,11 +63,11 @@ public class RtmClient(ILogger<RtmClient> logger, IHttpClientFactory httpClientF
         return addResponse.List;
     }
 
-    public async Task<string> CreateTimelineAsync(string authToken)
+    public async Task<string> CreateTimelineAsync(string? authToken)
     {
         var timelineResponse = await CallRtmMethodAsync<RtmTimelinesCreateResponse>(new Dictionary<string, string?>{
             {"method", "rtm.timelines.create"},
-            {"auth_token", authToken}
+            {"auth_token", authToken ?? throw new ArgumentNullException(nameof(authToken))}
         });
         return timelineResponse?.Timeline ?? "";
     }

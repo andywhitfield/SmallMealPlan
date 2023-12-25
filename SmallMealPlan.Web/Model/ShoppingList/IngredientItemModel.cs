@@ -1,8 +1,7 @@
-namespace SmallMealPlan.Web.Model.ShoppingList
+namespace SmallMealPlan.Web.Model.ShoppingList;
+
+public class IngredientItemModel
 {
-    public class IngredientItemModel
-    {
-        public int IngredientId { get; set; }
-        public string Description { get; set; }
-    }
+    public int IngredientId { get; set; }
+    public string? Description { get; set; }
 }

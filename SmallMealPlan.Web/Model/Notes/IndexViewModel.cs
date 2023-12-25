@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Http;
 
-namespace SmallMealPlan.Web.Model.Notes
+namespace SmallMealPlan.Web.Model.Notes;
+
+public class IndexViewModel : BaseViewModel
 {
-    public class IndexViewModel : BaseViewModel
+    public IndexViewModel(HttpContext context) : base(context)
     {
-        public IndexViewModel(HttpContext context) : base(context)
-        {
-            SelectedArea = SmpArea.Notes;
-        }
-        
-        public string Notes { get; set; }
+        SelectedArea = SmpArea.Notes;
     }
+    
+    public string? Notes { get; set; }
 }

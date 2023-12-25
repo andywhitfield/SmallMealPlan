@@ -6,15 +6,15 @@
 </div>
 <div class="smp-planner-add-recent">
     Sort by
-    @if (Model.Pagination.SortedByName) {
-    <a href="/meals?pageNumber=@(Model.Pagination.PageNumber)&sort=@(SmallMealPlan.Pagination.SortByRecentlyUsed)&filter=@(Model.Pagination.Filter)">recently used</a>
+    @if (Model.Pagination?.SortedByName ?? false) {
+    <a href="/meals?pageNumber=@(Model.Pagination?.PageNumber)&sort=@(SmallMealPlan.Pagination.SortByRecentlyUsed)&filter=@(Model.Pagination?.Filter)">recently used</a>
     } else {
-    <a href="/meals?pageNumber=@(Model.Pagination.PageNumber)&sort=@(SmallMealPlan.Pagination.SortByName)&filter=@(Model.Pagination.Filter)">name</a>
+    <a href="/meals?pageNumber=@(Model.Pagination?.PageNumber)&sort=@(SmallMealPlan.Pagination.SortByName)&filter=@(Model.Pagination?.Filter)">name</a>
     }
     <form method="get" action="/meals">
-    <input type="text" name="filter" value="@(Model.Pagination.Filter)" /> <button type="submit" name="find">Find</button>
-    <input type="hidden" name="pageNumber" value="@(Model.Pagination.PageNumber)" />
-    <input type="hidden" name="sort" value="@(Model.Pagination.Sort)" />
+    <input type="text" name="filter" value="@(Model.Pagination?.Filter)" /> <button type="submit" name="find">Find</button>
+    <input type="hidden" name="pageNumber" value="@(Model.Pagination?.PageNumber)" />
+    <input type="hidden" name="sort" value="@(Model.Pagination?.Sort)" />
     </form>
     <ul class="smp-planner-list-meal">
         @foreach (var meal in Model.Meals) {
@@ -27,7 +27,7 @@
                     @if (meal.HasIngredients) {
                     <div>Ingredients:</div>
                     <ul>
-                        @foreach (var ingredient in meal.Ingredients) {
+                        @foreach (var ingredient in (meal.Ingredients ?? Enumerable.Empty<string>())) {
                         <li>@ingredient</li>
                         }
                     </ul>
@@ -45,7 +45,7 @@
         </li>
         }
     </ul>
-    @if (Model.Pagination.PageCount > 1) {
+    @if (Model.Pagination?.PageCount > 1) {
     <div class="pagination">
         @if (Model.Pagination.PageNumber > 1) {
         <a href="/meals?pageNumber=@(Model.Pagination.PageNumber - 1)&sort=@(Model.Pagination.Sort)&filter=@(Model.Pagination.Filter)">&laquo;</a>

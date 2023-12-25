@@ -94,7 +94,7 @@
         </li>
     </ul>
 
-    @if (Model.BoughtListPagination.PageCount > 1) {
+    @if (Model.BoughtListPagination?.PageCount > 1) {
     <div class="pagination">
         @if (Model.BoughtListPagination.PageNumber > 1) {
         <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber - 1)&tab=smp-shoplist-bought">&laquo;</a>
