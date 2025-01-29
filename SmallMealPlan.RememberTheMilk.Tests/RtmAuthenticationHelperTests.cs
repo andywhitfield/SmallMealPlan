@@ -1,11 +1,12 @@
 using FluentAssertions;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SmallMealPlan.RememberTheMilk.Tests
 {
+    [TestClass]
     public class RtmAuthenticationHelperTests
     {
-        [Fact]
+        [TestMethod]
         public void BuildAuthenticationUri()
         {
             var config = new RtmConfig("rtm-key", "rtm-secret");

@@ -5,15 +5,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
-using Xunit;
 
 namespace SmallMealPlan.RememberTheMilk.Tests;
 
+[TestClass]
 public class RtmClientTests
 {
-    [Fact]
+    [TestMethod]
     public async Task CreateFromFrob()
     {
         var expectedResponse = @"{
@@ -50,7 +51,7 @@ public class RtmClientTests
         tokenResponse.User?.Fullname.Should().Be("John Smith");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetLists()
     {
         var expectedResponse = @"{
@@ -114,7 +115,7 @@ public class RtmClientTests
         listsResponse.List?.ElementAt(1).Smart.Should().Be("0");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetTasks()
     {
         var expectedResponse = @"{
@@ -167,7 +168,7 @@ public class RtmClientTests
         tasksResponse.List.ElementAt(0).TaskSeries.ElementAt(1).Name.Should().Be("item 2");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task AddTask()
     {
         var expectedResponse = @"{
@@ -206,7 +207,7 @@ public class RtmClientTests
         addResponse.TaskSeries.ElementAt(0).Name.Should().Be("new item 3");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task CreateTimeline()
     {
         var expectedResponse = @"{

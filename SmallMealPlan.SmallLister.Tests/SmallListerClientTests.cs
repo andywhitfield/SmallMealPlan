@@ -7,15 +7,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Moq.Protected;
-using Xunit;
 
 namespace SmallMealPlan.SmallLister.Tests;
 
+[TestClass]
 public class SmallListerClientTests
 {
-    [Fact]
+    [TestMethod]
     public async Task GetLists()
     {
         var expectedListResponse = @"{
@@ -58,7 +59,7 @@ public class SmallListerClientTests
         listsResponse.ElementAt(1).Name.Should().Be("My List");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetList()
     {
         var expectedListResponse = @"{
@@ -116,7 +117,7 @@ public class SmallListerClientTests
         listResponse.Items?.ElementAt(1).Notes.Should().Be("notes 2");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RegisterForWebhooks()
     {
         List<HttpRequestMessage> webhookRequests = new();
