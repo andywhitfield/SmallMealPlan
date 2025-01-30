@@ -1,11 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <NoWarn>CA2254</NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.*"/>
