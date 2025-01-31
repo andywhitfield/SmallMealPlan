@@ -116,7 +116,7 @@ public class HomeController(ILogger<HomeController> logger,
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? Array.Empty<string>(), addModel.Notes, addModel.DateNotes);
+        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description.Trim(), addModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? Array.Empty<string>(), addModel.Notes?.Trim(), addModel.DateNotes?.Trim());
         return Redirect($"~/planner/{date}");
     }
 
@@ -166,16 +166,16 @@ public class HomeController(ILogger<HomeController> logger,
         if (plannerMeal.User != user)
             return BadRequest();
 
-        var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
+        var ingredients = editModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
 
         if (editModel.SaveAsNew ?? false)
         {
             await plannerMealRepository.DeleteMealFromPlannerAsync(user, plannerMealId);
-            await plannerMealRepository.AddNewMealToPlannerAsync(user, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes, editModel.DateNotes);
+            await plannerMealRepository.AddNewMealToPlannerAsync(user, plannerMeal.Date, editModel.Description.Trim(), ingredients, editModel.Notes?.Trim(), editModel.DateNotes?.Trim());
         }
         else
         {
-            await plannerMealRepository.UpdateMealPlannerAsync(user, plannerMealId, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes, editModel.DateNotes);
+            await plannerMealRepository.UpdateMealPlannerAsync(user, plannerMealId, plannerMeal.Date, editModel.Description.Trim(), ingredients, editModel.Notes?.Trim(), editModel.DateNotes?.Trim());
         }
 
         return Redirect($"~/planner/{date}");

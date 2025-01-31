@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmallMealPlan.Data;
@@ -50,7 +47,7 @@ public class MealsController(
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await mealRepository.AddNewMealAsync(user, addModel.Description.Trim(), addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes?.Trim());
+        await mealRepository.AddNewMealAsync(user, addModel.Description.Trim(), addModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes?.Trim());
         return Redirect("~/meals");
     }
 
@@ -85,7 +82,7 @@ public class MealsController(
         if (meal.User != user)
             return BadRequest();
 
-        var ingredients = editModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
+        var ingredients = editModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
 
         if (editModel.SaveAsNew ?? false)
             await mealRepository.AddNewMealAsync(user, editModel.Description.Trim(), ingredients, editModel.Notes?.Trim());
