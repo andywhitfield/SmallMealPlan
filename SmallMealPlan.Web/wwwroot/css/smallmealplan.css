@@ -206,6 +206,7 @@ div.smp-planner-list-meal-details ul>li {
 
 div.smp-planner-list-meal-details>:first-child,
 div.smp-planner-list-meal-details>:nth-child(3),
+div.smp-planner-list-meal-details>:nth-child(5),
 div.smp-planner-add-new>div {
     font-style: oblique;
     font-size: 11pt;

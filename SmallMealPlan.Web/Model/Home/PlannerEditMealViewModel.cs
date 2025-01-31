@@ -1,6 +1,3 @@
-using System;
-using Microsoft.AspNetCore.Http;
-
 namespace SmallMealPlan.Web.Model.Home;
 
 public class PlannerEditMealViewModel : BaseViewModel
@@ -17,4 +14,5 @@ public class PlannerEditMealViewModel : BaseViewModel
     public string? Name { get; set; }
     public string? Ingredients { get; set; }
     public string? Notes { get; set; }
+    public string? DateNotes { get; set; }
 }

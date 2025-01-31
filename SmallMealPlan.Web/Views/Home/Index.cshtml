@@ -12,7 +12,7 @@
             @foreach (var meal in day.Meals) {
             <li class="smp-planner-list-meal" data-meal="@meal.Id">
                 <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
-                <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" title="Show/Hide ingredients and notes" />}</div>
+                <div>@if (meal.HasIngredients || meal.HasNotes || meal.HasDateNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" title="Show/Hide ingredients and notes" />}</div>
                 <div>
                     <div>@meal.Name</div>
                     <div class="smp-planner-list-meal-details">
@@ -27,6 +27,10 @@
                         @if (meal.HasNotes) {
                         <div>Notes:</div>
                         <div class="smp-meal-notes">@meal.Notes</div>
+                        }
+                        @if (meal.HasDateNotes) {
+                        <div>Notes for @day.Day.ToString("dddd dd MMMM yyyy"):</div>
+                        <div class="smp-meal-notes">@meal.DateNotes</div>
                         }
                     </div>
                 </div>

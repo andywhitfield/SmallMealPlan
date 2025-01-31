@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallMealPlan.SmallLister",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallMealPlan.SmallLister.Tests", "SmallMealPlan.SmallLister.Tests\SmallMealPlan.SmallLister.Tests.csproj", "{9266E22F-3551-4555-80FF-9FD5A4A75D53}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallMealPlan.Web.Tests", "SmallMealPlan.Web.Tests\SmallMealPlan.Web.Tests.csproj", "{415875AE-77D3-4D84-A161-DA4DDA34F355}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -114,5 +116,17 @@ Global
 		{9266E22F-3551-4555-80FF-9FD5A4A75D53}.Release|x64.Build.0 = Release|Any CPU
 		{9266E22F-3551-4555-80FF-9FD5A4A75D53}.Release|x86.ActiveCfg = Release|Any CPU
 		{9266E22F-3551-4555-80FF-9FD5A4A75D53}.Release|x86.Build.0 = Release|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Debug|x64.Build.0 = Debug|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Debug|x86.Build.0 = Debug|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Release|x64.ActiveCfg = Release|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Release|x64.Build.0 = Release|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Release|x86.ActiveCfg = Release|Any CPU
+		{415875AE-77D3-4D84-A161-DA4DDA34F355}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

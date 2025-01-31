@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Model;
@@ -41,7 +37,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
         await context.SaveChangesAsync();
     }
 
-    public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string? notes)
+    public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string? notes, string? dateNotes)
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
 
@@ -65,6 +61,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
                     SortOrder = idx
                 }).ToList()
             },
+            Notes = dateNotes,
             User = user,
             SortOrder = currentMealsOnDate
         });
@@ -159,7 +156,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string? notes)
+    public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string? notes, string? dateNotes)
     {
         if (user == null) throw new ArgumentNullException(nameof(user));
 
@@ -167,12 +164,13 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
         plannerMeal.Meal.LastUpdateDateTime = DateTime.UtcNow;
         plannerMeal.Meal.Description = description;
         plannerMeal.Meal.Notes = notes;
+        plannerMeal.Notes = dateNotes;
 
         if (
             plannerMeal.Meal.Ingredients?.Count != ingredients.Count() ||
             !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
         {
-            // for now, just delete the MealIngredient and create a a new set
+            // for now, just delete the MealIngredient and create a new set
             if (plannerMeal.Meal.Ingredients?.Any() ?? false)
                 context.MealIngredients.RemoveRange(plannerMeal.Meal.Ingredients);
             if (ingredients.Any())

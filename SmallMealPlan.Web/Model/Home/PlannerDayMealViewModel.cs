@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-
 namespace SmallMealPlan.Web.Model.Home;
 
 public class PlannerDayMealViewModel(int id)
@@ -14,4 +11,6 @@ public class PlannerDayMealViewModel(int id)
 
     public bool HasNotes => !string.IsNullOrWhiteSpace(Notes);
     public string? Notes { get; set; }
+    public bool HasDateNotes => !string.IsNullOrWhiteSpace(DateNotes);
+    public string? DateNotes { get; set; }
 }

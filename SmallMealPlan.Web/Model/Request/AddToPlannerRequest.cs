@@ -8,4 +8,5 @@ public class AddToPlannerRequest
     public required string Description { get; set; }
     public string? Ingredients { get; set; }
     public string? Notes { get; set; }
+    public string? DateNotes { get; set; }
 }

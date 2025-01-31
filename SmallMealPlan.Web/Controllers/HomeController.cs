@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
 using SmallMealPlan.Web.Authorisation;
@@ -59,6 +53,7 @@ public class HomeController(ILogger<HomeController> logger,
             {
                 Name = plannerMeal.Meal.Description,
                 Notes = plannerMeal.Meal.Notes,
+                DateNotes = plannerMeal.Notes,
                 Ingredients = plannerMeal.Meal.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description) ?? Enumerable.Empty<string>()
             });
         }
@@ -121,7 +116,7 @@ public class HomeController(ILogger<HomeController> logger,
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? Array.Empty<string>(), addModel.Notes);
+        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description, addModel.Ingredients?.Split('\n').Where(i => !string.IsNullOrWhiteSpace(i)) ?? Array.Empty<string>(), addModel.Notes, addModel.DateNotes);
         return Redirect($"~/planner/{date}");
     }
 
@@ -150,7 +145,8 @@ public class HomeController(ILogger<HomeController> logger,
         {
             Name = plannerMeal.Meal.Description,
             Ingredients = plannerMeal.Meal.Ingredients == null ? null : string.Join('\n', plannerMeal.Meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description)),
-            Notes = plannerMeal.Meal.Notes
+            Notes = plannerMeal.Meal.Notes,
+            DateNotes = plannerMeal.Notes
         });
     }
 
@@ -175,11 +171,11 @@ public class HomeController(ILogger<HomeController> logger,
         if (editModel.SaveAsNew ?? false)
         {
             await plannerMealRepository.DeleteMealFromPlannerAsync(user, plannerMealId);
-            await plannerMealRepository.AddNewMealToPlannerAsync(user, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes);
+            await plannerMealRepository.AddNewMealToPlannerAsync(user, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes, editModel.DateNotes);
         }
         else
         {
-            await plannerMealRepository.UpdateMealPlannerAsync(user, plannerMealId, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes);
+            await plannerMealRepository.UpdateMealPlannerAsync(user, plannerMealId, plannerMeal.Date, editModel.Description, ingredients, editModel.Notes, editModel.DateNotes);
         }
 
         return Redirect($"~/planner/{date}");

@@ -23,7 +23,7 @@
         @foreach (var meal in Model.Meals) {
         <li class="smp-planner-list-meal">
             <div></div>
-            <div>@if (meal.HasIngredients || meal.HasNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
+            <div>@if (meal.HasIngredients || meal.HasNotes || meal.HasDateNotes) {<img src="/images/expand.png" class="smp-planner-list-meal-oc" height="18" width="18" />}</div>
             <div>
                 <div><a href="/planner/@(Model.Day.ToString("yyyyMMdd"))/add/@(meal.Id)">@meal.Name</a></div>
                 <div class="smp-planner-list-meal-details">
@@ -38,6 +38,10 @@
                     @if (meal.HasNotes) {
                     <div>Notes:</div>
                     <div class="smp-meal-notes">@meal.Notes</div>
+                    }
+                    @if (meal.HasDateNotes) {
+                    <div>Notes for @Model.Day.ToString("dddd dd MMMM yyyy"):</div>
+                    <div class="smp-meal-notes">@meal.DateNotes</div>
                     }
                 </div>
             </div>
@@ -77,6 +81,9 @@
     <div>Notes:</div>
     <textarea name="notes" class="smp-planner-add-new-notes" wrap="off"></textarea>
 
+    <div>Notes for @Model.Day.ToString("dddd dd MMMM yyyy"):</div>
+    <textarea name="datenotes" class="smp-planner-add-new-notes" wrap="off"></textarea>
+    
     <p><button type="submit" data-depends="input.smp-planner-add-new-description">Add</button></p>
     </form>
 </div>

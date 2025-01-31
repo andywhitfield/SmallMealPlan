@@ -1,0 +1,14 @@
+<Project Sdk="MSTest.Sdk/3.7.3">
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmallMealPlan.Web\SmallMealPlan.Web.csproj" />
+  </ItemGroup>
+</Project>
