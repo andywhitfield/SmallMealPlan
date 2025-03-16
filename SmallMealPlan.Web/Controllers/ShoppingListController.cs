@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
@@ -26,13 +21,15 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     IOptions<SmallMealPlanConfig> options)
     : Controller
 {
-    public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber)
+    public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber, [FromQuery] string? regularOrBought)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
         var activeShoppingList = await shoppingListRepository.GetActiveItemsAsync(user);
         var shoppingListItems = activeShoppingList.Select(mi => mi.Ingredient.Description).ToHashSet();
         var futureMealIngredients = await shoppingListRepository.GetFutureMealIngredientsFromPlannerAsync(user);
-        var (boughtItems, boughtItemsPage, boughtItemsPageCount) = await shoppingListRepository.GetBoughtItemsAsync(user, boughtItemsPageNumber ?? 1);
+        var (boughtItems, boughtItemsPage, boughtItemsPageCount) = await (regularOrBought == "bought"
+            ? shoppingListRepository.GetBoughtItemsAsync(user, boughtItemsPageNumber ?? 1)
+            : shoppingListRepository.GetRegularItemsAsync(user, boughtItemsPageNumber ?? 1));
         return View(new IndexViewModel(HttpContext)
         {
             MyList = activeShoppingList.Select(i => new ShoppingListItemModel
@@ -58,6 +55,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
                 ShoppingListItemId = i.ShoppingListItemId,
                 Description = i.Ingredient.Description
             }),
+            RegularOrBought = regularOrBought,
             BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),
             HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken),
             HasSmallListerToken = !string.IsNullOrEmpty(user.SmallListerToken),
@@ -85,7 +83,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
             return BadRequest();
 
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        logger.LogTrace($"Adding ingredients [{string.Join(',', addModel.IngredientId)}] from planner");
+        logger.LogTrace("Adding ingredients [{IngredientIds}] from planner", string.Join(',', addModel.IngredientId));
         var shoppingListItems = await shoppingListRepository.AddIngredientsAsync(user, addModel.IngredientId);
         await SyncWithSmallListerAsync(user, shoppingListItems, added: true);
         return Redirect("~/shoppinglist");
@@ -95,7 +93,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     public async Task<IActionResult> AddSingleIngredientFromPlanner([FromRoute] int ingredientId)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        logger.LogTrace($"Adding ingredient {ingredientId} from planner");
+        logger.LogTrace("Adding ingredient {IngredientId} from planner", ingredientId);
         var shoppingListItems = await shoppingListRepository.AddIngredientsAsync(user, ingredientId);
         await SyncWithSmallListerAsync(user, shoppingListItems, added: true);
         return Redirect("~/shoppinglist");
@@ -105,7 +103,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     public async Task<IActionResult> AddIngredientsForMeal([FromRoute] int mealId)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        logger.LogTrace($"Adding ingredients for meal {mealId}");
+        logger.LogTrace("Adding ingredients for meal {MmealId}", mealId);
         var meal = await mealRepository.GetAsync(mealId);
         if (meal.User != user)
             return BadRequest();
@@ -129,10 +127,11 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         var shoppingListItem = await shoppingListRepository.GetAsync(shoppingListItemId);
         if (shoppingListItem.User != user)
             return BadRequest();
+
         if (shoppingListItem.BoughtDateTime != null)
         {
-            await shoppingListRepository.MarkAsActiveAsync(user, shoppingListItem);
-            await SyncWithSmallListerAsync(user, Enumerable.Repeat(shoppingListItem, 1), added: true);
+            var newShoppingListItem = await shoppingListRepository.AddIngredientsAsync(user, shoppingListItem.IngredientId);
+            await SyncWithSmallListerAsync(user, newShoppingListItem, added: true);
         }
         return Redirect("~/shoppinglist");
     }
@@ -181,7 +180,8 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     public async Task<IActionResult> RememberTheMilk([FromForm] SyncRequest requestModel)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        logger.LogTrace($"Sync with RTM: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}");
+        logger.LogTrace("Sync with RTM: import={RequestModelImport}; export={RequestModelExport}; list={RequestModelList}",
+            requestModel.Import, requestModel.Export, requestModel.List);
 
         if (requestModel.Export ?? false)
         {
@@ -213,7 +213,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
         {
             var timeline = await timelineTask.Value;
-            logger.LogTrace($"Adding item [{itemToAddToList}] to RTM list [{listId}] using timeline [{timeline}]");
+            logger.LogTrace("Adding item [{ItemToAddToList}] to RTM list [{ListId}] using timeline [{Timeline}]", itemToAddToList, listId, timeline);
             await rtmClient.AddTaskAsync(user.RememberTheMilkToken, timeline, listId, itemToAddToList);
         }
     }
@@ -228,7 +228,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         var currentList = (await shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description.Trim());
         foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))
         {
-            logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
+            logger.LogTrace("Adding item [{ItemToAddToShoppingList}] to shopping list", itemToAddToShoppingList);
             await shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
         }
     }
@@ -238,7 +238,8 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     public async Task<IActionResult> SmallLister([FromForm] SyncRequest requestModel)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        logger.LogTrace($"Sync with SML: import={requestModel.Import}; export={requestModel.Export}; list={requestModel.List}; sync={requestModel.Sync}");
+        logger.LogTrace("Sync with SML: import={RequestModelImport}; export={RequestModelExport}; list={RequestModelList}; sync={RequestModelSync}",
+            requestModel.Import, requestModel.Export, requestModel.List, requestModel.Sync);
 
         if (requestModel.Export ?? false)
         {
@@ -286,14 +287,14 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         var list = await smlClient.GetListAsync(user.SmallListerToken, listId);
         if (list == null)
         {
-            logger.LogInformation($"could not get list {listId}");
+            logger.LogInformation("could not get list {ListId}", listId);
             return;
         }
 
         var existingItemsInList = (list.Items ?? Enumerable.Empty<SmallListerItem>()).Select(x => x.Description?.Trim() ?? "");
         foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList, StringComparer.OrdinalIgnoreCase))
         {
-            logger.LogTrace($"Adding item [{itemToAddToList}] to SmallLister list [{listId}]");
+            logger.LogTrace("Adding item [{ItemToAddToList}] to SmallLister list [{ListId}]", itemToAddToList, listId);
             await smlClient.AddItemAsync(user.SmallListerToken, listId, itemToAddToList);
         }
     }
@@ -308,7 +309,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         var currentList = (await shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description.Trim());
         foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))
         {
-            logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
+            logger.LogTrace("Adding item [{ItemToAddToShoppingList}] to shopping list", itemToAddToShoppingList);
             await shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
         }
     }
@@ -319,7 +320,8 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         {
             foreach (var shoppingListItem in shoppingListItems)
             {
-                logger.LogInformation($"{(added ? "Added" : "Removed")} item {shoppingListItem.Ingredient.Description} {(added ? "to" : "from")} shopping list, queued sync with small:lister");
+                logger.LogInformation("{Added} item {ShoppingListItemIngredientDescription} {ToFrom} shopping list, queued sync with small:lister",
+                    added ? "Added" : "Removed", shoppingListItem.Ingredient.Description, added ? "to" : "from");
                 await smallListerSendQueue.QueueItemAsync(added, user.SmallListerToken, user.SmallListerSyncListId, shoppingListItem.Ingredient.Description.Trim());
             }
         }
@@ -339,20 +341,20 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         var smlList = await smlClient.GetListAsync(user.SmallListerToken, listId);
         if (smlList == null)
         {
-            logger.LogWarning($"Could not get list from small:lister {listId}");
+            logger.LogWarning("Could not get list from small:lister {ListId}", listId);
             return;
         }
 
         var currentList = await shoppingListRepository.GetActiveItemsAsync(user);
         foreach (var itemToAddToShoppingList in (smlList.Items ?? Enumerable.Empty<SmallListerItem>()).Select(i => i.Description?.Trim() ?? "").Except(currentList.Select(i => i.Ingredient.Description.Trim()), StringComparer.InvariantCultureIgnoreCase))
         {
-            logger.LogTrace($"Adding item [{itemToAddToShoppingList}] to shopping list");
+            logger.LogTrace("Adding item [{ItemToAddToShoppingList}] to shopping list", itemToAddToShoppingList);
             await shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
         }
 
         foreach (var itemToAddToSmallListerList in currentList.ExceptBy((smlList.Items ?? Enumerable.Empty<SmallListerItem>()).Select(i => i.Description?.Trim() ?? ""), sli => sli.Ingredient.Description.Trim(), StringComparer.InvariantCultureIgnoreCase))
         {
-            logger.LogTrace($"Adding item [{itemToAddToSmallListerList.Ingredient.Description}] to small:lister list [{list.Name}]");
+            logger.LogTrace("Adding item [{ItemToAddToSmallListerListIngredientDescription}] to small:lister list [{ListName}]", itemToAddToSmallListerList.Ingredient.Description, list.Name);
             await smlClient.AddItemAsync(user.SmallListerToken, listId, itemToAddToSmallListerList.Ingredient.Description.Trim());
         }
     }

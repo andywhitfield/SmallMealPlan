@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Model;
@@ -28,7 +24,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .ToListAsync();
 
     public async Task<List<(Meal Meal, Ingredient Ingredient)>> GetFutureMealIngredientsFromPlannerAsync(UserAccount user) =>
-        (await context
+        [.. (await context
             .PlannerMeals
             .Include(pm => pm.Meal)
             .ThenInclude(m => m.Ingredients)
@@ -42,24 +38,51 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
         .SelectMany(pm => pm.Meal.Ingredients)
         .Where(mi => mi.DeletedDateTime == null && mi.Ingredient.DeletedDateTime == null)
         .Select(mi => (mi.Meal ?? throw new InvalidOperationException($"Could not get meal from {mi.MealIngredientId}"), mi.Ingredient))
-        .Distinct()
-        .ToList();
+        .Distinct()];
 
     public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber)
     {
         var total = await context.ShoppingListItems
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .CountAsync();
-        var pagination = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
-        logger.LogTrace($"Getting page index {pagination.PageIndex} of {pagination.PageCount} total pages, total items: {total}, requested page: {pageNumber}");
-        
+        var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
+        logger.LogTrace("Getting page index {PageIndex} of {PageCount} total pages, total items: {Total}, requested page: {PageNumber}", pageIndex, pageCount, total, pageNumber);
+
         return (await context.ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .OrderByDescending(s => s.BoughtDateTime)
-            .Skip(pagination.PageIndex * BoughtItemsPageSize)
+            .Skip(pageIndex * BoughtItemsPageSize)
             .Take(BoughtItemsPageSize)
-            .ToListAsync(), pagination.PageIndex + 1, pagination.PageCount);
+            .ToListAsync(), pageIndex + 1, pageCount);
+    }
+
+    public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetRegularItemsAsync(UserAccount user, int pageNumber)
+    {
+        var total = await context.ShoppingListItems
+            .Include(s => s.Ingredient)
+            .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
+            .Select(s => s.Ingredient.Description)
+            .Distinct()
+            .CountAsync();
+        var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
+        logger.LogTrace("Getting page index {PageIndex} of {PageCount} total pages, total items: {Total}, requested page: {PageNumber}", pageIndex, pageCount, total, pageNumber);
+
+        var incredientByCount = context.ShoppingListItems
+            .Include(s => s.Ingredient)
+            .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
+            .GroupBy(s => s.Ingredient.Description)
+            .Select(g => new { IngredientDescription = g.Key, Count = g.Count(), LatestShoppingListItemId = g.Max(i => i.ShoppingListItemId) });
+
+        return (await context.ShoppingListItems
+            .Include(s => s.Ingredient)
+            .Join(incredientByCount, s => s.ShoppingListItemId, g => g.LatestShoppingListItemId, (s, g) => new { ShoppingListItem = s, g.Count })
+            .OrderByDescending(s => s.Count)
+            .ThenByDescending(s => s.ShoppingListItem.BoughtDateTime)
+            .Select(s => s.ShoppingListItem)
+            .Skip(pageIndex * BoughtItemsPageSize)
+            .Take(BoughtItemsPageSize)
+            .ToListAsync(), pageIndex + 1, pageCount);
     }
 
     public async Task<ShoppingListItem> AddNewIngredientAsync(UserAccount user, string description)
@@ -137,17 +160,6 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
         shoppingListItem.DeletedDateTime = DateTime.UtcNow;
         return context.SaveChangesAsync();
-    }
-
-    public async Task MarkAsActiveAsync(UserAccount user, ShoppingListItem shoppingListItem)
-    {
-        if (shoppingListItem.User.UserAccountId != user.UserAccountId)
-            throw new SecurityException($"Cannot update shopping list item id: {shoppingListItem.ShoppingListItemId}");
-
-        shoppingListItem.LastUpdateDateTime = DateTime.UtcNow;
-        shoppingListItem.BoughtDateTime = null;
-        shoppingListItem.SortOrder = (await GetMaxSortOrder(user)) + 1;
-        await context.SaveChangesAsync();
     }
 
     public async Task ReorderAsync(UserAccount user, int shoppingListItemId, int? sortOrderPreviousShoppingListItemId)

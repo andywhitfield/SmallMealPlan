@@ -3,7 +3,7 @@
 <div class="smp-planner-add-header">
     <span class="selected" data-select=".smp-shoplist-current">My list</span>
     <span data-select=".smp-shoplist-add-from-planner">Add from planner</span>
-    <span data-select=".smp-shoplist-bought">Bought</span>
+    <span data-select=".smp-shoplist-bought">Regulars/Bought</span>
     <span data-select=".smp-shoplist-sync">Sync</span>
 </div>
 <div class="smp-shoplist-current">
@@ -34,7 +34,7 @@
     <div>
     <form method="post" action="/shoppinglist">
     @Html.AntiForgeryToken()
-    <input type="text" name="description" class="smp-planner-add-new-description" /> <button type="submit" data-depends="input.smp-planner-add-new-description">Add to my shopping list</button>
+    <input type="text" name="description" class="smp-planner-add-new-description" autofocus /> <button type="submit" data-depends="input.smp-planner-add-new-description">Add to my shopping list</button>
     </form>
     </div>
 
@@ -79,6 +79,15 @@
 </div>
 
 <div class="smp-shoplist-bought">
+    @if (!Model.BoughtList.Any()) {
+    <div>You haven't bought anything from your shopping list yet.</div>
+    <div>Your regular shopping list items will be listed here to easily add back onto your list.</div>
+    } else {
+    @if (Model.RegularOrBought == "bought") {
+    <button title="Show the list ordered by your regular shopping list items first" name="regularsBought" type="button" value="regulars">Show your regular shopping list items</button>
+    } else {
+    <button title="Show list by recently bought" name="regularsBought" type="button" value="bought">Show by recently bought</button>
+    }
     <ul class="smp-planner-list">
         <li class="smp-planner-list">
             <ul class="smp-planner-list-meal">
@@ -87,30 +96,31 @@
                     <div></div>
                     <div></div>
                     <div>@boughtListItem.Description</div>
-                    <div><button title="Add back onto my shopping list" data-href="/shoppinglist/add/@boughtListItem.ShoppingListItemId"><img src="/images/add.png" height="15" width="15" /> Add back onto list</button></div>
+                    <div><button title="Add onto my shopping list" data-href="/shoppinglist/add/@boughtListItem.ShoppingListItemId"><img src="/images/add.png" height="15" width="15" /> Add </button></div>
                 </li>
                 }
             </ul>
         </li>
     </ul>
+    }
 
     @if (Model.BoughtListPagination?.PageCount > 1) {
     <div class="pagination">
         @if (Model.BoughtListPagination.PageNumber > 1) {
-        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber - 1)&tab=smp-shoplist-bought">&laquo;</a>
+        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber - 1)&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought">&laquo;</a>
         }
         @foreach (var pg in Model.BoughtListPagination.Pages) {
         @if (pg.IsSelected) {
         <a class="pagination-active">@pg.PageNumber</a>
         } else {
-        <a href="/shoppinglist?boughtItemsPageNumber=@pg.PageNumber&tab=smp-shoplist-bought">@pg.PageNumber</a>
+        <a href="/shoppinglist?boughtItemsPageNumber=@pg.PageNumber&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought">@pg.PageNumber</a>
         }
         @if (pg.IsNextPageSkipped) {
         <span>&bull;&bull;</span>
         }
         }
         @if (Model.BoughtListPagination.PageNumber < Model.BoughtListPagination.PageCount) {
-        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber + 1)&tab=smp-shoplist-bought">&raquo;</a>
+        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber + 1)&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought">&raquo;</a>
         }
     </div>
     }
@@ -189,8 +199,6 @@
         let activeTab = urlParams.get('tab');
         if (activeTab != null) {
             $('div.smp-planner-add-header > span[data-select=".' + activeTab + '"]').click();
-        } else {
-            $('input[name="description"]').focus();
         }
 
         $('button[name="selectall"]').click(function() {
@@ -220,6 +228,10 @@
             let ingredientsForMeal = $('input[type="checkbox"][data-ingredientmealid="' + selectMealId + '"]');
             let checkedIngredients = $('input[type="checkbox"][data-ingredientmealid="' + selectMealId + '"]:checked');
             $('input[type="checkbox"][data-mealid="' + selectMealId + '"]').prop('checked', ingredientsForMeal.length == checkedIngredients.length);
+        });
+
+        $('button[name="regularsBought"]').click(function() {
+            window.location = "/shoppinglist?regularOrBought=" + $(this).val() + "&tab=smp-shoplist-bought";
         });
 
         let rtmLists = $('form[name="rtm"] select[name="list"]');
