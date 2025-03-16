@@ -12,12 +12,17 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
     public async Task<ShoppingListItem> GetAsync(int shoppingListItemId)
     {
-        var shoppingListItem = await context.ShoppingListItems.Include(s => s.Ingredient).Where(s => s.ShoppingListItemId == shoppingListItemId).SingleOrDefaultAsync();
+        var shoppingListItem = await context
+            .ShoppingListItems
+            .Include(s => s.Ingredient)
+            .Where(s => s.ShoppingListItemId == shoppingListItemId)
+            .SingleOrDefaultAsync();
         return shoppingListItem ?? throw new ArgumentException($"ShoppingListItemId {shoppingListItemId} not found", nameof(shoppingListItemId));
     }
 
     public Task<List<ShoppingListItem>> GetActiveItemsAsync(UserAccount user) =>
-        context.ShoppingListItems
+        context
+            .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime == null && s.DeletedDateTime == null)
             .OrderBy(s => s.SortOrder)
@@ -42,13 +47,15 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
     public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber)
     {
-        var total = await context.ShoppingListItems
+        var total = await context
+            .ShoppingListItems
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .CountAsync();
         var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
         logger.LogTrace("Getting page index {PageIndex} of {PageCount} total pages, total items: {Total}, requested page: {PageNumber}", pageIndex, pageCount, total, pageNumber);
 
-        return (await context.ShoppingListItems
+        return (await context
+            .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .OrderByDescending(s => s.BoughtDateTime)
@@ -59,7 +66,8 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
     public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetRegularItemsAsync(UserAccount user, int pageNumber)
     {
-        var total = await context.ShoppingListItems
+        var total = await context
+            .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .Select(s => s.Ingredient.Description)
@@ -68,13 +76,15 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
         var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
         logger.LogTrace("Getting page index {PageIndex} of {PageCount} total pages, total items: {Total}, requested page: {PageNumber}", pageIndex, pageCount, total, pageNumber);
 
-        var incredientByCount = context.ShoppingListItems
+        var incredientByCount = context
+            .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .GroupBy(s => s.Ingredient.Description)
             .Select(g => new { IngredientDescription = g.Key, Count = g.Count(), LatestShoppingListItemId = g.Max(i => i.ShoppingListItemId) });
 
-        return (await context.ShoppingListItems
+        return (await context
+            .ShoppingListItems
             .Include(s => s.Ingredient)
             .Join(incredientByCount, s => s.ShoppingListItemId, g => g.LatestShoppingListItemId, (s, g) => new { ShoppingListItem = s, g.Count })
             .OrderByDescending(s => s.Count)
@@ -87,15 +97,15 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
     public async Task<ShoppingListItem> AddNewIngredientAsync(UserAccount user, string description)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
-        if (description == null) throw new ArgumentNullException(nameof(description));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(description);
 
         var maxSortOrder = await GetMaxSortOrder(user);
         var item = await context.ShoppingListItems.AddAsync(new ShoppingListItem
         {
             User = user,
             CreatedDateTime = DateTime.UtcNow,
-            Ingredient = new Ingredient
+            Ingredient = new()
             {
                 CreatedBy = user,
                 CreatedDateTime = DateTime.UtcNow,
@@ -109,16 +119,17 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
     public async Task AddIngredientAsync(UserAccount user, int ingredientId)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
         await InternalAddIngredientAsync(user, ingredientId);
         await context.SaveChangesAsync();
     }
 
     public async Task<List<ShoppingListItem>> AddIngredientsAsync(UserAccount user, params int[] ingredientIds)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
-        List<ShoppingListItem> added = new();
-        if (ingredientIds == null) return added;
+        ArgumentNullException.ThrowIfNull(user);
+        List<ShoppingListItem> added = [];
+        if (ingredientIds == null)
+            return added;
         foreach (var ingredientId in ingredientIds)
             added.Add(await InternalAddIngredientAsync(user, ingredientId));
         await context.SaveChangesAsync();
@@ -164,8 +175,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
 
     public async Task ReorderAsync(UserAccount user, int shoppingListItemId, int? sortOrderPreviousShoppingListItemId)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
 
         var shoppingListItem = await context.ShoppingListItems.FindAsync(shoppingListItemId);
         if (shoppingListItem == null)
@@ -174,9 +184,10 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
         if (shoppingListItem.User.UserAccountId != user.UserAccountId)
             throw new SecurityException($"Cannot update shopping list item id: {shoppingListItem.ShoppingListItemId}");
 
-        logger.LogDebug($"Update shopping list item id: {shoppingListItem.ShoppingListItemId} to be after {sortOrderPreviousShoppingListItemId}");
+        logger.LogDebug("Update shopping list item id: {ShoppingListItemId} to be after {SortOrderPreviousShoppingListItemId}", shoppingListItem.ShoppingListItemId, sortOrderPreviousShoppingListItemId);
 
-        var shoppingListItems = context.ShoppingListItems
+        var shoppingListItems = context
+            .ShoppingListItems
             .Where(pm => pm.User == user)
             .Where(pm => pm.BoughtDateTime == null)
             .Where(pm => pm.DeletedDateTime == null)
@@ -220,5 +231,8 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
     }
 
     private async Task<int> GetMaxSortOrder(UserAccount user) =>
-        (await context.ShoppingListItems.Where(s => s.User == user && s.BoughtDateTime == null && s.DeletedDateTime == null).MaxAsync(s => (int?)s.SortOrder)) ?? -1;
+        (await context
+            .ShoppingListItems
+            .Where(s => s.User == user && s.BoughtDateTime == null && s.DeletedDateTime == null)
+            .MaxAsync(s => (int?)s.SortOrder)) ?? -1;
 }

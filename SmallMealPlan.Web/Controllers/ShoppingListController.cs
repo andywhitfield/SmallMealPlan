@@ -190,9 +190,13 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
                 await MarkAllAsBought();
         }
         else if (requestModel.Import ?? false)
+        {
             await ImportFromRtmAsync(user, requestModel.List);
+        }
         else
+        {
             return BadRequest();
+        }
 
         user.RememberTheMilkLastListId = requestModel.List;
         await userAccountRepository.UpdateAsync(user);
