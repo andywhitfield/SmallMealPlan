@@ -53,7 +53,8 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
             BoughtList = boughtItems.Select(i => new ShoppingListItemModel
             {
                 ShoppingListItemId = i.ShoppingListItemId,
-                Description = i.Ingredient.Description
+                Description = i.Ingredient.Description,
+                LastBought = i.BoughtDateTime
             }),
             RegularOrBought = regularOrBought,
             BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),

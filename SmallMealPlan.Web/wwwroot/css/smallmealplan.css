@@ -348,6 +348,11 @@ div.smp-shoplist-sync {
     padding: 5px;
 }
 
+div.smp-shoplist-bought-date {
+    font-size: 10pt;
+    font-style: oblique;
+}
+
 div.smp-shoplist-actions {
     display: flex;
     flex-direction: row;

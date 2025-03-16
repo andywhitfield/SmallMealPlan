@@ -4,4 +4,5 @@ public class ShoppingListItemModel
 {
     public int ShoppingListItemId { get; set; }
     public string? Description { get; set; }
+    public DateTime? LastBought { get; set; }
 }
