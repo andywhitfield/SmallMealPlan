@@ -53,7 +53,7 @@ public class WebApplicationFactoryTest : WebApplicationFactory<Startup>
         return client;
     }
 
-    private async Task CreateTestUserAsync()
+    public async Task CreateTestUserAsync()
     {
         if (_testUser != null)
             return;
