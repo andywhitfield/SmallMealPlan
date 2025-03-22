@@ -1,24 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
 
 namespace SmallMealPlan.Web.Authorisation;
 
-public class AuthorisationHandler(ILogger<AuthorisationHandler> logger, IConfiguration configuration,
+public class AuthorisationHandler(ILogger<AuthorisationHandler> logger,
     IUserAccountRepository userAccountRepository, IFido2 fido2)
     : IAuthorisationHandler
 {
@@ -34,13 +26,7 @@ public class AuthorisationHandler(ILogger<AuthorisationHandler> logger, IConfigu
                     .GetUserAccountCredentialsAsync(user)
                     .Select(uac => new PublicKeyCredentialDescriptor(uac.CredentialId))
                     .ToArrayAsync(cancellationToken: cancellationToken),
-                UserVerificationRequirement.Discouraged,
-                new AuthenticationExtensionsClientInputs()
-                {
-                    Extensions = true,
-                    UserVerificationMethod = true,
-                    AppID = configuration.GetValue<string>("FidoOrigins")
-                }
+                UserVerificationRequirement.Discouraged
             ).ToJson();
         }
         else
@@ -50,13 +36,7 @@ public class AuthorisationHandler(ILogger<AuthorisationHandler> logger, IConfigu
                 new Fido2User() { Id = Encoding.UTF8.GetBytes(email), Name = email, DisplayName = email },
                 [],
                 AuthenticatorSelection.Default,
-                AttestationConveyancePreference.None,
-                new()
-                {
-                    Extensions = true,
-                    UserVerificationMethod = true,
-                    AppID = configuration.GetValue<string>("FidoOrigins")
-                }
+                AttestationConveyancePreference.None
             ).ToJson();
         }
 
