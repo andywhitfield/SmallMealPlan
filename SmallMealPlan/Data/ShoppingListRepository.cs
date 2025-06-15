@@ -8,7 +8,7 @@ namespace SmallMealPlan.Data;
 public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingListRepository> logger)
     : IShoppingListRepository
 {
-    private const int BoughtItemsPageSize = 10;
+    private const int BoughtItemsPageSize = 20;
 
     public async Task<ShoppingListItem> GetAsync(int shoppingListItemId)
     {

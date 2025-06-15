@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SmallMealPlan.Model;
 
@@ -12,7 +8,7 @@ public class MealRepository(SqliteDataContext context,
     IDirectDbService directDbService)
     : IMealRepository
 {
-    private const int PageSize = 10;
+    private const int PageSize = 20;
 
     public async Task<Meal> GetAsync(int mealId)
     {
@@ -22,58 +18,56 @@ public class MealRepository(SqliteDataContext context,
 
     public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByMostRecentlyUsedAsync(UserAccount user, int pageNumber, string? filter)
     {
-        var mealIds = await directDbService.GetMealIdsByMostRecentlyUsedAsync(user, pageNumber, PageSize, filter);
+        var (mealIds, realPageNumber, pageCount) = await directDbService.GetMealIdsByMostRecentlyUsedAsync(user, pageNumber, PageSize, filter);
         return ((
             await context
                 .Meals
                 .Include(m => m.Ingredients)
                 .ThenInclude(mi => mi.Ingredient)
                 .Where(m => m.User == user)
-                .Where(m => mealIds.MealIds.Contains(m.MealId))
+                .Where(m => mealIds.Contains(m.MealId))
                 .ToListAsync())
-            .OrderBy(m => mealIds.MealIds.IndexOf(m.MealId))
-            .ToList(), mealIds.PageNumber, mealIds.PageCount);
+            .OrderBy(m => mealIds.IndexOf(m.MealId))
+            .ToList(), realPageNumber, pageCount);
     }
 
     public async Task<(List<Meal> Meals, int PageNumber, int PageCount)> GetMealsByNameAsync(UserAccount user, int pageNumber, string? filter)
     {
-        var mealIds = await directDbService.GetMealIdsByNameAsync(user, pageNumber, PageSize, filter);
+        var (mealIds, realPageNumber, pageCount) = await directDbService.GetMealIdsByNameAsync(user, pageNumber, PageSize, filter);
         return ((
             await context
                 .Meals
                 .Include(m => m.Ingredients)
                 .ThenInclude(mi => mi.Ingredient)
                 .Where(m => m.User == user)
-                .Where(m => mealIds.MealIds.Contains(m.MealId))
+                .Where(m => mealIds.Contains(m.MealId))
                 .ToListAsync())
-            .OrderBy(m => mealIds.MealIds.IndexOf(m.MealId))
-            .ToList(), mealIds.PageNumber, mealIds.PageCount);
+            .OrderBy(m => mealIds.IndexOf(m.MealId))
+            .ToList(), realPageNumber, pageCount);
     }
 
     public async Task AddNewMealAsync(UserAccount user, string description, IEnumerable<string> ingredients, string? notes)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user);
 
         context.Meals.Add(new Meal
         {
             Description = description,
             Notes = notes,
             User = user,
-            Ingredients = ingredients.Select((i, idx) => new MealIngredient
+            Ingredients = [.. ingredients.Select((i, idx) => new MealIngredient
             {
                 Ingredient = new Ingredient { Description = i, CreatedBy = user },
                 SortOrder = idx
-            }).ToList()
+            })]
         });
         await context.SaveChangesAsync();
     }
 
     public async Task UpdateMealAsync(UserAccount user, Meal meal, string description, IEnumerable<string> ingredients, string? notes)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user));
-        if (meal == null)
-            throw new ArgumentNullException(nameof(meal));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(meal);
 
         if (meal.User.UserAccountId != user.UserAccountId)
             throw new SecurityException($"Cannot update meal id: {meal.MealId}");
@@ -87,15 +81,15 @@ public class MealRepository(SqliteDataContext context,
             !meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
         {
             // for now, just delete the MealIngredient and create a a new set
-            if (meal.Ingredients?.Any() ?? false)
+            if (meal.Ingredients?.Count > 0)
                 context.MealIngredients.RemoveRange(meal.Ingredients);
             if (ingredients.Any())
             {
-                meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                meal.Ingredients = [.. ingredients.Select((i, idx) => new MealIngredient
                 {
                     Ingredient = new Ingredient { Description = i, CreatedBy = user },
                     SortOrder = idx
-                }).ToList();
+                })];
             }
         }
         await context.SaveChangesAsync();
@@ -103,10 +97,8 @@ public class MealRepository(SqliteDataContext context,
 
     public async Task DeleteMealAsync(UserAccount user, Meal meal)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user));
-        if (meal == null)
-            throw new ArgumentNullException(nameof(meal));
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(meal);
 
         if (meal.User.UserAccountId != user.UserAccountId)
             throw new SecurityException($"Cannot delete meal id: {meal.MealId}");
