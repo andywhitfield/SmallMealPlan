@@ -29,7 +29,7 @@ public class HomeController(ILogger<HomeController> logger,
         if (monday.DayOfWeek != DayOfWeek.Monday)
         {
             var daysSinceMonday = (monday.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)monday.DayOfWeek) - 1;
-            monday = monday - TimeSpan.FromDays(daysSinceMonday);
+            monday -= TimeSpan.FromDays(daysSinceMonday);
         }
         monday = monday.Date;
 
@@ -54,7 +54,7 @@ public class HomeController(ILogger<HomeController> logger,
                 Name = plannerMeal.Meal.Description,
                 Notes = plannerMeal.Meal.Notes,
                 DateNotes = plannerMeal.Notes,
-                Ingredients = plannerMeal.Meal.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description) ?? Enumerable.Empty<string>()
+                Ingredients = plannerMeal.Meal.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description?.Trim() ?? "") ?? []
             });
         }
 
@@ -85,14 +85,13 @@ public class HomeController(ILogger<HomeController> logger,
         return View(new PlannerViewModel(HttpContext, date.ParseDateOrToday())
         {
             Pagination = new Pagination(page, pageCount, sort, filter),
-            Meals = meals
+            Meals = [.. meals
             .Select(m => new PlannerDayMealViewModel(m.MealId)
             {
                 Name = m.Description,
                 Notes = m.Notes,
-                Ingredients = m.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description) ?? Enumerable.Empty<string>()
-            })
-            .ToList()
+                Ingredients = m.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description?.Trim() ?? "") ?? []
+            })]
         });
     }
 
@@ -116,7 +115,7 @@ public class HomeController(ILogger<HomeController> logger,
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description.Trim(), addModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? Array.Empty<string>(), addModel.Notes?.Trim(), addModel.DateNotes?.Trim());
+        await plannerMealRepository.AddNewMealToPlannerAsync(user, date.ParseDateOrToday(), addModel.Description.Trim(), addModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? [], addModel.Notes?.Trim(), addModel.DateNotes?.Trim());
         return Redirect($"~/planner/{date}");
     }
 
@@ -144,7 +143,7 @@ public class HomeController(ILogger<HomeController> logger,
         return View(new PlannerEditMealViewModel(HttpContext, date.ParseDateOrToday(), plannerMeal.PlannerMealId)
         {
             Name = plannerMeal.Meal.Description,
-            Ingredients = plannerMeal.Meal.Ingredients == null ? null : string.Join('\n', plannerMeal.Meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description)),
+            Ingredients = plannerMeal.Meal.Ingredients == null ? null : string.Join('\n', plannerMeal.Meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description?.Trim() ?? "")),
             Notes = plannerMeal.Meal.Notes,
             DateNotes = plannerMeal.Notes
         });
@@ -166,7 +165,7 @@ public class HomeController(ILogger<HomeController> logger,
         if (plannerMeal.User != user)
             return BadRequest();
 
-        var ingredients = editModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
+        var ingredients = editModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? [];
 
         if (editModel.SaveAsNew ?? false)
         {

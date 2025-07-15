@@ -17,8 +17,8 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
 
     public async Task AddMealToPlannerAsync(UserAccount user, DateTime date, Meal meal)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
-        if (meal == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user, nameof(user));
+        ArgumentNullException.ThrowIfNull(meal, nameof(meal));
         if (meal.User != user) throw new SecurityException($"User {user.UserAccountId} does not own meal {meal.MealId}, cannot add.");
 
         var currentMealsOnDate = await context.PlannerMeals
@@ -39,7 +39,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
 
     public async Task AddNewMealToPlannerAsync(UserAccount user, DateTime date, string description, IEnumerable<string> ingredients, string? notes, string? dateNotes)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user, nameof(user));
 
         var currentMealsOnDate = await context.PlannerMeals
             .Where(pm => pm.User == user)
@@ -55,11 +55,11 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
                 Description = description,
                 Notes = notes,
                 User = user,
-                Ingredients = ingredients.Select((i, idx) => new MealIngredient
+                Ingredients = [.. ingredients.Select((i, idx) => new MealIngredient
                 {
-                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    Ingredient = new Ingredient { Description = i?.Trim() ?? "", CreatedBy = user },
                     SortOrder = idx
-                }).ToList()
+                })]
             },
             Notes = dateNotes,
             User = user,
@@ -83,8 +83,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
 
     public async Task DeleteMealFromPlannerAsync(UserAccount user, int mealPlannerId)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user, nameof(user));
 
         var plannerMeal = await context.PlannerMeals.FindAsync(mealPlannerId);
         if (plannerMeal == null)
@@ -100,8 +99,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
 
     public async Task UpdateAsync(UserAccount user, int mealPlannerId, DateTime date, int? sortOrderPreviousPlannerMealId)
     {
-        if (user == null)
-            throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user, nameof(user));
 
         var plannerMeal = await context.PlannerMeals.FindAsync(mealPlannerId);
         if (plannerMeal == null)
@@ -158,7 +156,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
 
     public async Task UpdateMealPlannerAsync(UserAccount user, int plannerMealId, DateTime date, string description, IEnumerable<string> ingredients, string? notes, string? dateNotes)
     {
-        if (user == null) throw new ArgumentNullException(nameof(user));
+        ArgumentNullException.ThrowIfNull(user, nameof(user));
 
         var plannerMeal = await GetAsync(plannerMealId);
         plannerMeal.Meal.LastUpdateDateTime = DateTime.UtcNow;
@@ -168,7 +166,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
 
         if (
             plannerMeal.Meal.Ingredients?.Count != ingredients.Count() ||
-            !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
+            !plannerMeal.Meal.Ingredients.Select(mi => mi.Ingredient.Description?.Trim() ?? "").SequenceEqual(ingredients))
         {
             // for now, just delete the MealIngredient and create a new set
             if (plannerMeal.Meal.Ingredients?.Any() ?? false)
@@ -177,7 +175,7 @@ public class PlannerMealRepository(SqliteDataContext context, ILogger<PlannerMea
             {
                 plannerMeal.Meal.Ingredients = ingredients.Select((i, idx) => new MealIngredient
                 {
-                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    Ingredient = new Ingredient { Description = i?.Trim() ?? "", CreatedBy = user },
                     SortOrder = idx
                 }).ToList();
             }

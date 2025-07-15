@@ -34,7 +34,7 @@ public class MealsController(
             {
                 Name = m.Description,
                 Notes = m.Notes,
-                Ingredients = m.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description) ?? Enumerable.Empty<string>()
+                Ingredients = m.Ingredients?.OrderBy(mi => mi.SortOrder).Select(i => i.Ingredient.Description?.Trim() ?? "") ?? []
             })
             .ToList()
         });
@@ -47,7 +47,7 @@ public class MealsController(
         if (!ModelState.IsValid)
             return BadRequest();
         var user = await userAccountRepository.GetUserAccountAsync(User);
-        await mealRepository.AddNewMealAsync(user, addModel.Description.Trim(), addModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0], addModel.Notes?.Trim());
+        await mealRepository.AddNewMealAsync(user, addModel.Description.Trim(), addModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? [], addModel.Notes?.Trim());
         return Redirect("~/meals");
     }
 
@@ -62,7 +62,7 @@ public class MealsController(
         return View(new EditMealViewModel(HttpContext, meal.MealId)
         {
             Name = meal.Description,
-            Ingredients = meal.Ingredients == null ? null : string.Join('\n', meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description)),
+            Ingredients = meal.Ingredients == null ? null : string.Join('\n', meal.Ingredients.OrderBy(mi => mi.SortOrder).Select(mi => mi.Ingredient.Description?.Trim() ?? "")),
             Notes = meal.Notes
         });
     }
@@ -82,7 +82,7 @@ public class MealsController(
         if (meal.User != user)
             return BadRequest();
 
-        var ingredients = editModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? new string[0];
+        var ingredients = editModel.Ingredients?.Split('\n', StringSplitOptions.TrimEntries).Where(i => !string.IsNullOrWhiteSpace(i)) ?? [];
 
         if (editModel.SaveAsNew ?? false)
             await mealRepository.AddNewMealAsync(user, editModel.Description.Trim(), ingredients, editModel.Notes?.Trim());

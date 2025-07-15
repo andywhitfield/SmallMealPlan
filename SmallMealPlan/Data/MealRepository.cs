@@ -57,7 +57,7 @@ public class MealRepository(SqliteDataContext context,
             User = user,
             Ingredients = [.. ingredients.Select((i, idx) => new MealIngredient
             {
-                Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                Ingredient = new Ingredient { Description = i?.Trim() ?? "", CreatedBy = user },
                 SortOrder = idx
             })]
         });
@@ -78,7 +78,7 @@ public class MealRepository(SqliteDataContext context,
 
         if (
             meal.Ingredients?.Count != ingredients.Count() ||
-            !meal.Ingredients.Select(mi => mi.Ingredient.Description).SequenceEqual(ingredients))
+            !meal.Ingredients.Select(mi => mi.Ingredient.Description?.Trim() ?? "").SequenceEqual(ingredients))
         {
             // for now, just delete the MealIngredient and create a a new set
             if (meal.Ingredients?.Count > 0)
@@ -87,7 +87,7 @@ public class MealRepository(SqliteDataContext context,
             {
                 meal.Ingredients = [.. ingredients.Select((i, idx) => new MealIngredient
                 {
-                    Ingredient = new Ingredient { Description = i, CreatedBy = user },
+                    Ingredient = new Ingredient { Description = i?.Trim() ?? "", CreatedBy = user },
                     SortOrder = idx
                 })];
             }

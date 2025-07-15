@@ -70,7 +70,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
-            .Select(s => s.Ingredient.Description)
+            .Select(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim())
             .Distinct()
             .CountAsync();
         var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
@@ -80,7 +80,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
-            .GroupBy(s => s.Ingredient.Description)
+            .GroupBy(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim())
             .Select(g => new { IngredientDescription = g.Key, Count = g.Count(), LatestShoppingListItemId = g.Max(i => i.ShoppingListItemId) });
 
         return (await context
@@ -109,7 +109,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             {
                 CreatedBy = user,
                 CreatedDateTime = DateTime.UtcNow,
-                Description = description
+                Description = description.Trim()
             },
             SortOrder = maxSortOrder + 1
         });
@@ -155,7 +155,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
     public Task MarkAsBoughtAsync(UserAccount user, IEnumerable<ShoppingListItem> shoppingListItems)
     {
         if (shoppingListItems.Any(sli => sli.User.UserAccountId != user.UserAccountId))
-            throw new SecurityException($"Cannot update shopping list item where the item's owner is not the specifid user");
+            throw new SecurityException($"Cannot update shopping list item where the item's owner is not the specified user");
 
         var now = DateTime.UtcNow;
         foreach (var shoppingListItem in shoppingListItems)
