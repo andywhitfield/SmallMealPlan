@@ -70,7 +70,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
-            .Select(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim())
+            .Select(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim(' ', '\n', '\r', '\t'))
             .Distinct()
             .CountAsync();
         var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
@@ -80,7 +80,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
-            .GroupBy(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim())
+            .GroupBy(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim(' ', '\n', '\r', '\t'))
             .Select(g => new { IngredientDescription = g.Key, Count = g.Count(), LatestShoppingListItemId = g.Max(i => i.ShoppingListItemId) });
 
         return (await context
