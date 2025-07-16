@@ -101,7 +101,7 @@
                         <div class="smp-shoplist-bought-date">@(Model.RegularOrBought == "bought" ? "Bought" : "Last bought ") @(boughtListItem.LastBought.Value.ToString("dddd dd MMMM yyyy"))</div>
                         }
                     </div>
-                    <div><button title="Add onto my shopping list" data-href="/shoppinglist/add/@boughtListItem.ShoppingListItemId"><img src="/images/add.png" height="15" width="15" /> Add </button></div>
+                    <div><button title="Add onto my shopping list" data-href="/shoppinglist/add/@boughtListItem.ShoppingListItemId?tab=smp-shoplist-bought"><img src="/images/add.png" height="15" width="15" /> Add </button></div>
                 </li>
                 }
             </ul>

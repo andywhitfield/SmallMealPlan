@@ -45,7 +45,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
         .Select(mi => (mi.Meal ?? throw new InvalidOperationException($"Could not get meal from {mi.MealIngredientId}"), mi.Ingredient))
         .Distinct()];
 
-    public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, int pageNumber)
+    public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetBoughtItemsAsync(UserAccount user, ISet<string> currentShoppingListItems, int pageNumber)
     {
         var total = await context
             .ShoppingListItems
@@ -64,13 +64,15 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .ToListAsync(), pageIndex + 1, pageCount);
     }
 
-    public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetRegularItemsAsync(UserAccount user, int pageNumber)
+    public async Task<(List<ShoppingListItem> Items, int PageNumber, int PageCount)> GetRegularItemsAsync(UserAccount user, ISet<string> currentShoppingListItems, int pageNumber)
     {
+        var excludeIngredientsLowercase = currentShoppingListItems.Select(i => i.ToLowerInvariant()).ToHashSet();
         var total = await context
             .ShoppingListItems
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .Select(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim(' ', '\n', '\r', '\t'))
+            .Where(i => !excludeIngredientsLowercase.Contains(i.ToLower()))
             .Distinct()
             .CountAsync();
         var (pageIndex, pageCount) = Paging.GetPageInfo(total, BoughtItemsPageSize, pageNumber);
@@ -81,6 +83,7 @@ public class ShoppingListRepository(SqliteDataContext context, ILogger<ShoppingL
             .Include(s => s.Ingredient)
             .Where(s => s.User == user && s.BoughtDateTime != null && s.DeletedDateTime == null)
             .GroupBy(s => s.Ingredient.Description == null ? "" : s.Ingredient.Description.Trim(' ', '\n', '\r', '\t'))
+            .Where(i => !excludeIngredientsLowercase.Contains(i.Key.ToLower()))
             .Select(g => new { IngredientDescription = g.Key, Count = g.Count(), LatestShoppingListItemId = g.Max(i => i.ShoppingListItemId) });
 
         return (await context

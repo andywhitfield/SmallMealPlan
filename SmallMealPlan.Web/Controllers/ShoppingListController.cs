@@ -28,8 +28,8 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         var shoppingListItems = activeShoppingList.Select(mi => mi.Ingredient.Description?.Trim() ?? "").ToHashSet();
         var futureMealIngredients = await shoppingListRepository.GetFutureMealIngredientsFromPlannerAsync(user);
         var (boughtItems, boughtItemsPage, boughtItemsPageCount) = await (regularOrBought == "bought"
-            ? shoppingListRepository.GetBoughtItemsAsync(user, boughtItemsPageNumber ?? 1)
-            : shoppingListRepository.GetRegularItemsAsync(user, boughtItemsPageNumber ?? 1));
+            ? shoppingListRepository.GetBoughtItemsAsync(user, shoppingListItems, boughtItemsPageNumber ?? 1)
+            : shoppingListRepository.GetRegularItemsAsync(user, shoppingListItems, boughtItemsPageNumber ?? 1));
         return View(new IndexViewModel(HttpContext)
         {
             MyList = activeShoppingList.Select(i => new ShoppingListItemModel
@@ -122,7 +122,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     }
 
     [HttpGet("~/shoppinglist/add/{shoppingListItemId}")]
-    public async Task<IActionResult> MakeAsNotBought(int shoppingListItemId)
+    public async Task<IActionResult> MakeAsNotBought(int shoppingListItemId, [FromQuery] string? tab = null)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
         var shoppingListItem = await shoppingListRepository.GetAsync(shoppingListItemId);
@@ -134,7 +134,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
             var newShoppingListItem = await shoppingListRepository.AddIngredientsAsync(user, shoppingListItem.IngredientId);
             await SyncWithSmallListerAsync(user, newShoppingListItem, added: true);
         }
-        return Redirect("~/shoppinglist");
+        return Redirect("~/shoppinglist" + (string.IsNullOrEmpty(tab) ? "" : $"?tab={tab}"));
     }
 
     [HttpPost("~/shoppinglist/bought/{shoppingListItemId}")]
