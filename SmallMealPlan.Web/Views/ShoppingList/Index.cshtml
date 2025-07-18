@@ -84,9 +84,10 @@
     <div>Your regular shopping list items will be listed here to easily add back onto your list.</div>
     } else {
     @if (Model.RegularOrBought == "bought") {
-    <button title="Show the list ordered by your regular shopping list items first" name="regularsBought" type="button" value="regulars">Show your regular shopping list items</button>
+    <button title="Show the list ordered by your regular shopping list items first" name="regularsBought" type="button" value="regulars">Show regulars</button>
     } else {
     <button title="Show list by recently bought" name="regularsBought" type="button" value="bought">Show by recently bought</button>
+    <label for="shoplist-bought-showall" title="Show items already on 'my list'"><input type="checkbox" id="shoplist-bought-showall" name="shoplistBoughtShowAll" value="true" checked="@Model.RegularOrBoughtShowAll" /> Show all</label>
     }
     <ul class="smp-planner-list">
         <li class="smp-planner-list">
@@ -112,20 +113,20 @@
     @if (Model.BoughtListPagination?.PageCount > 1) {
     <div class="pagination">
         @if (Model.BoughtListPagination.PageNumber > 1) {
-        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber - 1)&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought">&laquo;</a>
+        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber - 1)&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought&shoplistBoughtShowAll=@(Model.RegularOrBoughtShowAll)">&laquo;</a>
         }
         @foreach (var pg in Model.BoughtListPagination.Pages) {
         @if (pg.IsSelected) {
         <a class="pagination-active">@pg.PageNumber</a>
         } else {
-        <a href="/shoppinglist?boughtItemsPageNumber=@pg.PageNumber&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought">@pg.PageNumber</a>
+        <a href="/shoppinglist?boughtItemsPageNumber=@pg.PageNumber&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought&shoplistBoughtShowAll=@(Model.RegularOrBoughtShowAll)">@pg.PageNumber</a>
         }
         @if (pg.IsNextPageSkipped) {
         <span>&bull;&bull;</span>
         }
         }
         @if (Model.BoughtListPagination.PageNumber < Model.BoughtListPagination.PageCount) {
-        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber + 1)&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought">&raquo;</a>
+        <a href="/shoppinglist?boughtItemsPageNumber=@(Model.BoughtListPagination.PageNumber + 1)&regularOrBought=@(Model.RegularOrBought)&tab=smp-shoplist-bought&shoplistBoughtShowAll=@(Model.RegularOrBoughtShowAll)">&raquo;</a>
         }
     </div>
     }
@@ -237,6 +238,23 @@
 
         $('button[name="regularsBought"]').click(function() {
             window.location = "/shoppinglist?regularOrBought=" + $(this).val() + "&tab=smp-shoplist-bought";
+        });
+        $('input[type="checkbox"][name="shoplistBoughtShowAll"]').click(function() {
+            var showAllChecked = $(this).is(':checked');
+            var newLocation = window.location.toString();
+            if (newLocation.indexOf('?') < 0)
+                newLocation += '?tab=smp-shoplist-bought';
+            if (newLocation.indexOf('shoplistBoughtShowAll') < 0) {
+                newLocation += '&shoplistBoughtShowAll=' + showAllChecked;
+            } else {
+                // must be a better way to do this, but it's good enough for now
+                newLocation = newLocation
+                    .replace('shoplistBoughtShowAll=true', 'shoplistBoughtShowAll=' + showAllChecked)
+                    .replace('shoplistBoughtShowAll=True', 'shoplistBoughtShowAll=' + showAllChecked)
+                    .replace('shoplistBoughtShowAll=false', 'shoplistBoughtShowAll=' + showAllChecked)
+                    .replace('shoplistBoughtShowAll=False', 'shoplistBoughtShowAll=' + showAllChecked);
+            }
+            window.location = newLocation;
         });
 
         let rtmLists = $('form[name="rtm"] select[name="list"]');

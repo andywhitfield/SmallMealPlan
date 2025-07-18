@@ -21,15 +21,16 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     IOptions<SmallMealPlanConfig> options)
     : Controller
 {
-    public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber, [FromQuery] string? regularOrBought)
+    public async Task<IActionResult> Index([FromQuery] int? boughtItemsPageNumber, [FromQuery] string? regularOrBought, [FromQuery] bool? shoplistBoughtShowAll)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
         var activeShoppingList = await shoppingListRepository.GetActiveItemsAsync(user);
         var shoppingListItems = activeShoppingList.Select(mi => mi.Ingredient.Description?.Trim() ?? "").ToHashSet();
         var futureMealIngredients = await shoppingListRepository.GetFutureMealIngredientsFromPlannerAsync(user);
         var (boughtItems, boughtItemsPage, boughtItemsPageCount) = await (regularOrBought == "bought"
-            ? shoppingListRepository.GetBoughtItemsAsync(user, shoppingListItems, boughtItemsPageNumber ?? 1)
-            : shoppingListRepository.GetRegularItemsAsync(user, shoppingListItems, boughtItemsPageNumber ?? 1));
+            ? shoppingListRepository.GetBoughtItemsAsync(user, (shoplistBoughtShowAll ?? false) ? [] : shoppingListItems, boughtItemsPageNumber ?? 1)
+            : shoppingListRepository.GetRegularItemsAsync(user, (shoplistBoughtShowAll ?? false) ? [] : shoppingListItems, boughtItemsPageNumber ?? 1));
+
         return View(new IndexViewModel(HttpContext)
         {
             MyList = activeShoppingList.Select(i => new ShoppingListItemModel
@@ -58,6 +59,7 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
             }),
             RegularOrBought = regularOrBought,
             BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),
+            RegularOrBoughtShowAll = shoplistBoughtShowAll ?? false,
             HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken),
             HasSmallListerToken = !string.IsNullOrEmpty(user.SmallListerToken),
             SmallListerSyncListName = string.IsNullOrEmpty(user.SmallListerSyncListId) ? null : user.SmallListerSyncListName
