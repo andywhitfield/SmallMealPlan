@@ -28,22 +28,22 @@ public class ShoppingList_RegularsTests
         myListItems = myListItems[..myListItems.IndexOf("class=\"smp-shoplist-add-from-planner\"")];
         Assert.AreEqual(4, myListItems.Split("data-shoppinglistitem").Length - 1);
         var idx = myListItems.IndexOf("item 2");
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
         idx = myListItems.IndexOf("item 1", idx);
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
         idx = myListItems.IndexOf("item 4", idx);
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
         idx = myListItems.IndexOf("ITEM 5", idx);
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
 
         // check 'regulars' list
         var regularItems = responseContent[responseContent.IndexOf("class=\"smp-shoplist-bought\"")..];
         regularItems = regularItems[..regularItems.IndexOf("class=\"smp-shoplist-sync\"")];
         Assert.AreEqual(2, regularItems.Split("smp-shoplist-bought-date").Length - 1);
         idx = responseContent.IndexOf("item 6");
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 3", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
     }
 
     [TestMethod]
@@ -61,24 +61,24 @@ public class ShoppingList_RegularsTests
         myListItems = myListItems[..myListItems.IndexOf("class=\"smp-shoplist-add-from-planner\"")];
         Assert.AreEqual(4, myListItems.Split("data-shoppinglistitem").Length - 1);
         var idx = myListItems.IndexOf("item 2");
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
         idx = myListItems.IndexOf("item 1", idx);
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
         idx = myListItems.IndexOf("item 4", idx);
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
         idx = myListItems.IndexOf("ITEM 5", idx);
-        Assert.IsTrue(idx > 0, myListItems);
+        Assert.IsGreaterThan(0, idx, myListItems);
 
         // check 'regulars' list
         var regularItems = responseContent[responseContent.IndexOf("class=\"smp-shoplist-bought\"")..];
         regularItems = regularItems[..regularItems.IndexOf("class=\"smp-shoplist-sync\"")];
         Assert.AreEqual(3, regularItems.Split("smp-shoplist-bought-date").Length - 1);
         idx = responseContent.IndexOf("item 6");
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 3", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 5", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
     }
 
     private async Task AddShoppingListItemsAsync()

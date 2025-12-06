@@ -33,24 +33,24 @@ public class ShoppingListTests
 
         // checking the existance and order of items in the 'my list'
         var idx = responseContent.IndexOf("item 2");
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 1", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 4", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
 
         // check the order (and count) of items in the 'regular/bought' list
         // by default, it lists in 'regular' order, so only expect one entry per ingredient
         // description, therefore should be 3 items in the list in the order item 3, 5, then 6.
         idx = responseContent.IndexOf("item 3");
-        Assert.IsTrue(idx > 0, responseContent);
-        Assert.IsTrue(responseContent.IndexOf("item 3", idx + 1) < 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
+        Assert.IsLessThan(0, responseContent.IndexOf("item 3", idx + 1), responseContent);
         idx = responseContent.IndexOf("item 5", idx);
-        Assert.IsTrue(idx > 0, responseContent);
-        Assert.IsTrue(responseContent.IndexOf("item 5", idx + 1) < 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
+        Assert.IsLessThan(0, responseContent.IndexOf("item 5", idx + 1), responseContent);
         idx = responseContent.IndexOf("item 6", idx);
-        Assert.IsTrue(idx > 0, responseContent);
-        Assert.IsTrue(responseContent.IndexOf("item 6", idx + 1) < 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
+        Assert.IsLessThan(0, responseContent.IndexOf("item 6", idx + 1), responseContent);
     }
 
     [TestMethod]
@@ -65,24 +65,24 @@ public class ShoppingListTests
 
         // checking the existance and order of items in the 'my list'
         var idx = responseContent.IndexOf("item 2");
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 1", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 4", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
 
         // check the order (and count) of items in the 'regular/bought' list
         // should be in bought order: item 6, 3, 5, 3, 5
         idx = responseContent.IndexOf("item 6");
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 3", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 5", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 3", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
         idx = responseContent.IndexOf("item 5", idx);
-        Assert.IsTrue(idx > 0, responseContent);
+        Assert.IsGreaterThan(0, idx, responseContent);
     }
 
     private async Task AddShoppingListItemsAsync()

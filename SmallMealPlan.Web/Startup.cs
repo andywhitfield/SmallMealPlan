@@ -1,15 +1,6 @@
-﻿using System;
-using System.IO;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.RememberTheMilk;
 using SmallMealPlan.SmallLister;
@@ -104,7 +95,7 @@ public class Startup
             {
                 options.ServerName = "Small:MealPlan";
                 options.ServerDomain = Configuration.GetValue<string>("FidoDomain");
-                options.Origins = [Configuration.GetValue<string>("FidoOrigins")];
+                options.Origins = new HashSet<string>() { Configuration.GetValue("FidoOrigins", "") };
             });
     }
 

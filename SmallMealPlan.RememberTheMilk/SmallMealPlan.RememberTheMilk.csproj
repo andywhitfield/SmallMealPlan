@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="10.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.*" />
   </ItemGroup>
 </Project>

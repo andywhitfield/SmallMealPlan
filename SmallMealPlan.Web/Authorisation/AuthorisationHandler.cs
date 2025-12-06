@@ -21,23 +21,26 @@ public class AuthorisationHandler(ILogger<AuthorisationHandler> logger,
         if ((user = await userAccountRepository.GetUserAccountByEmailAsync(email)) != null)
         {
             logger.LogTrace($"Found existing user account with email [{email}], creating assertion options");
-            options = fido2.GetAssertionOptions(
-                await userAccountRepository
-                    .GetUserAccountCredentialsAsync(user)
-                    .Select(uac => new PublicKeyCredentialDescriptor(uac.CredentialId))
-                    .ToArrayAsync(cancellationToken: cancellationToken),
-                UserVerificationRequirement.Discouraged
-            ).ToJson();
+            options = fido2.GetAssertionOptions(new()
+            {
+                AllowedCredentials =
+                    await userAccountRepository
+                        .GetUserAccountCredentialsAsync(user)
+                        .Select(uac => new PublicKeyCredentialDescriptor(uac.CredentialId))
+                        .ToArrayAsync(cancellationToken: cancellationToken),
+                UserVerification = UserVerificationRequirement.Discouraged
+            }).ToJson();
         }
         else
         {
             logger.LogTrace($"Found no user account with email [{email}], creating request new creds options");
-            options = fido2.RequestNewCredential(
-                new Fido2User() { Id = Encoding.UTF8.GetBytes(email), Name = email, DisplayName = email },
-                [],
-                AuthenticatorSelection.Default,
-                AttestationConveyancePreference.None
-            ).ToJson();
+            options = fido2.RequestNewCredential(new()
+            {
+                User = new Fido2User() { Id = Encoding.UTF8.GetBytes(email), Name = email, DisplayName = email },
+                PubKeyCredParams = [],
+                AuthenticatorSelection = AuthenticatorSelection.Default,
+                AttestationPreference = AttestationConveyancePreference.None
+            }).ToJson();
         }
 
         logger.LogTrace($"Created sign in options: {options}");
@@ -84,18 +87,23 @@ public class AuthorisationHandler(ILogger<AuthorisationHandler> logger,
 
         logger.LogTrace($"Successfully parsed response: {verifyResponse}");
 
-        var success = await fido2.MakeNewCredentialAsync(authenticatorAttestationRawResponse, options, (_, _) => Task.FromResult(true), cancellationToken: cancellationToken);
-        logger.LogInformation($"got success status: {success.Status} error: {success.ErrorMessage}");
-        if (success.Result == null)
+        var success = await fido2.MakeNewCredentialAsync(new()
         {
-            logger.LogWarning($"Could not create new credential: {success.Status} - {success.ErrorMessage}");
+            AttestationResponse = authenticatorAttestationRawResponse,
+            OriginalOptions = options,
+            IsCredentialIdUniqueToUserCallback = (_, _) => Task.FromResult(true)
+        }, cancellationToken: cancellationToken);
+        logger.LogInformation($"got success status: {success}");
+        if (success == null)
+        {
+            logger.LogWarning("Could not create new credential");
             return null;
         }
 
-        logger.LogTrace($"Got new credential: {JsonSerializer.Serialize(success.Result)}");
+        logger.LogTrace($"Got new credential: {JsonSerializer.Serialize(success)}");
 
-        return await userAccountRepository.CreateNewUserAsync(email, success.Result.CredentialId,
-            success.Result.PublicKey, success.Result.User.Id);
+        return await userAccountRepository.CreateNewUserAsync(email, success.Id,
+            success.PublicKey, success.User.Id);
     }
 
     private async Task<bool> SigninUserAsync(UserAccount user, string verifyOptions, string verifyResponse, CancellationToken cancellationToken)
@@ -108,23 +116,30 @@ public class AuthorisationHandler(ILogger<AuthorisationHandler> logger,
             return false;
         }
         var options = AssertionOptions.FromJson(verifyOptions);
-        var userAccountCredential = await userAccountRepository.GetUserAccountCredentialsAsync(user).FirstOrDefaultAsync(uac => uac.CredentialId.SequenceEqual(authenticatorAssertionRawResponse.Id), cancellationToken);
+        var userAccountCredential = await userAccountRepository.GetUserAccountCredentialsAsync(user).FirstOrDefaultAsync(uac => uac.CredentialId.SequenceEqual(authenticatorAssertionRawResponse.RawId), cancellationToken);
         if (userAccountCredential == null)
         {
-            logger.LogWarning($"No credential id [{Convert.ToBase64String(authenticatorAssertionRawResponse.Id)}] for user [{user.Email}]");
+            logger.LogWarning($"No credential id [{Convert.ToBase64String(authenticatorAssertionRawResponse.RawId)}] for user [{user.Email}]");
             return false;
         }
         
         logger.LogTrace($"Making assertion for user [{user.Email}]");
-        var res = await fido2.MakeAssertionAsync(authenticatorAssertionRawResponse, options, userAccountCredential.PublicKey, userAccountCredential.SignatureCount, VerifyExistingUserCredentialAsync, cancellationToken: cancellationToken);
-        if (!string.IsNullOrEmpty(res.ErrorMessage))
+        var res = await fido2.MakeAssertionAsync(new()
         {
-            logger.LogWarning($"Signin assertion failed: {res.Status} - {res.ErrorMessage}");
+            AssertionResponse = authenticatorAssertionRawResponse,
+            OriginalOptions = options,
+            StoredPublicKey = userAccountCredential.PublicKey,
+            StoredSignatureCounter = userAccountCredential.SignatureCount,
+            IsUserHandleOwnerOfCredentialIdCallback = VerifyExistingUserCredentialAsync
+        }, cancellationToken: cancellationToken);
+        if (res == null)
+        {
+            logger.LogWarning("Signin assertion failed");
             return false;
         }
 
         logger.LogTrace($"Signin success, got response: {JsonSerializer.Serialize(res)}");
-        await userAccountRepository.SetSignatureCountAsync(userAccountCredential, res.Counter);
+        await userAccountRepository.SetSignatureCountAsync(userAccountCredential, res.SignCount);
 
         return true;
     }
