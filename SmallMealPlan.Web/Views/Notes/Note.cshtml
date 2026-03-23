@@ -1,0 +1,12 @@
+﻿@model SmallMealPlan.Web.Model.Notes.NoteViewModel
+
+<form method="post" action="/meals">
+@Html.AntiForgeryToken()
+<div>Title (optional):</div>
+<input type="text" name="title" class="smp-planner-add-new-description" />
+
+<div>Note:</div>
+<textarea name="notes" class="smp-planner-add-new-notes" wrap="off"></textarea>
+
+<p><button type="submit">Save</button> <button type="submit">Cancel</button></p>
+</form>
