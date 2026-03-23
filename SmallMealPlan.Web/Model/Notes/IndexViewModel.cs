@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace SmallMealPlan.Web.Model.Notes;
 
 public class IndexViewModel : BaseViewModel
@@ -8,6 +6,4 @@ public class IndexViewModel : BaseViewModel
     {
         SelectedArea = SmpArea.Notes;
     }
-    
-    public string? Notes { get; set; }
 }
