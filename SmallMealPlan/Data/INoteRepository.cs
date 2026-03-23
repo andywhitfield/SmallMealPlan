@@ -1,11 +1,11 @@
-using System.Threading.Tasks;
 using SmallMealPlan.Model;
 
-namespace SmallMealPlan.Data
+namespace SmallMealPlan.Data;
+
+public interface INoteRepository
 {
-    public interface INoteRepository
-    {
-        Task<string> GetAsync(UserAccount user);
-        Task AddOrUpdateAsync(UserAccount user, string noteText);
-    }
+    Task<Note?> GetAsync(int noteId);
+    IAsyncEnumerable<Note> GetAllAsync(UserAccount user);
+
+    Task AddOrUpdateAsync(UserAccount user, string noteText);
 }

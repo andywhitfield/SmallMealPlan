@@ -6,34 +6,22 @@
 <ul class="smp-planner-list">
     <li class="smp-planner-list">
         <ul class="smp-planner-list-meal">
+            @await foreach (var note in Model.Notes) {
             <li class="smp-planner-list-meal">
                 <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                 <div></div>
-                <div>Note title 1</div>
+                <div>@note.TitleForDisplay</div>
                 <div>
-                    <form method="get" action="/notes/1">
+                    <form method="get" action="/notes/@note.Note.NoteId">
                     <button title="Bought"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
                     </form>
-                    <form data-confirm="Are you sure you want to delete this note?" method="post" action="/TODO">
+                    <form data-confirm="Are you sure you want to delete this note?" method="post" action="/notes/delete/@note.Note.NoteId">
                     @Html.AntiForgeryToken()
                     <button title="Delete"><img src="/images/close.png" height="15" width="15" /> Delete</button>
                     </form>
                 </div>
             </li>
-            <li class="smp-planner-list-meal">
-                <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
-                <div></div>
-                <div>Note title 2</div>
-                <div>
-                    <form method="get" action="/notes/2">
-                    <button title="Bought"><img src="/images/notes.png" height="15" width="15" /> Edit</button>
-                    </form>
-                    <form data-confirm="Are you sure you want to delete this note?" method="post" action="/TODO">
-                    @Html.AntiForgeryToken()
-                    <button title="Delete"><img src="/images/close.png" height="15" width="15" /> Delete</button>
-                    </form>
-                </div>
-            </li>
+            }
         </ul>
     </li>
 </ul>
