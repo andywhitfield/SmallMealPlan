@@ -31,6 +31,18 @@ public class NotesController(
         return View(new NoteViewModel(HttpContext, note));
     }
 
+    [HttpGet("~/notes/add")]
+    public IActionResult NewNote()
+        => View(new NewNoteViewModel(HttpContext));
+
+    [HttpPost("~/notes/add")]
+    public async Task<IActionResult> NewNote([FromForm] string? title, [FromForm] string notes)
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        await noteRepository.AddAsync(user, title, notes);
+        return Redirect("~/notes");
+    }
+
     [HttpPost("~/notes/delete/{noteId}")]
     public async Task<IActionResult> DeleteNote(int noteId)
         //=> View(new NoteViewModel(HttpContext));

@@ -3,10 +3,10 @@
 <form method="post" action="/notes/@Model.Note.NoteId">
 @Html.AntiForgeryToken()
 <div>Title (optional):</div>
-<input type="text" name="title" class="smp-planner-add-new-description" value="@Model.Note.Title">
+<input type="text" name="title" class="smp-planner-add-new-description" value="@Model.Note.Title" autofocus />
 
 <div>Note:</div>
-<textarea name="notes" class="smp-planner-add-new-notes" wrap="off">@Model.Note.NoteText</textarea>
+<textarea name="notes" class="notes" wrap="off">@Model.Note.NoteText</textarea>
 
 <p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button></p>
 </form>

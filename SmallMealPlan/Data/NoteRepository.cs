@@ -13,6 +13,18 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
     public IAsyncEnumerable<Note> GetAllAsync(UserAccount user)
         => context.Notes.Where(n => n.UserAccountId == user.UserAccountId && n.DeletedDateTime == null).AsAsyncEnumerable();
 
+    public async Task AddAsync(UserAccount user, string? title, string noteText)
+    {
+        logger.LogDebug("Creating new note for user: {User}: [{Title}]: {NoteText}", user.UserAccountId, title, noteText);
+        context.Notes.Add(new()
+        {
+            User = user,
+            Title = string.IsNullOrWhiteSpace(title) ? null : title.Trim(),
+            NoteText = noteText
+        });
+        await context.SaveChangesAsync();
+    }
+
     public async Task AddOrUpdateAsync(UserAccount user, string noteText)
     {
         var note = await context.Notes.FirstOrDefaultAsync(n => n.User == user);
