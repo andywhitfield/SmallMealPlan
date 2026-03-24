@@ -1,5 +1,5 @@
 ﻿@model SmallMealPlan.Web.Model.Notes.IndexViewModel
-
+@{bool anyNotes = false;}
 <button type="button" title="Add a new note" onclick="window.location.href='/notes/add'">Add</button>
 
 <!-- TODO: add find and sort/order options -->
@@ -8,6 +8,7 @@
     <li class="smp-planner-list">
         <ul class="smp-planner-list-meal">
             @await foreach (var note in Model.Notes) {
+            anyNotes = true;
             <li class="smp-planner-list-meal">
                 <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
                 <div></div>
@@ -22,6 +23,9 @@
                     </form>
                 </div>
             </li>
+            }
+            @if (!anyNotes) {
+            <div>You don't currently have any notes. <button type="button" title="Add a new note" onclick="window.location.href='/notes/add'">Add a new note</button></div>
             }
         </ul>
     </li>
