@@ -6,4 +6,5 @@ public class IndexViewModel : BaseViewModel
         => SelectedArea = SmpArea.Notes;
 
     public IAsyncEnumerable<NoteViewModel> Notes { get; set; } = AsyncEnumerable.Empty<NoteViewModel>();
+    public bool SortedManually { get; set; }
 }

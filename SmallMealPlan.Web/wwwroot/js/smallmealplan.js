@@ -1,6 +1,11 @@
 function smpInitialise() {
     smpInitialiseNav();
 
+    const noteSortButton = $('#smp-note-sort');
+    noteSortButton.click(function() { $(this).closest('form').submit(); });
+    if (!noteSortButton.attr('data-visible'))
+        noteSortButton.hide();
+
     $('ul.smp-planner-list').sortable({
         handle: '.smp-planner-list-meal-drag-handle',
         isValidTarget: function(item, container) {
@@ -35,6 +40,23 @@ function smpInitialise() {
                     data: JSON.stringify({ sortOrderPreviousShoppingListItemId: prevShoppingListItem == NaN ? null : prevShoppingListItem }),
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json'
+                });
+
+                return;
+            }
+
+            let noteMoved = item.attr('data-note');
+            if (typeof noteMoved !== 'undefined') {
+                let prevNote = parseInt(item.prev('li').attr('data-note'));
+
+                $.ajax({
+                    url: '/api/notes/' + noteMoved + '/move',
+                    type: 'PUT',
+                    data: JSON.stringify({ sortOrderPreviousNoteId: prevNote == NaN ? null : prevNote }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json'
+                }).done(function() {
+                    noteSortButton.show();
                 });
 
                 return;

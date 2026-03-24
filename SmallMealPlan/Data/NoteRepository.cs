@@ -1,3 +1,4 @@
+using System.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SmallMealPlan.Model;
@@ -11,7 +12,14 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
         => await context.Notes.SingleOrDefaultAsync(n => n.NoteId == noteId && n.DeletedDateTime == null);
 
     public IAsyncEnumerable<Note> GetAllAsync(UserAccount user)
-        => context.Notes.Where(n => n.UserAccountId == user.UserAccountId && n.DeletedDateTime == null).AsAsyncEnumerable();
+    {
+        var notes = context.Notes.Where(n => n.UserAccountId == user.UserAccountId && n.DeletedDateTime == null);
+        if (user.NoteSortOrdering == INoteRepository.SortedManually)
+            notes = notes.OrderBy(n => n.SortOrdering ?? 0);
+        else
+            notes = notes.OrderByDescending(n => n.LastUpdateDateTime ?? n.CreatedDateTime);
+        return notes.AsAsyncEnumerable();
+    }
 
     public async Task AddAsync(UserAccount user, string? title, string noteText)
     {
@@ -20,7 +28,8 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
         {
             User = user,
             Title = string.IsNullOrWhiteSpace(title) ? null : title.Trim(),
-            NoteText = noteText
+            NoteText = noteText,
+            SortOrdering = user.NoteSortOrdering == INoteRepository.SortedManually ? (context.Notes.Where(n => n.DeletedDateTime == null).Max(n => n.SortOrdering) ?? -1) + 1 : null
         });
         await context.SaveChangesAsync();
     }
@@ -51,6 +60,66 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
         });
         note.DeletedDateTime = DateTime.UtcNow;
         note.LastUpdateDateTime = DateTime.UtcNow;
+        await context.SaveChangesAsync();
+    }
+
+    public async Task ReorderAsync(UserAccount user, int noteId, int? sortOrderPreviousNoteId)
+    {
+        ArgumentNullException.ThrowIfNull(user);
+
+        var note = await context.Notes.FindAsync(noteId);
+        if (note == null)
+            return;
+
+        if (note.User.UserAccountId != user.UserAccountId)
+            throw new SecurityException($"Cannot update note id: {note.NoteId}");
+
+        logger.LogDebug("Update note id: {NoteId} to be after {SortOrderPreviousNoteId}", note.NoteId, sortOrderPreviousNoteId);
+
+        var notes = await context.Notes
+            .Where(n => n.UserAccountId == user.UserAccountId && n.DeletedDateTime == null)
+            .ToListAsync();
+        
+        if (user.NoteSortOrdering != INoteRepository.SortedManually)
+        {
+            user.NoteSortOrdering = INoteRepository.SortedManually;
+            var order = 0;
+            foreach (var n in notes.OrderByDescending(n => n.LastUpdateDateTime ?? n.CreatedDateTime))
+                n.SortOrdering = order++;
+        }
+
+        int? sortOrder = null;
+        if (!sortOrderPreviousNoteId.HasValue)
+        {
+            sortOrder = 0;
+            note.SortOrdering = sortOrder.Value;
+            sortOrder++;
+        }
+
+        Note? lastNote = null;
+        foreach (var n in notes)
+        {
+            if (n.NoteId == note.NoteId)
+                continue;
+
+            if (sortOrderPreviousNoteId == n.NoteId)
+            {
+                sortOrder = (n.SortOrdering ?? 0) + 1;
+                note.SortOrdering = sortOrder.Value;
+                sortOrder++;
+            }
+            else if (sortOrder.HasValue)
+            {
+                n.SortOrdering = sortOrder.Value;
+                sortOrder++;
+            }
+
+            lastNote = n;
+        }
+
+        if (!sortOrder.HasValue)
+            note.SortOrdering = lastNote?.SortOrdering ?? 0;
+
         await context.SaveChangesAsync();
     }
 }

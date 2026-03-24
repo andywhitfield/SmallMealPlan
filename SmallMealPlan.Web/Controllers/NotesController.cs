@@ -17,7 +17,8 @@ public class NotesController(
         var user = await userAccountRepository.GetUserAccountAsync(User);
         return View(new IndexViewModel(HttpContext)
         {
-            Notes = noteRepository.GetAllAsync(user).Select(n => new NoteViewModel(HttpContext, n))
+            Notes = noteRepository.GetAllAsync(user).Select(n => new NoteViewModel(HttpContext, n)),
+            SortedManually = user.NoteSortOrdering == INoteRepository.SortedManually
         });
     }
 
@@ -71,6 +72,17 @@ public class NotesController(
         if (note?.UserAccountId != user.UserAccountId)
             return NotFound();
         await noteRepository.DeleteAsync(note);
-        return Redirect("~/notes");        
+        return Redirect("~/notes");
+    }
+
+    [HttpPost("~/notes/sort")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Sort()
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        // for now, we have 2 sort options: latest and manual. If not manually ordered, the sort property should be null.
+        user.NoteSortOrdering = null;
+        await userAccountRepository.UpdateAsync(user);
+        return Redirect("~/notes");
     }
 }
