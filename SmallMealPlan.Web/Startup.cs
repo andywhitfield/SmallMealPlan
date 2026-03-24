@@ -85,7 +85,11 @@ public class Startup
             .AddSingleton<ISmallListerSendQueue, SmallListerSendQueue>()
             .AddHostedService<SmallListerSendQueueHostedService>();
 
-        services.AddMvc().AddSessionStateTempDataProvider();
+        services.AddMvc()
+#if DEBUG
+            .AddRazorRuntimeCompilation()
+#endif
+            .AddSessionStateTempDataProvider();
         services.AddRazorPages();
         services.AddCors();
         services.AddDistributedMemoryCache();
