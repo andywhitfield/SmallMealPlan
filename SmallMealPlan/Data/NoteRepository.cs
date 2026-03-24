@@ -25,27 +25,18 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
         await context.SaveChangesAsync();
     }
 
-    public async Task AddOrUpdateAsync(UserAccount user, string noteText)
+    public async Task UpdateAsync(Note note, string? title, string noteText)
     {
-        var note = await context.Notes.FirstOrDefaultAsync(n => n.User == user);
-        if (note == null)
+        logger.LogDebug("Updating note {NoteId}: [{Title}]: {NoteText}", note.NoteId, title, noteText);
+        context.NoteHistories.Add(new()
         {
-            note = new Note
-            {
-                User = user,
-                NoteText = noteText
-            };
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug($"Creating new note for user: {user}: {noteText}");
-            await context.Notes.AddAsync(note);
-        }
-        else
-        {
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug($"Updating note for user: {user}: {noteText}");
-            note.NoteText = noteText;
-            note.LastUpdateDateTime = DateTime.UtcNow;
-        }
+            Note = note,
+            Title = note.Title,
+            NoteText = note.NoteText
+        });
+        note.Title = string.IsNullOrWhiteSpace(title) ? null : title.Trim();
+        note.NoteText = noteText;
+        note.LastUpdateDateTime = DateTime.UtcNow;
         await context.SaveChangesAsync();
     }
 }
