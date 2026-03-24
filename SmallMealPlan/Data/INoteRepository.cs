@@ -8,4 +8,5 @@ public interface INoteRepository
     IAsyncEnumerable<Note> GetAllAsync(UserAccount user);
     Task AddAsync(UserAccount user, string? title, string noteText);
     Task UpdateAsync(Note note, string? title, string noteText);
+    Task DeleteAsync(Note note);
 }

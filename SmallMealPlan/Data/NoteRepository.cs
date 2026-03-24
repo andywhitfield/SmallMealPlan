@@ -39,4 +39,18 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
         note.LastUpdateDateTime = DateTime.UtcNow;
         await context.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(Note note)
+    {
+        logger.LogDebug("Deleting note {NoteId}", note.NoteId);
+        context.NoteHistories.Add(new()
+        {
+            Note = note,
+            Title = note.Title,
+            NoteText = note.NoteText
+        });
+        note.DeletedDateTime = DateTime.UtcNow;
+        note.LastUpdateDateTime = DateTime.UtcNow;
+        await context.SaveChangesAsync();
+    }
 }

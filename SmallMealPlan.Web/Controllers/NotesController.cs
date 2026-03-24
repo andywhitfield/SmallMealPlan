@@ -65,6 +65,12 @@ public class NotesController(
     [HttpPost("~/notes/delete/{noteId}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteNote(int noteId)
-        //=> View(new NoteViewModel(HttpContext));
-        => throw new NotImplementedException("TODO");
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        var note = await noteRepository.GetAsync(noteId);
+        if (note?.UserAccountId != user.UserAccountId)
+            return NotFound();
+        await noteRepository.DeleteAsync(note);
+        return Redirect("~/notes");        
+    }
 }
