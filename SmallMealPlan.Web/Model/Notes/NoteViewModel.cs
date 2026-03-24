@@ -12,5 +12,8 @@ public class NoteViewModel : BaseViewModel
 
     public Note Note { get; }
 
-    public string TitleForDisplay => Note.Title ?? Note.NoteText; // TODO: get the first line of NoteText (or perhaps up to a max length)
+    public string TitleForDisplay => Note.Title ?? Title(Note.NoteText);
+
+    private static string Title(string? text)
+        => string.IsNullOrEmpty(text) ? "" : text.Split('\n', '\r', '\t')[0];
 }
