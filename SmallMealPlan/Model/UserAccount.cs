@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmallMealPlan.Model;
@@ -20,4 +18,6 @@ public class UserAccount
     public string? SmallListerLastListId { get; set; }
     public string? SmallListerSyncListId { get; set; }
     public string? SmallListerSyncListName { get; set; }
+    public string? CurrentArea { get; set; }
+    public string? NoteSortOrdering { get; set; }
 }

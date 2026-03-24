@@ -8,6 +8,7 @@ public class Note
     [Required]
     public required UserAccount User { get; set; }
     public int UserAccountId { get; set; }
+    public int? SortOrdering { get; set; }
     public string? Title { get; set; }
     [Required]
     public required string NoteText { get; set; }
