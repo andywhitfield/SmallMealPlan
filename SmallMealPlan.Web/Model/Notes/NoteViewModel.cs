@@ -14,6 +14,8 @@ public class NoteViewModel : BaseViewModel
 
     public string TitleForDisplay => Note.Title ?? Title(Note.NoteText);
 
+    public bool ShowExpandIcon => !string.IsNullOrEmpty(Note.Title) || TitleForDisplay != Note.NoteText;
+
     public string UpdatedDate => (Note.LastUpdateDateTime ?? Note.CreatedDateTime).ToString("yyyy-MM-dd HH:mm:ss");
 
     private static string Title(string? text)

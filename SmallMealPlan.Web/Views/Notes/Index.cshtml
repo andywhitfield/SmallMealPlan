@@ -23,7 +23,7 @@
             anyNotes = true;
             <li class="smp-planner-list-meal" data-note="@note.Note.NoteId">
                 <div><img class="smp-planner-list-meal-drag-handle" src="/images/drag.png" height="26" width="22" title="Move" /></div>
-                <div></div>
+                <div>@if (note.ShowExpandIcon) {<img src="/images/expand.png" class="smp-notes-oc" height="18" width="18" title="Show/Hide full note" />}</div>
                 <div>
                     <div>@note.TitleForDisplay</div>
                     <div class="smp-note-date">@note.UpdatedDate</div>

@@ -212,7 +212,8 @@ div.smp-planner-add-new>div {
     font-size: 11pt;
 }
 
-img.smp-planner-list-meal-oc {
+img.smp-planner-list-meal-oc,
+img.smp-notes-oc {
     padding-top: 3px;
 }
 
@@ -379,20 +380,32 @@ div.smp-note-date {
     font-style: oblique;
 }
 
+div.smp-note-info-title {
+    font-weight: bold;
+}
+
+div.smp-note-info-text {
+    white-space: pre-line;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;
         flex-direction: column;
     }
+
     aside {
         display: none;
     }
+
     .nav-show {
         display: inline;
     }
+
     ul.smp-planner-list-meal>li {
         flex-direction: column;
     }
+
     div.smp-shoplist-actions {
         flex-direction: column;
     }
@@ -402,6 +415,7 @@ div.smp-note-date {
     aside {
         min-width: 32px;
     }
+
     aside ul li span {
         visibility: hidden;
         white-space: nowrap;
@@ -412,17 +426,21 @@ div.smp-note-date {
     body {
         background-color: black;
     }
+
     article {
         background-color: black;
         color: white;
     }
+
     footer {
         color: white;
     }
+
     .smp-planner-add-recent>a,
     .pagination>a {
         color: white;
     }
+
     ul.smp-planner-list-meal>li,
     a.pagination-active,
     span.selected {

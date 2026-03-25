@@ -81,6 +81,27 @@ function smpInitialise() {
         $(selectEl).show();
     });
 
+    $('.smp-notes-oc').click(function() {
+        const noteLi = $(this).parent('div').parent('li');
+        const noteId = noteLi.attr('data-note');
+        const view = noteLi.attr('data-view-state') === 'summary' ? 'summary' : 'details';
+        console.log('Loading '+view+' for note '+noteId);
+
+        $.get('/api/notes/' + noteId + '/info/' + view, function(data) {
+            console.log('got '+view+' note info: '+data.title);
+            const noteDiv = $('div:nth-child(3) div:first-child', noteLi);
+            noteDiv.empty();
+            if (view === 'summary') {
+                noteDiv.text(data.title);
+            } else {
+                if (data.title !== '')
+                    noteDiv.append($('<div />', { "class":"smp-note-info-title", text: data.title }));
+                noteDiv.append($('<div />', { "class":"smp-note-info-text", text: data.note }));
+            }
+            noteLi.attr('data-view-state', view === 'details' ? 'summary' : 'details');
+        });
+    });
+
     $('button[data-depends]').each(function() {
         let btnWithDependency = $(this);
         let dependentFormObject = $(btnWithDependency.attr('data-depends'));

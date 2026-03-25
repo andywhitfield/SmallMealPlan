@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmallMealPlan.Data;
+using SmallMealPlan.Web.Model.Notes;
 using SmallMealPlan.Web.Model.Request;
 
 namespace SmallMealPlan.Web.Controllers;
@@ -13,6 +14,19 @@ public class NotesApiController(
     INoteRepository noteRepository)
     : ControllerBase
 {
+    [HttpGet("~/api/notes/{noteId}/info/{infoType}")]
+    public async Task<IActionResult> NoteInfo(int noteId, string infoType)
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        var note = await noteRepository.GetAsync(noteId);
+        if (note?.UserAccountId != user.UserAccountId)
+            return NotFound();
+        if (infoType == "details")
+            return Ok(new { title = note.Title ?? "", note = note.NoteText });
+
+        return Ok(new { title = new NoteViewModel(HttpContext, note).TitleForDisplay });
+    }
+
     [HttpPut("~/api/notes/{noteId}/move")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Move(int noteId, NoteMoveRequest noteMoveRequest)
