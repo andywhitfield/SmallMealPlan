@@ -1,12 +1,20 @@
 ﻿@model SmallMealPlan.Web.Model.Notes.IndexViewModel
 @{bool anyNotes = false;}
+<div class="smp-notes-controls">
+<button type="button" title="Add a new note" onclick="window.location.href='/notes/add'">Add</button>
 <form action="/notes/sort" method="post">
 @Html.AntiForgeryToken()
-<button type="button" title="Add a new note" onclick="window.location.href='/notes/add'">Add</button>
 <button type="button" title="Sort by the most recently added or changed note to the oldest" id="smp-note-sort" data-visible="@(Model.SortedManually ? "true" : "")">Sort by latest</button>
 </form>
-
-<!-- TODO: add find -->
+<form action="/notes" method="get">
+@if (Context.Request.Query.TryGetValue("find", out var findVal)) {
+<input type="text" name="find" placeholder="Find note..." value="@findVal" autofocus />
+} else {
+<input type="text" name="find" placeholder="Find note..." />
+}
+<input type="submit" value="Find"/>
+</form>
+</div>
 
 <ul class="smp-planner-list">
     <li class="smp-planner-list">

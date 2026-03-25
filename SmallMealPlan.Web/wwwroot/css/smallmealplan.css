@@ -370,6 +370,10 @@ div.smp-shoplist-actions>div:first-child button {
     white-space: nowrap;
 }
 
+div.smp-notes-controls form {
+    display: inline;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;

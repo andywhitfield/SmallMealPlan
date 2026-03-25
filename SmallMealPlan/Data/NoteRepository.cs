@@ -11,13 +11,20 @@ public class NoteRepository(SqliteDataContext context, ILogger<NoteRepository> l
     public async Task<Note?> GetAsync(int noteId)
         => await context.Notes.SingleOrDefaultAsync(n => n.NoteId == noteId && n.DeletedDateTime == null);
 
-    public IAsyncEnumerable<Note> GetAllAsync(UserAccount user)
+    public IAsyncEnumerable<Note> GetAllAsync(UserAccount user, string? find)
     {
         var notes = context.Notes.Where(n => n.UserAccountId == user.UserAccountId && n.DeletedDateTime == null);
         if (user.NoteSortOrdering == INoteRepository.SortedManually)
             notes = notes.OrderBy(n => n.SortOrdering ?? 0);
         else
             notes = notes.OrderByDescending(n => n.LastUpdateDateTime ?? n.CreatedDateTime);
+    
+        if (!string.IsNullOrWhiteSpace(find))
+        {
+            var like = $"%{find.Trim()}%";
+            notes = notes.Where(n => (n.Title != null && EF.Functions.Like(n.Title, like)) || EF.Functions.Like(n.NoteText, like));
+        }
+
         return notes.AsAsyncEnumerable();
     }
 

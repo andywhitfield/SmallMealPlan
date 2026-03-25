@@ -12,12 +12,12 @@ public class NotesController(
     : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery] string? find)
     {
         var user = await userAccountRepository.GetUserAccountAsync(User);
         return View(new IndexViewModel(HttpContext)
         {
-            Notes = noteRepository.GetAllAsync(user).Select(n => new NoteViewModel(HttpContext, n)),
+            Notes = noteRepository.GetAllAsync(user, find).Select(n => new NoteViewModel(HttpContext, n)),
             SortedManually = user.NoteSortOrdering == INoteRepository.SortedManually
         });
     }
