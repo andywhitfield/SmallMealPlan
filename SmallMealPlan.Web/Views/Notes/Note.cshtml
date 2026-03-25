@@ -8,5 +8,10 @@
 <div>Note:</div>
 <textarea name="notes" class="notes" wrap="off">@Model.Note.NoteText</textarea>
 
+<div class="smp-note-date">Created: @Model.Note.CreatedDateTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
+@if (Model.Note.LastUpdateDateTime != null) {
+<div class="smp-note-date">Last updated: @Model.Note.LastUpdateDateTime.Value.ToString("yyyy-MM-dd HH:mm:ss")</div>
+}
+
 <p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button></p>
 </form>

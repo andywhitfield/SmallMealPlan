@@ -374,6 +374,11 @@ div.smp-notes-controls form {
     display: inline;
 }
 
+div.smp-note-date {
+    font-size: 10pt;
+    font-style: oblique;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;
