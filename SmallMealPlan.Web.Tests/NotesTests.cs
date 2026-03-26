@@ -99,6 +99,67 @@ public class NotesTests
         Assert.DoesNotContain("other user's note", responseContent);
     }
 
+    [TestMethod]
+    public async Task Can_add_new_note()
+    {
+        await AddNotesAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync("/notes/add");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");        
+
+        using var postResponse = await client.PostAsync("/notes/add", new FormUrlEncodedContent(new Dictionary<string, string>()
+            { { "notes", "New note with only note text" }, { "__RequestVerificationToken", validationToken } }));
+        Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
+        Assert.AreEqual(new Uri("/notes", UriKind.Relative), postResponse.Headers.Location);
+
+        await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+        var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+        var newNote = await db.Notes.SingleOrDefaultAsync(n => n.NoteText == "New note with only note text");
+        Assert.IsNotNull(newNote);
+        Assert.IsNull(newNote.Title);
+    }
+
+    [TestMethod]
+    public async Task Can_add_new_note_with_title()
+    {
+        await AddNotesAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync("/notes/add");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");        
+
+        using var postResponse = await client.PostAsync("/notes/add", new FormUrlEncodedContent(new Dictionary<string, string>()
+            { { "notes", "New note with a title" }, { "title", "New note title" }, { "__RequestVerificationToken", validationToken } }));
+        Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
+        Assert.AreEqual(new Uri("/notes", UriKind.Relative), postResponse.Headers.Location);
+
+        await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+        var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+        var newNote = await db.Notes.SingleOrDefaultAsync(n => n.NoteText == "New note with a title");
+        Assert.IsNotNull(newNote);
+        Assert.AreEqual("New note title", newNote.Title);
+    }
+
+    [TestMethod]
+    public async Task Should_not_add_note_without_content()
+    {
+        await AddNotesAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync("/notes/add");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");        
+
+        using var postResponse = await client.PostAsync("/notes/add", new FormUrlEncodedContent(new Dictionary<string, string>()
+            { { "notes", "" }, { "title", "Note without content" }, { "__RequestVerificationToken", validationToken } }));
+        Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
+        Assert.AreEqual(new Uri("/notes/add", UriKind.Relative), postResponse.Headers.Location);
+
+        await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+        var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+        Assert.IsFalse(await db.Notes.AnyAsync(n => n.Title == "Note without content"));
+    }
+
     private async Task AddNotesAsync()
     {
         await _webApplicationFactory.CreateTestUserAsync();
