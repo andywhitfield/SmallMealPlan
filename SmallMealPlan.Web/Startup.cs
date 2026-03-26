@@ -49,12 +49,7 @@ public class Startup
             .SetApplicationName(typeof(Startup).Namespace ?? "")
             .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Environment.ContentRootPath, ".keys")));
 
-        services.AddLogging(logging =>
-        {
-            logging.AddConsole();
-            logging.AddDebug();
-            logging.SetMinimumLevel(LogLevel.Trace);
-        });
+        services.AddLogging(logging => logging.AddConsole());
 
         services.Configure<SmallMealPlanConfig>(Configuration);
         services.Configure<CookiePolicyOptions>(o =>
@@ -66,11 +61,12 @@ public class Startup
         services.AddDbContext<SqliteDataContext>((serviceProvider, options) =>
         {
             var sqliteConnectionString = Configuration.GetConnectionString("SmallMealPlan");
-            serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation($"Using connection string: {sqliteConnectionString}");
+            serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation("Using connection string: {SqliteConnectionString}", sqliteConnectionString);
             options.UseSqlite(sqliteConnectionString);
         });
         services.AddHttpClient(RtmClient.HttpClientName);
         services
+            .AddScoped<UserAccountCurrentAreaMiddleware>()
             .AddScoped<IUserAccountRepository, UserAccountRepository>()
             .AddScoped<IPlannerMealRepository, PlannerMealRepository>()
             .AddScoped<IMealRepository, MealRepository>()
@@ -116,6 +112,7 @@ public class Startup
         app.UseAuthentication();
         app.UseRouting();
         app.UseAuthorization();
+        app.UseMiddleware<UserAccountCurrentAreaMiddleware>();
         app.UseEndpoints(options => options.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}"));
