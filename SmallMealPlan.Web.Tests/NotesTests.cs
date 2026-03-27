@@ -106,7 +106,7 @@ public class NotesTests
         using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
         using var getResponse = await client.GetAsync("/notes/add");
         var getResponseContent = await getResponse.Content.ReadAsStringAsync();
-        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");        
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");
 
         using var postResponse = await client.PostAsync("/notes/add", new FormUrlEncodedContent(new Dictionary<string, string>()
             { { "notes", "New note with only note text" }, { "__RequestVerificationToken", validationToken } }));
@@ -127,7 +127,7 @@ public class NotesTests
         using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
         using var getResponse = await client.GetAsync("/notes/add");
         var getResponseContent = await getResponse.Content.ReadAsStringAsync();
-        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");        
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");
 
         using var postResponse = await client.PostAsync("/notes/add", new FormUrlEncodedContent(new Dictionary<string, string>()
             { { "notes", "New note with a title" }, { "title", "New note title" }, { "__RequestVerificationToken", validationToken } }));
@@ -148,7 +148,7 @@ public class NotesTests
         using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
         using var getResponse = await client.GetAsync("/notes/add");
         var getResponseContent = await getResponse.Content.ReadAsStringAsync();
-        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");        
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/add");
 
         using var postResponse = await client.PostAsync("/notes/add", new FormUrlEncodedContent(new Dictionary<string, string>()
             { { "notes", "" }, { "title", "Note without content" }, { "__RequestVerificationToken", validationToken } }));
@@ -158,6 +158,41 @@ public class NotesTests
         await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
         var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
         Assert.IsFalse(await db.Notes.AnyAsync(n => n.Title == "Note without content"));
+    }
+
+    [TestMethod]
+    public async Task Can_update_note()
+    {
+        await AddNotesAsync();
+        var noteId = await GetTestNoteIdAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync($"/notes/{noteId}");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, $"/notes/{noteId}");
+
+        using var postResponse = await client.PostAsync($"/notes/{noteId}", new FormUrlEncodedContent(new Dictionary<string, string>()
+            { { "notes", "note 1 updated" }, { "__RequestVerificationToken", validationToken } }));
+        Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
+        Assert.AreEqual(new Uri("/notes", UriKind.Relative), postResponse.Headers.Location);
+
+        await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+        var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+        var updatedNote = await db.Notes.SingleOrDefaultAsync(n => n.NoteText == "note 1 updated");
+        Assert.IsNotNull(updatedNote);
+        Assert.IsNull(updatedNote.Title);
+        Assert.IsFalse(await db.Notes.AnyAsync(n => n.NoteText == "note 1"));
+
+        var auditNote = await db.NoteHistories.SingleOrDefaultAsync(n => n.NoteId == noteId);
+        Assert.IsNotNull(auditNote);
+        Assert.AreEqual("note 1", auditNote.NoteText);
+        Assert.IsNull(auditNote.Title);
+
+        async Task<int> GetTestNoteIdAsync()
+        {
+            await using var services = _webApplicationFactory.Services.CreateAsyncScope();
+            var context = services.ServiceProvider.GetRequiredService<SqliteDataContext>();
+            return (await context.Notes.SingleAsync(n => n.NoteText == "note 1")).NoteId;
+        }
     }
 
     private async Task AddNotesAsync()
@@ -172,7 +207,7 @@ public class NotesTests
         context.Notes.Add(new() { User = user1, NoteText = "note 3\nsecond line of text", CreatedDateTime = DateTime.UtcNow.AddMinutes(3), SortOrdering = 2 });
         context.Notes.Add(new() { User = user1, NoteText = "note 4", CreatedDateTime = DateTime.UtcNow.AddMinutes(2), LastUpdateDateTime = DateTime.UtcNow.AddMinutes(4), SortOrdering = 3 });
         context.Notes.Add(new() { User = user1, NoteText = "note 5", CreatedDateTime = DateTime.UtcNow.AddMinutes(1), DeletedDateTime = DateTime.UtcNow });
-        
+
         context.Notes.Add(new() { User = user2.Entity, NoteText = "other user's note" });
         await context.SaveChangesAsync();
     }
