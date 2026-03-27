@@ -232,6 +232,48 @@ public class NotesTests
         }
     }
 
+    [TestMethod]
+    public async Task When_manually_sorted_Can_update_sort_order()
+    {
+        await AddNotesAsync();
+        await UpdateSortOrderToManualAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync("/notes/");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        Assert.Contains("data-visible=\"true\"", getResponseContent);
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, "/notes/sort");
+
+        using var postResponse = await client.PostAsync("/notes/sort", new FormUrlEncodedContent(new Dictionary<string, string>()
+            {{ "__RequestVerificationToken", validationToken }}));
+        Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
+        Assert.AreEqual(new Uri("/notes", UriKind.Relative), postResponse.Headers.Location);
+
+        await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+        var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+        var user = await db.UserAccounts.SingleAsync(ua => ua.Email == "test-user-1");
+        Assert.IsNotNull(user);
+        Assert.IsNull(user.NoteSortOrdering);
+
+        async Task UpdateSortOrderToManualAsync()
+        {
+            await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+            var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+            var user = await db.UserAccounts.SingleAsync(ua => ua.Email == "test-user-1");
+            user.NoteSortOrdering = INoteRepository.SortedManually;
+            await db.SaveChangesAsync();
+        }
+    }
+
+    [TestMethod]
+    public async Task When_default_sort_Cannot_update_sort_order()
+    {
+        await AddNotesAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync("/notes/");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        Assert.Contains("data-visible=\"\"", getResponseContent);
+    }
+
     private async Task AddNotesAsync()
     {
         await _webApplicationFactory.CreateTestUserAsync();

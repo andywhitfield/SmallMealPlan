@@ -2,7 +2,7 @@
 @{bool anyNotes = false;}
 <div class="smp-notes-controls">
 <button type="button" title="Add a new note" onclick="window.location.href='/notes/add'">Add</button>
-<form action="/notes/sort" method="post">
+<form method="post" action="/notes/sort">
 @Html.AntiForgeryToken()
 <button type="button" title="Sort by the most recently added or changed note to the oldest" id="smp-note-sort" data-visible="@(Model.SortedManually ? "true" : "")">Sort by latest</button>
 </form>
