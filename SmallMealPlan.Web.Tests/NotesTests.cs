@@ -171,15 +171,16 @@ public class NotesTests
         var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, $"/notes/{noteId}");
 
         using var postResponse = await client.PostAsync($"/notes/{noteId}", new FormUrlEncodedContent(new Dictionary<string, string>()
-            { { "notes", "note 1 updated" }, { "__RequestVerificationToken", validationToken } }));
+            { { "notes", "note 1 updated" }, { "title", "new title" }, { "__RequestVerificationToken", validationToken } }));
         Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
         Assert.AreEqual(new Uri("/notes", UriKind.Relative), postResponse.Headers.Location);
 
         await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
         var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
-        var updatedNote = await db.Notes.SingleOrDefaultAsync(n => n.NoteText == "note 1 updated");
+        var updatedNote = await db.Notes.FindAsync(noteId);
         Assert.IsNotNull(updatedNote);
-        Assert.IsNull(updatedNote.Title);
+        Assert.AreEqual("note 1 updated", updatedNote.NoteText);
+        Assert.AreEqual("new title", updatedNote.Title);
         Assert.IsFalse(await db.Notes.AnyAsync(n => n.NoteText == "note 1"));
 
         var auditNote = await db.NoteHistories.SingleOrDefaultAsync(n => n.NoteId == noteId);
@@ -192,6 +193,42 @@ public class NotesTests
             await using var services = _webApplicationFactory.Services.CreateAsyncScope();
             var context = services.ServiceProvider.GetRequiredService<SqliteDataContext>();
             return (await context.Notes.SingleAsync(n => n.NoteText == "note 1")).NoteId;
+        }
+    }
+
+    [TestMethod]
+    public async Task Can_delete_note()
+    {
+        await AddNotesAsync();
+        var noteId = await GetTestNoteIdAsync();
+        using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
+        using var getResponse = await client.GetAsync("/notes/");
+        var getResponseContent = await getResponse.Content.ReadAsStringAsync();
+        var validationToken = WebApplicationFactoryTest.GetFormValidationToken(getResponseContent, $"/notes/delete/{noteId}");
+
+        using var postResponse = await client.PostAsync($"/notes/delete/{noteId}", new FormUrlEncodedContent(new Dictionary<string, string>()
+            {{ "__RequestVerificationToken", validationToken }}));
+        Assert.AreEqual(HttpStatusCode.Redirect, postResponse.StatusCode);
+        Assert.AreEqual(new Uri("/notes", UriKind.Relative), postResponse.Headers.Location);
+
+        await using var serviceScope = _webApplicationFactory.Services.CreateAsyncScope();
+        var db = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
+        var deletedNote = await db.Notes.FindAsync(noteId);
+        Assert.IsNotNull(deletedNote);
+        Assert.AreEqual("note 4", deletedNote.NoteText);
+        Assert.IsNotNull(deletedNote.DeletedDateTime);
+
+        var auditNote = await db.NoteHistories.SingleOrDefaultAsync(n => n.NoteId == noteId);
+        Assert.IsNotNull(auditNote);
+        Assert.AreEqual("note 4", auditNote.NoteText);
+        Assert.IsNull(auditNote.Title);
+        Assert.IsFalse(auditNote.IsDeleted);
+
+        async Task<int> GetTestNoteIdAsync()
+        {
+            await using var services = _webApplicationFactory.Services.CreateAsyncScope();
+            var context = services.ServiceProvider.GetRequiredService<SqliteDataContext>();
+            return (await context.Notes.SingleAsync(n => n.NoteText == "note 4")).NoteId;
         }
     }
 
