@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
 using SmallMealPlan.SmallLister;
@@ -68,7 +62,7 @@ public class SmallListerWebhookApiController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> HandleListItemChangeAsync(int userid, IEnumerable<ListItemChange> request)
     {
-        logger.LogInformation($"Received list item change webhook for userid: {userid}: [{string.Join(',', request.Select(lc => $"(listid={lc.ListId} listitemid={lc.ListItemId} event={lc.Event})"))}]");
+        logger.LogInformation($"Received list item change webhook for userid: {userid}: [{string.Join(',', request.Select(lc => $"(listid={lc.ListId} prev listid={lc.PreviousListId} listitemid={lc.ListItemId} event={lc.Event})"))}]");
         var user = await userAccountRepository.GetUserAccountAsync(userid);
         if (user == null)
         {
@@ -76,10 +70,10 @@ public class SmallListerWebhookApiController(
             return BadRequest();
         }
 
-        if (request.Any(itemChange => itemChange.ListId == user.SmallListerSyncListId))
+        if (request.Any(itemChange => itemChange.ListId == user.SmallListerSyncListId || itemChange.PreviousListId == user.SmallListerSyncListId))
             await SyncWithSmallListerAsync(user);
         else
-            logger.LogInformation($"No changes to items in the sync list ({user.SmallListerSyncListId}): [{string.Join(',', request.Select(r => $"{r.ListId}:{r.ListItemId}:{r.Event}"))}]");
+            logger.LogInformation($"No changes to items in the sync list ({user.SmallListerSyncListId}): [{string.Join(',', request.Select(r => $"{r.ListId}:{r.PreviousListId}:{r.ListItemId}:{r.Event}"))}]");
 
         return Ok();
     }
@@ -103,6 +97,6 @@ public class SmallListerWebhookApiController(
         }
 
         logger.LogTrace("Removing items from shopping list not in small:lister list");
-        await shoppingListRepository.MarkAsBoughtAsync(user, currentList.ExceptBy((smlList.Items ?? Enumerable.Empty<SmallListerItem>()).Select(i => i.Description?.Trim() ?? ""), sli => sli.Ingredient.Description.Trim(), StringComparer.InvariantCultureIgnoreCase));
+        await shoppingListRepository.MarkAsBoughtAsync(user, currentList.ExceptBy((smlList.Items ?? []).Select(i => i.Description?.Trim() ?? ""), sli => sli.Ingredient.Description.Trim(), StringComparer.InvariantCultureIgnoreCase));
     }
 }
