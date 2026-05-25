@@ -8,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Moq;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
+using SmallMealPlan.SmallLister;
 
 namespace SmallMealPlan.Web.Tests;
 
@@ -27,13 +29,16 @@ public class WebApplicationFactoryTest : WebApplicationFactory<Startup>
     }
 
     public UserAccount TestUser => _testUser ?? throw new InvalidOperationException("Test user not created");
+    public Mock<ISmallListerClient> SmallListerClientMock { get; } = new();
 
     protected override IHostBuilder CreateHostBuilder()
         => Host
         .CreateDefaultBuilder()
         .ConfigureWebHostDefaults(x => x.UseStartup<Startup>().UseTestServer().ConfigureTestServices(services =>
         {
-            services.Replace(ServiceDescriptor.Scoped(_ => new SqliteDataContext(_options)));
+            services
+                .Replace(ServiceDescriptor.Scoped(_ => SmallListerClientMock.Object))
+                .Replace(ServiceDescriptor.Scoped(_ => new SqliteDataContext(_options)));
             services
                 .AddAuthentication("Test")
                 .AddScheme<AuthenticationSchemeOptions, TestStubAuthHandler>("Test", null);
