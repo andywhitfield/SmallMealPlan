@@ -21,6 +21,18 @@ public class HomeController(ILogger<HomeController> logger,
 {
     [Authorize]
     [HttpGet("~/")]
+    public async Task<IActionResult> Index()
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        if (user.CurrentArea != null)
+        {
+            logger.LogTrace("User has current area of {CurrentArea}, redirecting", user.CurrentArea);
+            return Redirect(user.CurrentArea);
+        }
+        return Redirect("~/planner");
+    }
+
+    [Authorize]
     [HttpGet("~/planner")]
     [HttpGet("~/planner/{date}")]
     public async Task<IActionResult> Index(string? date)
@@ -217,7 +229,7 @@ public class HomeController(ILogger<HomeController> logger,
 
             return Redirect(redirectUri);
         }
-        
+
         return Redirect("~/signin");
     }
 

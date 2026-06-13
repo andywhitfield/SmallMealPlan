@@ -70,7 +70,7 @@ public class UserAccountCurrentAreaMiddleware(
     private static string? GetArea(string path)
     {
         if (path == "/")
-            return _plannerArea;
+            return null;
         path = path.ToLowerInvariant();
         foreach (var area in _knownAreaPaths)
             if (path.StartsWith(area)) return area;

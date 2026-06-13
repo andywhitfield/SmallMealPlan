@@ -22,9 +22,13 @@ public class HomeTests
     public async Task Given_valid_credentials_should_be_logged_in()
     {
         using var client = await _webApplicationFactory.CreateAuthenticatedClientAsync();
-        using var response = await client.GetAsync("/");
-        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        var responseContent = await response.Content.ReadAsStringAsync();
+        using var homeResponse = await client.GetAsync("/");
+        Assert.AreEqual(HttpStatusCode.Redirect, homeResponse.StatusCode);
+        Assert.AreEqual(new Uri("/planner", UriKind.Relative), homeResponse.Headers.Location);
+
+        using var plannerResponse = await client.GetAsync("/planner");
+        Assert.AreEqual(HttpStatusCode.OK, plannerResponse.StatusCode);
+        var responseContent = await plannerResponse.Content.ReadAsStringAsync();
         StringAssert.Contains(responseContent, "Logout");
     }
 
