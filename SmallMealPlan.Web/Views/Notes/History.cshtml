@@ -1,0 +1,30 @@
+﻿@model SmallMealPlan.Web.Model.Notes.HistoryViewModel
+<p>History for: Note Title</p>
+
+<ul class="smp-planner-list">
+    <li class="smp-planner-list">
+        <ul class="smp-planner-list-meal">
+            <li class="smp-planner-list-meal" data-note="@Model.Note.Note.NoteId">
+                <div></div>
+                <div>@if (Model.Note.ShowExpandIcon) {<img src="/images/expand.png" class="smp-notes-oc" height="18" width="18" title="Show/Hide full note" />}</div>
+                <div>
+                    <div>@Model.Note.TitleForDisplay</div>
+                </div>
+                <div class="smp-note-date" title="History date (UTC)">@Model.Note.UpdatedDate</div>
+            </li>
+            @{var allHistories = await Model.Histories.ToListAsync();}
+            @for (var i = 0; i < allHistories.Count; i++) {
+            <li class="smp-planner-list-meal" data-note="@allHistories[i].NoteHistoryId">
+                <div></div>
+                <div>@if (allHistories[i].ShowExpandIcon) {<img src="/images/expand.png" class="smp-note-hist-oc" height="18" width="18" title="Show/Hide full note" />}</div>
+                <div>
+                    <div>@allHistories[i].TitleForDisplay</div>
+                </div>
+                <div>
+                    <div class="smp-note-date" title="History date (UTC)">@(i == allHistories.Count - 1 ? Model.NoteCreatedDateTime : allHistories[i + 1].AuditDateTime)</div>
+                </div>
+            </li>
+            }
+        </ul>
+    </li>
+</ul>

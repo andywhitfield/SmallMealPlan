@@ -11,7 +11,8 @@ namespace SmallMealPlan.Web.Controllers;
 public class NotesApiController(
     ILogger<ShoppingListApiController> logger,
     IUserAccountRepository userAccountRepository,
-    INoteRepository noteRepository)
+    INoteRepository noteRepository,
+    INoteHistoryRepository noteHistoryRepository)
     : ControllerBase
 {
     [HttpGet("~/api/notes/{noteId}/info/{infoType}")]
@@ -35,5 +36,18 @@ public class NotesApiController(
         logger.LogTrace("Moving note {NoteId} to after {SortOrderPreviousNoteId}", noteId, noteMoveRequest.SortOrderPreviousNoteId);
         await noteRepository.ReorderAsync(user, noteId, noteMoveRequest.SortOrderPreviousNoteId);
         return NoContent();
+    }
+
+    [HttpGet("~/api/notehistory/{noteHistoryId}/info/{infoType}")]
+    public async Task<IActionResult> NoteHistoryInfo(int noteHistoryId, string infoType)
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        var noteHistory = await noteHistoryRepository.GetAsync(noteHistoryId);
+        if (noteHistory?.Note.UserAccountId != user.UserAccountId)
+            return NotFound();
+        if (infoType == "details")
+            return Ok(new { title = noteHistory.Title ?? "", note = noteHistory.NoteText });
+
+        return Ok(new { title = new NoteHistoryViewModel(noteHistory).TitleForDisplay });
     }
 }

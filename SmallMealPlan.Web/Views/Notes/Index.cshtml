@@ -26,11 +26,14 @@
                 <div>@if (note.ShowExpandIcon) {<img src="/images/expand.png" class="smp-notes-oc" height="18" width="18" title="Show/Hide full note" />}</div>
                 <div>
                     <div>@note.TitleForDisplay</div>
-                    <div class="smp-note-date">@note.UpdatedDate</div>
+                    <div class="smp-note-date" title="Last updated date (UTC)">@note.UpdatedDate</div>
                 </div>
                 <div>
                     <form method="get" action="/notes/@note.Note.NoteId">
                     <button><img src="/images/notes.png" height="15" width="15" /> Edit</button>
+                    </form>
+                    <form method="get" action="/notes/history/@note.Note.NoteId">
+                    <button><img src="/images/history.png" height="15" width="15" /> History</button>
                     </form>
                     <form method="post" action="/notes/delete/@note.Note.NoteId" data-confirm="Are you sure you want to delete this note?">
                     @Html.AntiForgeryToken()

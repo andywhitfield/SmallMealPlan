@@ -72,6 +72,7 @@ public class Startup
             .AddScoped<IMealRepository, MealRepository>()
             .AddScoped<IShoppingListRepository, ShoppingListRepository>()
             .AddScoped<INoteRepository, NoteRepository>()
+            .AddScoped<INoteHistoryRepository, NoteHistoryRepository>()
             .AddScoped<IDirectDbService, DirectDbService>()
             .AddScoped<IAuthorisationHandler, AuthorisationHandler>()
             .AddSingleton(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey") ?? "", Configuration.GetValue<string>("RememberTheMilk:SharedSecret") ?? ""))

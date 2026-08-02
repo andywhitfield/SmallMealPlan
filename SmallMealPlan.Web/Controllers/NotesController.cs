@@ -8,7 +8,8 @@ namespace SmallMealPlan.Web.Controllers;
 [Authorize]
 public class NotesController(
     IUserAccountRepository userAccountRepository,
-    INoteRepository noteRepository)
+    INoteRepository noteRepository,
+    INoteHistoryRepository noteHistoryRepository)
     : Controller
 {
     [HttpGet]
@@ -45,6 +46,19 @@ public class NotesController(
             return NotFound();
         await noteRepository.UpdateAsync(note, title, notes);
         return Redirect("~/notes");
+    }
+
+    [HttpGet("~/notes/history/{noteId}")]
+    public async Task<IActionResult> History(int noteId)
+    {
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        var note = await noteRepository.GetAsync(noteId);
+        if (note?.UserAccountId != user.UserAccountId)
+            return NotFound();
+        return View(new HistoryViewModel(HttpContext, new(HttpContext, note))
+        {
+            Histories = noteHistoryRepository.GetByNoteIdAsync(note.NoteId).OrderByDescending(nh => nh.NoteHistoryId).Select(nh => new NoteHistoryViewModel(nh))
+        });
     }
 
     [HttpGet("~/notes/add")]
