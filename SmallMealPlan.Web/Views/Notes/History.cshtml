@@ -1,5 +1,5 @@
 ﻿@model SmallMealPlan.Web.Model.Notes.HistoryViewModel
-<p>History for: Note Title</p>
+<p>History for: @Model.Note.TitleForDisplay</p>
 
 <ul class="smp-planner-list">
     <li class="smp-planner-list">
@@ -28,3 +28,5 @@
         </ul>
     </li>
 </ul>
+
+<p><button type="button" onclick="window.location.href='/notes'">Back to Notebook</button></p>
