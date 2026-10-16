@@ -6,62 +6,13 @@ function smpInitialise() {
     if (!noteSortButton.attr('data-visible'))
         noteSortButton.hide();
 
-    $('ul.smp-planner-list').sortable({
-        handle: '.smp-planner-list-meal-drag-handle',
-        isValidTarget: function(item, container) {
-            return container.el[0].className.includes('smp-planner-list-meal');
-        },
-        onDrop: function(item, container, _super, event) {
-            _super(item, container, event);
-
-            let mealMoved = item.attr('data-meal');
-            let newDate = item.parent('ul').attr('data-day');
-            if (typeof mealMoved !== 'undefined' && typeof newDate !== 'undefined') {
-                let prevMeal = parseInt(item.prev('li').attr('data-meal'));
-
-                $.ajax({
-                    url: '/api/planner/' + mealMoved + '/move',
-                    type: 'PUT',
-                    data: JSON.stringify({ date: newDate, sortOrderPreviousPlannerMealId: prevMeal == NaN ? null : prevMeal }),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json'
-                });
-
-                return;
-            }
-
-            let shoppingListItemMoved = item.attr('data-shoppinglistitem');
-            if (typeof shoppingListItemMoved !== 'undefined') {
-                let prevShoppingListItem = parseInt(item.prev('li').attr('data-shoppinglistitem'));
-
-                $.ajax({
-                    url: '/api/shoppinglist/' + shoppingListItemMoved + '/move',
-                    type: 'PUT',
-                    data: JSON.stringify({ sortOrderPreviousShoppingListItemId: prevShoppingListItem == NaN ? null : prevShoppingListItem }),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json'
-                });
-
-                return;
-            }
-
-            let noteMoved = item.attr('data-note');
-            if (typeof noteMoved !== 'undefined') {
-                let prevNote = parseInt(item.prev('li').attr('data-note'));
-
-                $.ajax({
-                    url: '/api/notes/' + noteMoved + '/move',
-                    type: 'PUT',
-                    data: JSON.stringify({ sortOrderPreviousNoteId: prevNote == NaN ? null : prevNote }),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json'
-                }).done(function() {
-                    noteSortButton.show();
-                });
-
-                return;
-            }
-        }
+    $('ul.smp-planner-list-meal').each(function() {
+        Sortable.create($(this).get(0), {
+            handle: '.smp-planner-list-meal-drag-handle',
+            group: 'smp-planner-list-meal',
+            animation: 150,
+            onEnd: smpUpdateSortable
+        });
     });
 
     $('.smp-planner-list-meal-oc').click(function() {
@@ -145,6 +96,58 @@ function smpInitialise() {
             return false;
         }
     });
+}
+
+function smpUpdateSortable(evt) {
+    let item = $(evt.item);
+
+    let mealMoved = item.attr('data-meal');
+    let newDate = item.parent('ul').attr('data-day');
+    if (typeof mealMoved !== 'undefined' && typeof newDate !== 'undefined') {
+        let prevMeal = parseInt(item.prev('li').attr('data-meal'));
+
+        $.ajax({
+            url: '/api/planner/' + mealMoved + '/move',
+            type: 'PUT',
+            data: JSON.stringify({ date: newDate, sortOrderPreviousPlannerMealId: prevMeal == NaN ? null : prevMeal }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json'
+        });
+
+        return;
+    }
+
+    let shoppingListItemMoved = item.attr('data-shoppinglistitem');
+    if (typeof shoppingListItemMoved !== 'undefined') {
+        let prevShoppingListItem = parseInt(item.prev('li').attr('data-shoppinglistitem'));
+
+        $.ajax({
+            url: '/api/shoppinglist/' + shoppingListItemMoved + '/move',
+            type: 'PUT',
+            data: JSON.stringify({ sortOrderPreviousShoppingListItemId: prevShoppingListItem == NaN ? null : prevShoppingListItem }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json'
+        });
+
+        return;
+    }
+
+    let noteMoved = item.attr('data-note');
+    if (typeof noteMoved !== 'undefined') {
+        let prevNote = parseInt(item.prev('li').attr('data-note'));
+
+        $.ajax({
+            url: '/api/notes/' + noteMoved + '/move',
+            type: 'PUT',
+            data: JSON.stringify({ sortOrderPreviousNoteId: prevNote == NaN ? null : prevNote }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json'
+        }).done(function() {
+            noteSortButton.show();
+        });
+
+        return;
+    }
 }
 
 function smpInitialiseNav() {

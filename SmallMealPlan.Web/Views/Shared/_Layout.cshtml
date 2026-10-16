@@ -9,10 +9,10 @@
     <title>Small:MealPlan</title>
 
     <environment names="Development">
-        <link rel="stylesheet" href="/css/smallmealplan.css" />
+    <link rel="stylesheet" href="/css/smallmealplan.css" />
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="/css/smallmealplan.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/smallmealplan.min.css" asp-append-version="true" />
     </environment>
     @RenderSection("HeaderScripts", required: false)
 </head>
@@ -60,24 +60,13 @@
         &#169; @DateTime.Today.Year Small:MealPlan
     </footer>
 
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/4.0.0/jquery.min.js" integrity="sha512-8LENNbXmzI/Gbj+OwXmqR6V4QaUAw0/porPzy1+dQoJqC0JPHedWoe0DDOTL2uHA5XXJyIsPtiMHH86pVlay6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.7/Sortable.min.js" integrity="sha512-ri8dokds012Oxz+iFzMs4KNJXVc+h7J1zq6unM1NTtzBLj4jD1R5BWiK6QycK0TdSdkt7zYcIcv6sUPhmYkbdQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <environment names="Development">
-        <script src="/lib/jquery/jquery.min.js"></script>
-        <script src="/lib/jquery-sortable/jquery-sortable-min.js"></script>
-        <script src="/js/smallmealplan.js" asp-append-version="true"></script>
+    <script src="/js/smallmealplan.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-                asp-fallback-src="/lib/jquery/jquery.min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous">
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"
-                asp-fallback-src="/lib/jquery-sortable/jquery-sortable-min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous">
-        </script>
-        <script src="/js/smallmealplan.min.js" asp-append-version="true"></script>
+    <script src="/js/smallmealplan.min.js" asp-append-version="true"></script>
     </environment>
 
     <script type="text/javascript">
