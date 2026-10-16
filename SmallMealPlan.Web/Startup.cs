@@ -90,8 +90,8 @@ public class Startup
             .AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(5))
             .AddFido2(options =>
             {
-                options.ServerName = "Small:MealPlan";
-                options.ServerDomain = Configuration.GetValue<string>("FidoDomain");
+                options.RPName = "Small:MealPlan";
+                options.RPID = Configuration.GetValue<string>("FidoDomain");
                 options.Origins = new HashSet<string>() { Configuration.GetValue("FidoOrigins", "") };
             });
     }
