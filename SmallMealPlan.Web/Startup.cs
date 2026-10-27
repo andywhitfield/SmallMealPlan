@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using SmallMealPlan.Data;
-using SmallMealPlan.RememberTheMilk;
 using SmallMealPlan.SmallLister;
 using SmallMealPlan.Web.Authorisation;
 
@@ -64,7 +63,7 @@ public class Startup
             serviceProvider.GetRequiredService<ILogger<Startup>>().LogInformation("Using connection string: {SqliteConnectionString}", sqliteConnectionString);
             options.UseSqlite(sqliteConnectionString);
         });
-        services.AddHttpClient(RtmClient.HttpClientName);
+        services.AddHttpClient();
         services
             .AddScoped<UserAccountCurrentAreaMiddleware>()
             .AddScoped<IUserAccountRepository, UserAccountRepository>()
@@ -75,8 +74,6 @@ public class Startup
             .AddScoped<INoteHistoryRepository, NoteHistoryRepository>()
             .AddScoped<IDirectDbService, DirectDbService>()
             .AddScoped<IAuthorisationHandler, AuthorisationHandler>()
-            .AddSingleton(new RtmConfig(Configuration.GetValue<string>("RememberTheMilk:ApiKey") ?? "", Configuration.GetValue<string>("RememberTheMilk:SharedSecret") ?? ""))
-            .AddScoped<IRtmClient, RtmClient>()
             .AddSingleton(new SmallListerConfig(Configuration.GetValue<Uri>("SmallLister:BaseUri") ?? throw new InvalidOperationException("Missing SmallLister:BaseUri config"), Configuration.GetValue<string>("SmallLister:AppKey") ?? "", Configuration.GetValue<string>("SmallLister:AppSecret") ?? ""))
             .AddScoped<ISmallListerClient, SmallListerClient>()
             .AddSingleton<ISmallListerSendQueue, SmallListerSendQueue>()

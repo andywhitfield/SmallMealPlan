@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SmallMealPlan.Data;
 using SmallMealPlan.Model;
-using SmallMealPlan.RememberTheMilk;
 using SmallMealPlan.SmallLister;
 using SmallMealPlan.Web.Model.Request;
 using SmallMealPlan.Web.Model.ShoppingList;
@@ -15,7 +14,6 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
     IUserAccountRepository userAccountRepository,
     IShoppingListRepository shoppingListRepository,
     IMealRepository mealRepository,
-    IRtmClient rtmClient,
     ISmallListerClient smlClient,
     ISmallListerSendQueue smallListerSendQueue,
     IOptions<SmallMealPlanConfig> options)
@@ -60,7 +58,6 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
             RegularOrBought = regularOrBought,
             BoughtListPagination = new Pagination(boughtItemsPage, boughtItemsPageCount, Pagination.SortByRecentlyUsed, ""),
             RegularOrBoughtShowAll = shoplistBoughtShowAll ?? false,
-            HasRtmToken = !string.IsNullOrEmpty(user.RememberTheMilkToken),
             HasSmallListerToken = !string.IsNullOrEmpty(user.SmallListerToken),
             SmallListerSyncListName = string.IsNullOrEmpty(user.SmallListerSyncListId) ? null : user.SmallListerSyncListName
         });
@@ -176,68 +173,6 @@ public class ShoppingListController(ILogger<ShoppingListController> logger,
         await shoppingListRepository.DeleteAsync(user, shoppingListItem);
         await SyncWithSmallListerAsync(user, Enumerable.Repeat(shoppingListItem, 1), added: false);
         return Redirect("~/shoppinglist");
-    }
-
-    [HttpPost("~/shoppinglist/rtm")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RememberTheMilk([FromForm] SyncRequest requestModel)
-    {
-        var user = await userAccountRepository.GetUserAccountAsync(User);
-        logger.LogTrace("Sync with RTM: import={RequestModelImport}; export={RequestModelExport}; list={RequestModelList}",
-            requestModel.Import, requestModel.Export, requestModel.List);
-
-        if (requestModel.Export ?? false)
-        {
-            await ExportToRtmAsync(user, requestModel.List);
-            if (requestModel.DeleteAfterExport ?? false)
-                await MarkAllAsBought();
-        }
-        else if (requestModel.Import ?? false)
-        {
-            await ImportFromRtmAsync(user, requestModel.List);
-        }
-        else
-        {
-            return BadRequest();
-        }
-
-        user.RememberTheMilkLastListId = requestModel.List;
-        await userAccountRepository.UpdateAsync(user);
-
-        return Redirect("~/shoppinglist");
-    }
-
-    private async Task ExportToRtmAsync(UserAccount user, string listId)
-    {
-        var itemsToExport = (await shoppingListRepository.GetActiveItemsAsync(user)).Select(x => x.Ingredient.Description?.Trim() ?? "");
-
-        var listTasks = await rtmClient.GetTaskListsAsync(user.RememberTheMilkToken, listId);
-        if (listTasks.List == null)
-            return;
-
-        var timelineTask = new Lazy<Task<string>>(() => rtmClient.CreateTimelineAsync(user.RememberTheMilkToken));
-        var existingItemsInList = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name ?? "");
-        foreach (var itemToAddToList in itemsToExport.Except(existingItemsInList))
-        {
-            var timeline = await timelineTask.Value;
-            logger.LogTrace("Adding item [{ItemToAddToList}] to RTM list [{ListId}] using timeline [{Timeline}]", itemToAddToList, listId, timeline);
-            await rtmClient.AddTaskAsync(user.RememberTheMilkToken, timeline, listId, itemToAddToList);
-        }
-    }
-
-    private async Task ImportFromRtmAsync(UserAccount user, string listId)
-    {
-        var listTasks = await rtmClient.GetTaskListsAsync(user.RememberTheMilkToken, listId);
-        if (listTasks.List == null)
-            return;
-        var itemsToImport = listTasks.List.SelectMany(x => x.TaskSeries).Select(x => x.Name ?? "");
-
-        var currentList = (await shoppingListRepository.GetActiveItemsAsync(user)).Select(i => i.Ingredient.Description.Trim());
-        foreach (var itemToAddToShoppingList in itemsToImport.Except(currentList, StringComparer.InvariantCultureIgnoreCase))
-        {
-            logger.LogTrace("Adding item [{ItemToAddToShoppingList}] to shopping list", itemToAddToShoppingList);
-            await shoppingListRepository.AddNewIngredientAsync(user, itemToAddToShoppingList);
-        }
     }
 
     [HttpPost("~/shoppinglist/sml")]

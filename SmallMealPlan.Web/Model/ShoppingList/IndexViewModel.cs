@@ -10,7 +10,6 @@ public class IndexViewModel : BaseViewModel
     public string? RegularOrBought { get; set; }
     public Pagination? BoughtListPagination { get; set; }
     public bool RegularOrBoughtShowAll { get; set; }
-    public bool HasRtmToken { get; set; }
     public bool HasSmallListerToken { get; set; }
     public bool HasSmallListerSyncList => !string.IsNullOrEmpty(SmallListerSyncListName);
     public string? SmallListerSyncListName { get; set; }

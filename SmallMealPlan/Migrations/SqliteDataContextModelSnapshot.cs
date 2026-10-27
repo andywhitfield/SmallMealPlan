@@ -15,7 +15,7 @@ namespace SmallMealPlan.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("SmallMealPlan.Model.Ingredient", b =>
                 {
@@ -278,12 +278,6 @@ namespace SmallMealPlan.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NoteSortOrdering")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RememberTheMilkLastListId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RememberTheMilkToken")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SmallListerLastListId")

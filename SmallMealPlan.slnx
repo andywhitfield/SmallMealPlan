@@ -4,8 +4,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="SmallMealPlan.RememberTheMilk.Tests/SmallMealPlan.RememberTheMilk.Tests.csproj" />
-  <Project Path="SmallMealPlan.RememberTheMilk/SmallMealPlan.RememberTheMilk.csproj" />
   <Project Path="SmallMealPlan.SmallLister.Tests/SmallMealPlan.SmallLister.Tests.csproj" />
   <Project Path="SmallMealPlan.SmallLister/SmallMealPlan.SmallLister.csproj" />
   <Project Path="SmallMealPlan.Tests/SmallMealPlan.Tests.csproj" />
