@@ -8,5 +8,15 @@
 <div>Note:</div>
 <textarea name="notes" class="notes" wrap="off"></textarea>
 
-<p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button></p>
+<p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button> <span class="smp-notes-wrapping"><input type="checkbox" id="notes-wrapping" name="notes-wrapping" /> <label for="notes-wrapping">wrap</label></span></p>
 </form>
+
+@section Scripts {
+<script type="text/javascript">
+    $(function() {
+        $('#notes-wrapping').change(function() {
+            $('textarea[name="notes"]').attr('wrap', this.checked ? 'on' : 'off');
+        });
+    }); 
+</script>
+}

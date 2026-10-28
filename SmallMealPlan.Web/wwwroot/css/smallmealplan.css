@@ -389,6 +389,10 @@ div.smp-note-info-text {
     white-space: pre-line;
 }
 
+span.smp-notes-wrapping {
+    float: right;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;
