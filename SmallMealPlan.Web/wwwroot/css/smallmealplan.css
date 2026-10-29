@@ -300,6 +300,12 @@ ul.smp-planner-list li.placeholder:before {
 
 .smp-planner-list-meal-drag-handle {
     cursor: move;
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 
 div.smp-planner-add-header,
