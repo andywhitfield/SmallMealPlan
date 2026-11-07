@@ -2,11 +2,11 @@ namespace SmallMealPlan.Web.Model.Home;
 
 public class IndexCalendarViewModel : BaseViewModel
 {
-    public IndexCalendarViewModel(HttpContext context) : base(context)
+    public IndexCalendarViewModel(HttpContext context, DateTime date) : base(context)
     {
         SelectedArea = SmpArea.Planner;
+        InitialDate = date.ToString("yyyy-MM-dd");
     }
 
-    // TODO
-    public string InitialDate => "2026-11-02";
+    public string InitialDate { init; get; }
 }

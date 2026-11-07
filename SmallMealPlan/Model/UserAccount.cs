@@ -18,4 +18,5 @@ public class UserAccount
     public string? SmallListerSyncListName { get; set; }
     public string? CurrentArea { get; set; }
     public string? NoteSortOrdering { get; set; }
+    public string? HomeView { get; set; }
 }

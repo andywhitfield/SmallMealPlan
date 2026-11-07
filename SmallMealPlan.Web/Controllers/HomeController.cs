@@ -19,6 +19,8 @@ public class HomeController(ILogger<HomeController> logger,
     IAuthorisationHandler authorisationHandler)
     : Controller
 {
+    private const string HomeViewCalendar = "calendar";
+
     [Authorize]
     [HttpGet("~/")]
     public async Task<IActionResult> Index()
@@ -37,13 +39,21 @@ public class HomeController(ILogger<HomeController> logger,
     [HttpGet("~/planner/{date}")]
     public async Task<IActionResult> Index(string? date, [FromQuery] string? view = null)
     {
-        if (view == "calendar")
-            return View("IndexCalendar", new IndexCalendarViewModel(HttpContext));
-        // TODO: update user pref to calendar view
-
-        if (view == "list")
+        var user = await userAccountRepository.GetUserAccountAsync(User);
+        if ((user.HomeView == HomeViewCalendar && string.IsNullOrEmpty(view)) || view == HomeViewCalendar)
         {
-            // TODO: update user pref to list view and continue as per below...
+            if (user.HomeView != HomeViewCalendar)
+            {
+                user.HomeView = HomeViewCalendar;
+                await userAccountRepository.UpdateAsync(user);
+            }
+            return View("IndexCalendar", new IndexCalendarViewModel(HttpContext, date.ParseDateOrToday()));
+        }
+
+        if (user.HomeView != "")
+        {
+            user.HomeView = "";
+            await userAccountRepository.UpdateAsync(user);
         }
 
         var monday = date.ParseDateOrToday();
@@ -60,7 +70,7 @@ public class HomeController(ILogger<HomeController> logger,
         }).ToList();
 
         var plannerMeals = await plannerMealRepository.GetPlannerMealsAsync(
-            await userAccountRepository.GetUserAccountAsync(User), monday, monday.AddDays(14));
+            user, monday, monday.AddDays(14));
 
         foreach (var plannerMeal in plannerMeals)
         {
@@ -81,6 +91,7 @@ public class HomeController(ILogger<HomeController> logger,
 
         return View(new IndexViewModel(HttpContext)
         {
+            WeekStart = monday,
             PreviousWeekStart = monday.AddDays(-7),
             NextWeekStart = monday.AddDays(7),
             PreviousWeek = $"{monday.AddDays(-7).ToString(BaseViewModel.ShortDateFormat)} - {monday.AddDays(-1).ToString(BaseViewModel.ShortDateFormat)}",

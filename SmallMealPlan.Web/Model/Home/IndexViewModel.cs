@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-
 namespace SmallMealPlan.Web.Model.Home;
 
 public class IndexViewModel : BaseViewModel
@@ -11,6 +7,7 @@ public class IndexViewModel : BaseViewModel
         SelectedArea = SmpArea.Planner;
     }
 
+    public required DateTime WeekStart { get; set; }
     public DateTime? PreviousWeekStart { get; set; }
     public DateTime? NextWeekStart { get; set; }
     public string? PreviousWeek { get; set; }

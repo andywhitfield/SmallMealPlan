@@ -408,7 +408,7 @@ span.smp-notes-wrapping {
     white-space: wrap;
 }
 
-#calendar-date {
+.smp-calendar-date {
     float: right;
 }
 

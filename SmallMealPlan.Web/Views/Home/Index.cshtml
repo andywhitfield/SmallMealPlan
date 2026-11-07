@@ -1,6 +1,7 @@
 ﻿@model SmallMealPlan.Web.Model.Home.IndexViewModel
 
 <p>
+    <div class="smp-calendar-date"><button data-href="/planner/@(Model.WeekStart.ToString("yyyyMMdd"))?view=calendar" type="button">Calendar view</button></div>
     <button data-href="/planner/@(Model.PreviousWeekStart?.ToString("yyyyMMdd"))" type="button"><img src="/images/up.png" height="18" width="18" />@Model.PreviousWeek</button>
 </p>
 <ul class="smp-planner-list">

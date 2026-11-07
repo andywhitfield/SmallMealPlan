@@ -90,6 +90,7 @@ $().ready(function() {
     calendar.render();
     function onDateChange() {
         $('#calendar-date').text(calendar.getDate().toLocaleDateString(undefined, { year: 'numeric', month: 'long' }));
+        $('#calendar-date').click(function() { window.location.href = '/planner/'+calendar.getDate().toISOString().slice(0, 10).replace(/-/g,'')+'?view=list'; });
         const calendarMonth = new Date(Date.UTC(calendar.getDate().getFullYear(), calendar.getDate().getMonth(), 1));
         if (datesLoaded.has(calendarMonth.getTime())) {
             console.log('meals already loaded for date ' + calendarMonth + ', no need to load meals');
@@ -123,7 +124,7 @@ $().ready(function() {
 </script>
 }
 
-<div id="calendar-date"></div>
+<div class="smp-calendar-date"><button id="calendar-date" title="View as a list"></button></div>
 <div class="smp-cal-date-controls">
 <button id="cal-prev-year" title="Previous year">&nbsp;&laquo;&nbsp;</button>
 <button id="cal-prev-month" title="Previous month">&nbsp;&nbsp;&lsaquo;&nbsp;&nbsp;</button>

@@ -274,6 +274,9 @@ namespace SmallMealPlan.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("HomeView")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("LastUpdateDateTime")
                         .HasColumnType("TEXT");
 
