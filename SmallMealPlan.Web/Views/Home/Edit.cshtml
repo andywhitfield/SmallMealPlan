@@ -24,4 +24,5 @@
         <button name="cancel" value="true" type="submit">Cancel</button>
     </p>
     </form>
+    <form data-confirm="Are you sure you want to delete this meal from your planner?" method="post" action="/planner/@(Model.Day.ToString("yyyyMMdd"))/delete/@(Model.PlannerMealId)">@Html.AntiForgeryToken()<button title="Delete" type="submit"><img src="/images/close.png" height="15" width="15" /> Delete</button></form>
 </p>
