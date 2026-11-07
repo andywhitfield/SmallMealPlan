@@ -35,8 +35,17 @@ public class HomeController(ILogger<HomeController> logger,
     [Authorize]
     [HttpGet("~/planner")]
     [HttpGet("~/planner/{date}")]
-    public async Task<IActionResult> Index(string? date)
+    public async Task<IActionResult> Index(string? date, [FromQuery] string? view = null)
     {
+        if (view == "calendar")
+            return View("IndexCalendar", new IndexCalendarViewModel(HttpContext));
+        // TODO: update user pref to calendar view
+
+        if (view == "list")
+        {
+            // TODO: update user pref to list view and continue as per below...
+        }
+
         var monday = date.ParseDateOrToday();
         if (monday.DayOfWeek != DayOfWeek.Monday)
         {

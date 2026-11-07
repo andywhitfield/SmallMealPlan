@@ -399,6 +399,31 @@ span.smp-notes-wrapping {
     float: right;
 }
 
+:root {
+    --fc-classic-primary: black !important;
+    --fc-classic-primary-foreground: white !important;
+}
+
+.smp-cal-title {
+    white-space: wrap;
+}
+
+#calendar-date {
+    float: right;
+}
+
+#smp-event-details-dialog-close {
+    float: right;
+}
+
+dialog {
+    padding: 5px;
+    border-width: 1px;
+    border-color: #20b2aa;
+    background-color: #fffae1;
+    min-width: 250px;
+}
+
 @media (max-width: 600px) {
     header {
         -webkit-flex-direction: column;
@@ -456,5 +481,10 @@ span.smp-notes-wrapping {
     a.pagination-active,
     span.selected {
         color: black;
+    }
+
+    :root {
+        --fc-classic-primary: white !important;
+        --fc-classic-primary-foreground: black !important;
     }
 }
