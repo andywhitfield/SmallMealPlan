@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmallMealPlan.Data;
+using SmallMealPlan.Web.Model.Home;
 using SmallMealPlan.Web.Model.Request;
 
 namespace SmallMealPlan.Web.Controllers;
@@ -37,5 +38,3 @@ public class HomeApiController(
             yield return new(plannerMeal.PlannerMealId, DateOnly.FromDateTime(plannerMeal.Date), plannerMeal.Date.ToString("dddd dd MMM"), plannerMeal.Meal.Description, [.. plannerMeal.Meal.Ingredients.Select(i => i.Ingredient.Description)], plannerMeal.Meal.Notes ?? "", plannerMeal.Notes ?? "");
     }
 }
-
-public record MealApiModel(int Id, DateOnly Date, string DateDesc, string Title, string[] Ingredients, string Notes, string DateNotes);

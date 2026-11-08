@@ -58,15 +58,17 @@ public class WebApplicationFactoryTest : WebApplicationFactory<Startup>
         return client;
     }
 
-    public async Task CreateTestUserAsync()
+    public async Task<UserAccount> CreateTestUserAsync()
     {
         if (_testUser != null)
-            return;
+            return _testUser;
 
         await using var serviceScope = Services.CreateAsyncScope();
         var context = serviceScope.ServiceProvider.GetRequiredService<SqliteDataContext>();
         _testUser = context.UserAccounts.Add(new() { Email = "test-user-1" }).Entity;
         await context.SaveChangesAsync();
+
+        return _testUser;
     }
 
     protected override void Dispose(bool disposing)

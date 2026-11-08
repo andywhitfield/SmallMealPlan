@@ -19,7 +19,7 @@ public class HomeController(ILogger<HomeController> logger,
     IAuthorisationHandler authorisationHandler)
     : Controller
 {
-    private const string HomeViewCalendar = "calendar";
+    public const string HomeViewCalendar = "calendar";
 
     [Authorize]
     [HttpGet("~/")]
