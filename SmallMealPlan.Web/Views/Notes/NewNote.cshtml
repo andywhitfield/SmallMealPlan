@@ -8,15 +8,44 @@
 <div>Note:</div>
 <textarea name="notes" class="notes" wrap="off"></textarea>
 
-<p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button> <span class="smp-notes-wrapping"><input type="checkbox" id="notes-wrapping" name="notes-wrapping" /> <label for="notes-wrapping">wrap</label></span></p>
+<p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button> <button type="button" name="draft">Restore Draft Edits</button> <span class="smp-notes-wrapping"><input type="checkbox" id="notes-wrapping" name="notes-wrapping" /> <label for="notes-wrapping">wrap</label></span></p>
 </form>
 
 @section Scripts {
 <script type="text/javascript">
     $(function() {
+        let formDraftEdits = $('form button[name="draft"]');
+        formDraftEdits.hide();
+
         $('#notes-wrapping').change(function() {
             $('textarea[name="notes"]').attr('wrap', this.checked ? 'on' : 'off');
         });
-    }); 
+
+        let formTitle = $('form input[name="title"]');
+        formTitle.on('input', function() {
+            console.log('updating new note title');
+            localStorage.setItem('note.new.title', $(this).val());
+        });
+        let formNotes = $('form textarea[name="notes"]');
+        formNotes.on('input', function() {
+            console.log('updating new note notes');
+            localStorage.setItem('note.new.notes', $(this).val());
+        });
+
+        let draftTitle = localStorage.getItem('note.new.title');
+        let draftNotes = localStorage.getItem('note.new.notes');
+        if (draftTitle || draftNotes) {
+            formDraftEdits.show();
+            formDraftEdits.click(function() {
+                formTitle.val(draftTitle);
+                formNotes.val(draftNotes);
+            });
+        }
+
+        $('form').submit(function() {
+            localStorage.removeItem('note.new.title');
+            localStorage.removeItem('note.new.notes');
+        });
+    });
 </script>
 }

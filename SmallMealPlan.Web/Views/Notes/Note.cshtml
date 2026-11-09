@@ -13,5 +13,43 @@
 <div class="smp-note-date">Last updated: @Model.Note.LastUpdateDateTime.Value.ToString("yyyy-MM-dd HH:mm:ss")</div>
 }
 
-<p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button></p>
+<p><button type="submit" name="save" value="save">Save</button> <button type="button" onclick="window.location.href='/notes'">Cancel</button> <button type="button" name="draft">Restore Draft Edits</button> <span class="smp-notes-wrapping"><input type="checkbox" id="notes-wrapping" name="notes-wrapping" /> <label for="notes-wrapping">wrap</label></span></p>
 </form>
+@section Scripts {
+<script type="text/javascript">
+    $(function() {
+        let formDraftEdits = $('form button[name="draft"]');
+        formDraftEdits.hide();
+
+        $('#notes-wrapping').change(function() {
+            $('textarea[name="notes"]').attr('wrap', this.checked ? 'on' : 'off');
+        });
+
+        let formTitle = $('form input[name="title"]');
+        formTitle.on('input', function() {
+            console.log('updating note title');
+            localStorage.setItem('note.@(Model.Note.NoteId).title', $(this).val());
+        });
+        let formNotes = $('form textarea[name="notes"]');
+        formNotes.on('input', function() {
+            console.log('updating note notes');
+            localStorage.setItem('note.@(Model.Note.NoteId).notes', $(this).val());
+        });
+
+        let draftTitle = localStorage.getItem('note.@(Model.Note.NoteId).title');
+        let draftNotes = localStorage.getItem('note.@(Model.Note.NoteId).notes');
+        if (draftTitle || draftNotes) {
+            formDraftEdits.show();
+            formDraftEdits.click(function() {
+                formTitle.val(draftTitle);
+                formNotes.val(draftNotes);
+            });
+        }
+
+        $('form').submit(function() {
+            localStorage.removeItem('note.@(Model.Note.NoteId).title');
+            localStorage.removeItem('note.@(Model.Note.NoteId).notes');
+        });
+    });
+</script>
+}
