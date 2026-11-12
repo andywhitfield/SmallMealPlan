@@ -2,7 +2,7 @@
   <ItemGroup>
     <PackageReference Include="BuildBundlerMinifier" Version="*" />
     <PackageReference Include="Fido2.AspNet" Version="4.3.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.*" PrivateAssets="All" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.*" />
     <PackageReference Include="System.Linq.Async" Version="7.0.*" />
   </ItemGroup>
